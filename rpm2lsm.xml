@@ -63,9 +63,11 @@ If no such option is given, it is omitted.</para>
 <varlistentry>
 <term>Author:</term>
 <listitem>
-<para>Taken from the value of the <option>-a</option> command-line option.
-If no such option is given, it is filled in with your email addess and
-full name from the password file</para>
+<para>Taken from the value of the <option>-a</option> command-line
+option.  If no such option is given, it looks for an AUTHORS file in
+the current directory (GNU convention) and uses that.  If no AUTHORS
+file is present, your email addess and full name from the password
+file</para>
 </listitem>
 </varlistentry>
 <varlistentry>

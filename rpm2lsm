@@ -18,9 +18,15 @@ do
   esac
 done
 shift `expr $OPTIND - 1`
-rpm=$1
+
+# If no RPM was given, look in the current directory and pick one.
+if [ -z "$1" ]
+then
+	set -- *.rpm
+fi
 
 # Mine out all the single-token fields we'll need
+rpm=$1
 set -- `rpm --queryformat="%{name} %{version} %{release}" -qp $rpm`
 name=$1
 version=$2
@@ -34,8 +40,13 @@ fullname=`cat /etc/passwd | awk -F : "/^${USERNAME}/ "'{print $5}'`
 fullname="${USERNAME}@${HOSTNAME} ($fullname)"
 
 if [ -z "$author"]
-then
-    author=$fullname
+then 
+    if [ -f AUTHORS ]
+    then
+	author=`cat AUTHORS`
+    else
+	author=$fullname
+    fi
 fi
 
 # Fill in keywords if present
