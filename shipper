@@ -109,6 +109,7 @@ def upload(destination, files):
         commands.append("close\n")
     else:
         (host, directory) = destination.split(":")
+        directory = os.path.join(directory, package)
         commands = ["sftp -C -b /dev/stdin " + host]
         if directory:
             commands.append("cd " + directory + "\r\n")
