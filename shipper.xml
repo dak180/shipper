@@ -184,7 +184,7 @@ The following table lists all the variables:</para>
 </citerefentry>.  Each location is a to drop deliverables at:
 either a [user@]site:path destination that
 <citerefentry>
-<refentrytitle>sftp</refentrytitle> <manvolnum>1</manvolnum>
+<refentrytitle>scp</refentrytitle> <manvolnum>1</manvolnum>
 </citerefentry>can use, or an FTP url that
 <citerefentry>
 <refentrytitle>lftp</refentrytitle> <manvolnum>1</manvolnum>
@@ -528,17 +528,17 @@ generated into the local deliverable ANNOUNCE.FRESHMEAT.</para>
 <entry>Generic Web site</entry>
 <entry>README, tarball, zipfile, RPMs, CHANGES, NEWS, HISTORY, *.html, 
 BUGS, TODO.</entry>
-<entry>sftp destination ([user@]host:dir)</entry>
+<entry>scp destination ([user@]host:dir)</entry>
 <entry>
 <para>This channel type represents a website.
 <application>shipper</application> uses
-<citerefentry><refentrytitle>sftp</refentrytitle><manvolnum>1</manvolnum></citerefentry>
-to put deliverables on websites.  If the user part of the sftp
+<citerefentry><refentrytitle>scp</refentrytitle><manvolnum>1</manvolnum></citerefentry>
+to put deliverables on websites.  If the user part of the scp
 destination is absent, it will be taken from the environment variable
 <envar>USERNAME</envar>.</para>
 
 <para>No generic Web sites are shipped to by default. You must declare
-them by putting sftp destinations in the <varname>destinations</varname>
+them by putting scp destinations in the <varname>destinations</varname>
 variable.</para>
 </entry>
 </row>
@@ -617,6 +617,31 @@ script was originally by Sean Reifschneider.</para>
 <para>There is a project web page at
 <ulink
 url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink>.</para>
+</refsect1>
+
+<refsect1><title>See Also</title>
+
+<para>
+<citerefentry>
+<refentrytitle>freshmeat-submit</refentrytitle>
+<manvolnum>1</manvolnum>
+</citerefentry>,
+<citerefentry>
+<refentrytitle>lftp</refentrytitle>
+<manvolnum>1</manvolnum>
+</citerefentry>,
+<citerefentry>
+<refentrytitle>rpm2lsm</refentrytitle>
+<manvolnum>1</manvolnum>
+</citerefentry>,
+<citerefentry>
+<refentrytitle>scp</refentrytitle>
+<manvolnum>1</manvolnum>
+</citerefentry>,
+<citerefentry>
+<refentrytitle>ssh</refentrytitle>
+<manvolnum>1</manvolnum>
+</citerefentry>.</para>
 </refsect1>
 </refentry>
 
