@@ -34,5 +34,5 @@ shipper-$(VERS).tar.gz: $(SOURCES)
 dist: shipper-$(VERS).tar.gz
 
 release: shipper-$(VERS).tar.gz shipper.html rpm2lsm.html
-	shipper -f; rm CHANGES ANNOUNCE* shipper.html index.html *.lsm
+	shipper -f; rm CHANGES ANNOUNCE* *.html *.lsm *.1
 
