@@ -69,7 +69,6 @@ date = None		# User has not yet set a date
 homepage = None		# Nor a home page
 description = None	# Nor a description
 destinations = []	# List of remote directories to update
-extras = []     	# No extra deliverables, by default
 
 def croak(msg):
     sys.stderr.write("shipper: " + msg + "\n")
@@ -88,33 +87,55 @@ def do_or_die(cmd):
 
 def upload(destination, files):
     # Upload a file via ftp or sftp, handles 
+    print "Uploading to %s" % destination
+    if destination.startswith("ftp://"):
+        destination = destination[6:].split("/")
+        host = destination.pop(0)
+        directory = "/".join(destination)
+        commands = ["open -u anonymous," + whoami + " " + host]
+        if directory:
+            commands.append("cd " + directory)
+        for file in files:
+            if not os.path.exists(file):
+                if options.verbose:
+                    print "Upload of %s to %s skipped." % (file, destination)
+            else:
+                commands.append("put " + file + " " + file + ".new")
+                commands.append("mv " + file + ".new " + file)
+        commands.append("close")
+    elif destination.startswith("mailto:"):
+        commands = ["echo 'Not yet supported'"]
+    else:
+        commands = ["sftp -C " + destination]
+        for file in files:
+            if not os.path.exists(file):
+                if options.verbose:
+                    print "Upload of %s to %s skipped." % (file, destination)
+            else:
+                commands.append("put -P " + file + " " + file + ".new")
+                commands.append("mv " + file + ".new " + file)
+        commands.append("bye")
+    # Here goes the actual upload
+    if options.noupload:
+        print "\n".join(commands)
+    else:
+        pfp = os.popen(commands.pop(0))
+        pfp.writelines(commands)
+        pfp.close()
+
+def freshmeat_ship(manifest):
+    "Ship a specified update to freshmeat."
     if options.verbose:
-        print "Upload %s to %s" % (file, destination)
-    if not options.noupload:
-        if destination.startswith("ftp://"):
-            destination = destination[6:].split("/")
-            host = destination.pop(0)
-            directory = "/".join(destination)
-            commands = ["open -u anonymous," + whoami + " " + site]
-            if directory:
-                commands += "cd " + directory
-            for file in files:
-                if not os.path.exists(file):
-                    print "Upload of %s to %s skipped." % (file, destination)
-                else:
-                    commands.append("put " + file)
-            commands.append("close")
-            do_or_die("lftp -c "+join(" ",map(lambda x: " '%s'" % x,commands)))
-        else:
-            pfp = os.popen("sftp -C " + destination)
-            for file in files:
-                if not os.path.exists(file):
-                    print "Upload of %s to %s skipped." % (file, destination)
-                else:
-                    pfp.write("rm " + file + "\n")	# It's OK if this fails
-                    pfp.write("put -P " + file + "\n")
-            pfp.write("bye")
-            pfp.close()
+        print "Announcing to freshmeat..."
+    command = "freshmeat-submit <" + manifest[0]
+    if options.noupload:
+        print command
+    else:
+        do_or_die(command)
+
+#
+# Metadata extraction
+#
 
 def grep(pattern, file):
     "Mine for a specified pattern in a file."
@@ -211,21 +232,20 @@ zip       = package + "-" + version + ".zip"
 lsm       = package + ".lsm"
 html      = package + ".html"
 
-# Map deliverable-type keys to explanations for the resource table
-deliverables = [
+# Map web deliverables to explanations for the resource table
+# Stuff niot included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
+web_deliverables = [
     ("README", "roadmap file"),
     (tarball,  "source tarball"),
     (zip,      "ZIP archive"),
     (binrpm,   "installable RPM"),		# Generated
     (srcrpm,   "source RPM"),			# Generated
-    (lsm,      "Linux Software Map file"),	# Generated
     ("CHANGES","Changelog file"),		# Generated
     ("NEWS",   "Project news"),
     ("HISTORY","Project history"),
     ("BUGS",   "Known bugs"),
     ("TODO",   "To-do file"),
     ]
-deliverables += extras
 
 #
 # Build deliverables
@@ -285,7 +305,7 @@ if options.force or (not os.path.exists(lsm) and 'ibiblio' in channels):
 if options.force or not os.path.exists("index.html"):
     print "Building index page..."
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
-    for (file, explanation) in deliverables:
+    for (file, explanation) in web_deliverables:
         if os.path.exists(file) and not file.endswith(".lsm"):
             resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
     for file in glob.glob('*.html'):
@@ -314,6 +334,7 @@ if options.force or not os.path.exists("CHANGES"):
 
 # The freshmeat announcement
 if options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
+    print "Building ANNOUNCE.FRESHMEAT..."
     focus = raw_input("freshmeat.net release focus: ")
     if focus in "0123456789":
         print "OK:", freshmeat_focus_types[int(focus)]
@@ -346,18 +367,34 @@ if options.force or not os.path.exists("ANNOUNCE.EMAIL"):
 
 # Shipping methods, locations, and deliverables for well-known public channels.
 hardwired = {
-    'freshmeat' : (lambda: do_or_die("freshmeat-submit <ANNOUNCE.FRESHMEAT"),
-                   tarball, binrpm, srcrpm, zip),
-    'ibiblio'   : (lambda fn: upload("ftp://ibiblio.org/incoming/linux", fn),
-                   tarball, binrpm, srcrpm, lsm),
-    'redhat'    : (lambda fn: upload("ftp://incoming.redhat.com/libc6", fn),
-                   tarball, binrpm, srcrpm),
+    'freshmeat' : (lambda: freshmeat_ship(("ANNOUNCE.FRESHMEAT",))),
+    'ibiblio'   : (lambda: upload("ftp://ibiblio.org/incoming/linux",
+                                  (tarball, binrpm, srcrpm, lsm))),
+    'redhat'    : (lambda: upload("ftp://incoming.redhat.com/libc6", 
+                                  (tarball, binrpm, srcrpm))),
 }
 
 if not options.noupload:
     print"Uploading version %s of %s" % (version, package)
 
+# First ship to private channels.
+# Order is important here, we need to hit the user's primary website first
+# so everything will be in place when announcements are generated.
+for destination in destinations:
+    if destination.startswith("ftp:"):
+        manifest = (tarball, binrpm, srcrpm,)
+    elif destination.startswith("mailto:"):
+        manifest = ("ANNOUNCE.EMAIL")
+    else:
+        manifest = map(lambda x: x[0], web_deliverables)
+    upload(destination, manifest)
 
+# Now ship to to public channels
+for channel in channels:
+    if channel in hardwired:
+        apply(hardwired[channel])
+
+print "Done"
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
