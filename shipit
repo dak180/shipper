@@ -12,12 +12,13 @@
 . ${HOME}/.shipit
 
 notify=echo
-while getopts dhk:wpr:t:fF: c;
+while getopts a:dhk:wpr:t:fF: c;
 do
   case $c in
+   'a') author="-a '$OPTARG'" ;;
    'd') noupload=echo dumpcmds=yes explicit='sh -x' notify=: ;;	# List upload commands
    'h') hide=yes ;;
-   'k') keywords="$OPTARG" ;;
+   'k') keywords="-k $OPTARG" ;;
    'w') noupload=: pagedump=yes notify=: ;;	# List generated web page
    'p') primary=: ;;				# Changes only primary site
    'r') releasefocus="$OPTARG";;
@@ -236,7 +237,7 @@ fi
 # Generate an LSM file if we have an RPM file to do it from
 if [ -f ${queryable} ]
 then
-    rpm2lsm -k "$keywords" $queryable >$lsm
+    rpm2lsm "$author" "$keywords" $queryable >$lsm
 fi
 
 # First copy to primary website
