@@ -181,7 +181,8 @@ class Specfile:
             line = fp.readline()
             if not line:
                 break
-            if line.startswith("%" + fieldname):
+            # Pick up fieldnames *without* translation options.
+            if line.strip() == "%" + fieldname:
                 gather = True
                 continue
             elif line[0] == "%":
