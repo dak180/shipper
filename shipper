@@ -236,7 +236,7 @@ try:
 
     # Map web deliverables to explanations for the resource table
     # Stuff niot included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
-    web_deliverables = [
+    stock_deliverables = [
         ("README", "roadmap file"),
         (tarball,  "source tarball"),
         (zip,      "ZIP archive"),
@@ -306,10 +306,12 @@ try:
     # Next the index page if it doesn't exist
     if options.force or not os.path.exists("index.html"):
         print "# Building index page..."
-        resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
-        for (file, explanation) in web_deliverables:
-            if os.path.exists(file) and not file.endswith(".lsm"):
-                resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
+        web_deliverables = []
+        # Anything in the list of standard deliverables is eligible.
+        for (file, explanation) in stock_deliverables:
+            if os.path.exists(file):
+                web_deliverables.append((file, explanation))
+        # So is anything with an HTML extendion
         for file in glob.glob('*.html'):
             if file == 'index.html':
                 continue
@@ -320,11 +322,18 @@ try:
                     break
             else:
                 explanation = "HTML page."
-            resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
+            web_deliverables.append((file, explanation))
+        # Now that we've computed all deliverables, build the resource table
+        resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
+        for (file, explanation) in web_deliverables:
+            resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
         resourcetable += "</table>"
+        # OK, now build the index page itself
         ofp = open("index.html", "w")
         ofp.write(indextemplate % globals())
         ofp.close()
+        # Compute final deliverables
+        web_deliverables = map(lambda x: x[0], web_deliverables)+["index.html"]
 
     # Next the CHANGES file
     if options.force or not os.path.exists("CHANGES"):
@@ -385,7 +394,7 @@ try:
         elif destination.startswith("mailto:"):
             do_or_die("sendmail -i -oem %s <ANNOUNCE.ENAIL" % destination[7:])
         else:
-            upload(destination, map(lambda x: x[0], web_deliverables))
+            upload(destination, web_deliverables)
 
     # Now ship to to public channels
     for channel in channels:
