@@ -180,222 +180,225 @@ def get_metadata(fieldname):
 # Main sequence
 #
 
-parser = optparse.OptionParser(usage="%prog: [-h] [-n] [-f] [-v]")
-parser.add_option("-v", "--verbose",
-                  action="store_true", dest="verbose", default=False,
-                  help="print progress messages to stdout")
-parser.add_option("-n", "--noupload",
-                  action="store_true", dest="noupload", default=False,
-                  help="don't do uploads, just build deliverables")
-parser.add_option("-f", "--force",
-                  action="store_true", dest="force", default=False,
-                  help="force rebuilding of all local deliverables")
-(options, args) = parser.parse_args()
+try:
+    parser = optparse.OptionParser(usage="%prog: [-h] [-n] [-f] [-v]")
+    parser.add_option("-v", "--verbose",
+                      action="store_true", dest="verbose", default=False,
+                      help="print progress messages to stdout")
+    parser.add_option("-n", "--noupload",
+                      action="store_true", dest="noupload", default=False,
+                      help="don't do uploads, just build deliverables")
+    parser.add_option("-f", "--force",
+                      action="store_true", dest="force", default=False,
+                      help="force rebuilding of all local deliverables")
+    (options, args) = parser.parse_args()
 
-# Read in variable overrides
-home_profile = os.path.join(os.getenv('HOME'), ".shipper")
-if os.path.exists(home_profile):
-    execfile(home_profile)
-here_profile = ".shipper"
-if os.path.exists(here_profile):
-    execfile(here_profile)
+    # Read in variable overrides
+    home_profile = os.path.join(os.getenv('HOME'), ".shipper")
+    if os.path.exists(home_profile):
+        execfile(home_profile)
+    here_profile = ".shipper"
+    if os.path.exists(here_profile):
+        execfile(here_profile)
 
-# Set various sensible defaults
-package = os.path.basename(os.getcwd())
-whoami = os.getenv('USERNAME') + "@" + os.getenv('HOSTNAME')
+    # Set various sensible defaults
+    package = os.path.basename(os.getcwd())
+    whoami = os.getenv('USERNAME') + "@" + os.getenv('HOSTNAME')
 
-# Where to get the metadata
-specfile = package + ".spec"
+    # Where to get the metadata
+    specfile = package + ".spec"
 
-# Extract the package vers from the specfile or Makefile
-specvers = get_metadata("version")
-makevers = None
-if os.path.exists("Makefile"):
-    makevers = grep("^VERS[A-Z]* *= *(.*)", "Makefile")
-    # Maybe it's a shell command intended to extract version from specfile
-    if makevers[0] == '$':
-        makevers = commands.getoutput(makevers[7:-1])
-if specvers != makevers:
-    croak("specfile version %s != Makefile version %s" % (specvers, makevers))
-elif specvers == None:
-    croak("can't get package version")
-elif specvers[0] not in "0123456789":
-    croak("package version %s appears garbled" % specvers)
-else:
-    version = specvers
-
-# These are all the potential deliverable files that include the version number
-arch = get_metadata("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
-tarball   = package + "-" + version + ".tar.gz"
-srcrpm    = package + "-" + version + "-1.src.rpm"
-binrpm    = package + "-" + version + "-1." + arch + ".rpm"
-zip       = package + "-" + version + ".zip"
-lsm       = package + ".lsm"
-html      = package + ".html"
-
-# Map web deliverables to explanations for the resource table
-# Stuff niot included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
-web_deliverables = [
-    ("README", "roadmap file"),
-    (tarball,  "source tarball"),
-    (zip,      "ZIP archive"),
-    (binrpm,   "installable RPM"),		# Generated
-    (srcrpm,   "source RPM"),			# Generated
-    ("CHANGES","Changelog file"),		# Generated
-    ("NEWS",   "Project news"),
-    ("HISTORY","Project history"),
-    ("BUGS",   "Known bugs"),
-    ("TODO",   "To-do file"),
-    ]
-
-#
-# Build deliverables
-#
-
-suppress = " >/dev/null 2>&1"
-if options.verbose:
-    suppress = ""
-
-# Sanity checks
-if not os.path.exists(tarball):
-    croak("no tarball %s, check your make dist command!" % tarball)
-if not os.path.exists(specfile):
-    croak("no specfile %s, can't build RPMs!" % specfile)
-if not get_metadata("BuildRoot"):
-    croak("specfile %s doesn't have a BuildRoot!" % specfile)
-if 'freshmeat' in channels and not get_metadata("URL"):
-    croak("can't announce to freshmeat without a primary website!")
-
-# Extract variables for templating
-if options.force or not homepage:
-    homepage = get_metadata("URL")
-if not date:
-    date = time.asctime()
-if not description:
-    description = get_metadata("description").strip()
-
-# RPMs first.
-if options.force or (not os.path.exists(binrpm) or not os.path.exists(srcrpm)):
-    print "Building RPMs..."
-    if get_metadata("target") == "noarch":
-        do_or_die("buildrpms %s noarch %s" % (tarball, suppress))
+    # Extract the package vers from the specfile or Makefile
+    specvers = get_metadata("version")
+    makevers = None
+    if os.path.exists("Makefile"):
+        makevers = grep("^VERS[A-Z]* *= *(.*)", "Makefile")
+        # Maybe it's a shell command intended to extract version from specfile
+        if makevers[0] == '$':
+            makevers = commands.getoutput(makevers[7:-1])
+    if specvers != makevers:
+        croak("specfile version %s != Makefile version %s"%(specvers,makevers))
+    elif specvers == None:
+        croak("can't get package version")
+    elif specvers[0] not in "0123456789":
+        croak("package version %s appears garbled" % specvers)
     else:
-        do_or_die("buildrpms %s %s" % (tarball, suppress))
+        version = specvers
 
-# Now that we have RPMs, extract the changelog information
-changelog = commands.getoutput("rpm --changelog -qp " + binrpm)
-lastchange = ""
-for line in changelog.split("\n"):
-    if not lastchange and (not line.strip() or line[0] == '*'):
-        continue
-    elif line.strip():
-        lastchange += line + "\n"
-    else:
-        break
+    # These are all potential deliverable files that include the version number
+    arch = get_metadata("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
+    tarball   = package + "-" + version + ".tar.gz"
+    srcrpm    = package + "-" + version + "-1.src.rpm"
+    binrpm    = package + "-" + version + "-1." + arch + ".rpm"
+    zip       = package + "-" + version + ".zip"
+    lsm       = package + ".lsm"
+    html      = package + ".html"
 
-# Next, the LSM if needed
-if options.force or (not os.path.exists(lsm) and 'ibiblio' in channels):
-    print "Building LSM..."
-    keywords = get_metadata("keywords")
-    if keywords:
-        do_or_die("rpm2lsm -k '" + keywords +  "' " + binrpm + " >" + lsm)
-    else:
-        do_or_die("rpm2lsm " + binrpm + ">" + lsm)
+    # Map web deliverables to explanations for the resource table
+    # Stuff niot included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
+    web_deliverables = [
+        ("README", "roadmap file"),
+        (tarball,  "source tarball"),
+        (zip,      "ZIP archive"),
+        (binrpm,   "installable RPM"),		# Generated
+        (srcrpm,   "source RPM"),			# Generated
+        ("CHANGES","Changelog file"),		# Generated
+        ("NEWS",   "Project news"),
+        ("HISTORY","Project history"),
+        ("BUGS",   "Known bugs"),
+        ("TODO",   "To-do file"),
+        ]
 
-# Next the index page if it doesn't exist
-if options.force or not os.path.exists("index.html"):
-    print "Building index page..."
-    resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
-    for (file, explanation) in web_deliverables:
-        if os.path.exists(file) and not file.endswith(".lsm"):
-            resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
-    for file in glob.glob('*.html'):
-        if file == 'index.html':
-            continue
-        stem = file[:-4]
-        for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
-            if os.path.exists(stem + ext):
-                explanation = "HTML rendering of " + stem + ext
-                break
+    #
+    # Build deliverables
+    #
+
+    suppress = " >/dev/null 2>&1"
+    if options.verbose:
+        suppress = ""
+
+    # Sanity checks
+    if not os.path.exists(tarball):
+        croak("no tarball %s, check your make dist command!" % tarball)
+    if not os.path.exists(specfile):
+        croak("no specfile %s, can't build RPMs!" % specfile)
+    if not get_metadata("BuildRoot"):
+        croak("specfile %s doesn't have a BuildRoot!" % specfile)
+    if 'freshmeat' in channels and not get_metadata("URL"):
+        croak("can't announce to freshmeat without a primary website!")
+
+    # Extract variables for templating
+    if options.force or not homepage:
+        homepage = get_metadata("URL")
+    if not date:
+        date = time.asctime()
+    if not description:
+        description = get_metadata("description").strip()
+
+    # RPMs first.
+    if options.force or (not os.path.exists(binrpm) or not os.path.exists(srcrpm)):
+        print "Building RPMs..."
+        if get_metadata("target") == "noarch":
+            do_or_die("buildrpms %s noarch %s" % (tarball, suppress))
         else:
-            explanation = "HTML page."
-        resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
-    resourcetable += "</table>"
-    ofp = open("index.html", "w")
-    ofp.write(indextemplate % globals())
-    ofp.close()
+            do_or_die("buildrpms %s %s" % (tarball, suppress))
 
-# Next the CHANGES file
-if options.force or not os.path.exists("CHANGES"):
-    print "Building CHANGES..."
-    ofp = open("CHANGES", "w")
-    ofp.write("                     Changelog for " + package + "\n\n")
-    ofp.write(changelog)
-    ofp.close()
+    # Now that we have RPMs, extract the changelog information
+    changelog = commands.getoutput("rpm --changelog -qp " + binrpm)
+    lastchange = ""
+    for line in changelog.split("\n"):
+        if not lastchange and (not line.strip() or line[0] == '*'):
+            continue
+        elif line.strip():
+            lastchange += line + "\n"
+        else:
+            break
 
-# The freshmeat announcement
-if options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
-    print "Building ANNOUNCE.FRESHMEAT..."
-    focus = raw_input("freshmeat.net release focus: ")
-    if focus in "0123456789":
-        print "OK:", freshmeat_focus_types[int(focus)]
-    elif focus.lower() not in map(lambda x: x.lower(), freshmeat_focus_types):
-        croak("not a valid freshmeat.net release focus!")
-    ofp = open("ANNOUNCE.FRESHMEAT", "w")
-    ofp.write("Project: %s\n" % (get_metadata("freshmeat-name") or package))
-    ofp.write("Version: %s\n"% version)
-    ofp.write("Release-Focus: %s\n" % focus)
-    ofp.write("Home-Page-URL: %s\n" % homepage)
-    if os.path.exists(tarball):
-        ofp.write("Gzipped-Tar-URL: %s\n" % os.path.join(homepage, tarball))
-    if os.path.exists(zip):
-        ofp.write("Zipped-Tar-URL: %s\n" % os.path.join(homepage, zip))
-    if os.path.exists("CHANGES"):
-        ofp.write("Changelog-URL: %s\n" % os.path.join(homepage, "CHANGES"))
-    if os.path.exists(binrpm):
-        ofp.write("RPM-URL: %s\n" % os.path.join(homepage, binrpm))
-    # freshmeat.net doesn't like bulleted entries.
-    freshmeatlog = lastchange[2:].replace("\n  ", "\n")
-    ofp.write("\n" + freshmeatlog)
-    ofp.close()
+    # Next, the LSM if needed
+    if options.force or (not os.path.exists(lsm) and 'ibiblio' in channels):
+        print "Building LSM..."
+        keywords = get_metadata("keywords")
+        if keywords:
+            do_or_die("rpm2lsm -k '" + keywords +  "' " + binrpm + " >" + lsm)
+        else:
+            do_or_die("rpm2lsm " + binrpm + ">" + lsm)
 
-# Finally, email notification
-if options.force or not os.path.exists("ANNOUNCE.EMAIL"):
-    print "Building ANNOUNCE.EMAIL..."
-    ofp = open("ANNOUNCE.EMAIL", "w")
-    ofp.write(mailtemplate % globals())
-    ofp.close()
+    # Next the index page if it doesn't exist
+    if options.force or not os.path.exists("index.html"):
+        print "Building index page..."
+        resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
+        for (file, explanation) in web_deliverables:
+            if os.path.exists(file) and not file.endswith(".lsm"):
+                resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
+        for file in glob.glob('*.html'):
+            if file == 'index.html':
+                continue
+            stem = file[:-4]
+            for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
+                if os.path.exists(stem + ext):
+                    explanation = "HTML rendering of " + stem + ext
+                    break
+            else:
+                explanation = "HTML page."
+            resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
+        resourcetable += "</table>"
+        ofp = open("index.html", "w")
+        ofp.write(indextemplate % globals())
+        ofp.close()
 
-# Shipping methods, locations, and deliverables for well-known public channels.
-hardwired = {
-    'freshmeat' : (lambda: freshmeat_ship(("ANNOUNCE.FRESHMEAT",))),
-    'ibiblio'   : (lambda: upload("ftp://ibiblio.org/incoming/linux",
-                                  (tarball, binrpm, srcrpm, lsm))),
-    'redhat'    : (lambda: upload("ftp://incoming.redhat.com/libc6", 
-                                  (tarball, binrpm, srcrpm))),
-}
+    # Next the CHANGES file
+    if options.force or not os.path.exists("CHANGES"):
+        print "Building CHANGES..."
+        ofp = open("CHANGES", "w")
+        ofp.write("                     Changelog for " + package + "\n\n")
+        ofp.write(changelog)
+        ofp.close()
 
-if not options.noupload:
-    print"Uploading version %s of %s" % (version, package)
+    # The freshmeat announcement
+    if options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
+        print "Building ANNOUNCE.FRESHMEAT..."
+        focus = raw_input("freshmeat.net release focus: ")
+        if focus in "0123456789":
+            print "OK:", freshmeat_focus_types[int(focus)]
+        elif focus.lower() not in map(lambda x: x.lower(), freshmeat_focus_types):
+            croak("not a valid freshmeat.net release focus!")
+        ofp = open("ANNOUNCE.FRESHMEAT", "w")
+        ofp.write("Project: %s\n"%(get_metadata("freshmeat-name") or package))
+        ofp.write("Version: %s\n"% version)
+        ofp.write("Release-Focus: %s\n" % focus)
+        ofp.write("Home-Page-URL: %s\n" % homepage)
+        if os.path.exists(tarball):
+            ofp.write("Gzipped-Tar-URL: %s\n" % os.path.join(homepage,tarball))
+        if os.path.exists(zip):
+            ofp.write("Zipped-Tar-URL: %s\n" % os.path.join(homepage, zip))
+        if os.path.exists("CHANGES"):
+            ofp.write("Changelog-URL: %s\n" % os.path.join(homepage, "CHANGES"))
+        if os.path.exists(binrpm):
+            ofp.write("RPM-URL: %s\n" % os.path.join(homepage, binrpm))
+        # freshmeat.net doesn't like bulleted entries.
+        freshmeatlog = lastchange[2:].replace("\n  ", "\n")
+        ofp.write("\n" + freshmeatlog)
+        ofp.close()
 
-# First ship to private channels.
-# Order is important here, we need to hit the user's primary website first
-# so everything will be in place when announcements are generated.
-for destination in destinations:
-    if destination.startswith("ftp:"):
-        manifest = (tarball, binrpm, srcrpm,)
-    elif destination.startswith("mailto:"):
-        manifest = ("ANNOUNCE.EMAIL")
-    else:
-        manifest = map(lambda x: x[0], web_deliverables)
-    upload(destination, manifest)
+    # Finally, email notification
+    if options.force or not os.path.exists("ANNOUNCE.EMAIL"):
+        print "Building ANNOUNCE.EMAIL..."
+        ofp = open("ANNOUNCE.EMAIL", "w")
+        ofp.write(mailtemplate % globals())
+        ofp.close()
 
-# Now ship to to public channels
-for channel in channels:
-    if channel in hardwired:
-        apply(hardwired[channel])
+    # Shipping methods, locations, and deliverables for public channels.
+    hardwired = {
+        'freshmeat' : (lambda: freshmeat_ship(("ANNOUNCE.FRESHMEAT",))),
+        'ibiblio'   : (lambda: upload("ftp://ibiblio.org/incoming/linux",
+                                      (tarball, binrpm, srcrpm, lsm))),
+        'redhat'    : (lambda: upload("ftp://incoming.redhat.com/libc6", 
+                                      (tarball, binrpm, srcrpm))),
+    }
 
-print "Done"
+    if not options.noupload:
+        print"Uploading version %s of %s" % (version, package)
+
+    # First ship to private channels.
+    # Order is important here, we need to hit the user's primary website first
+    # so everything will be in place when announcements are generated.
+    for destination in destinations:
+        if destination.startswith("ftp:"):
+            manifest = (tarball, binrpm, srcrpm,)
+        elif destination.startswith("mailto:"):
+            manifest = ("ANNOUNCE.EMAIL")
+        else:
+            manifest = map(lambda x: x[0], web_deliverables)
+        upload(destination, manifest)
+
+    # Now ship to to public channels
+    for channel in channels:
+        if channel in hardwired:
+            apply(hardwired[channel])
+
+    print "Done"
+except KeyboardInterrupt:
+    print "Bye!"
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
