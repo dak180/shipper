@@ -17,6 +17,7 @@ keywords = None  	# Keywords for LSMs
 freshmeat_name = None	# Name of the project ob Freshmeat
 changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
+summary = None   	# One-line summary of the package
 description = None	# Nor a description
 
 indextemplate = """
@@ -143,24 +144,36 @@ def freshmeat_ship(manifest):
 def grep(pattern, file):
     "Mine for a specified pattern in a file."
     fp = open(file)
-    while True:
-        line = fp.readline()
-        if not line:
-            return None
-        m = re.search(pattern, line, re.I)
-        if m:
-            return m.group(1)
-    fp.close()
+    try:
+        while True:
+            line = fp.readline()
+            if not line:
+                return None
+            m = re.search(pattern, line)
+            if m:
+                return m.group(1)
+    finally:
+        fp.close()
+    return None
 
-def get_metadata(fieldname):
-    "Fetch package metadata."
-    # Someday we'll support getting metadata from Debian control files
-    if not os.path.exists(specfile):
-        return None
-    if fieldname in ("description", "changelog"):
-        # Grab everything from leader line to just before the next blank line
+class Specfile:
+    def __init__(self, filename):
+        self.filename = filename
+        self.type = None
+        if filename.endswith(".spec"):
+            self.type = "RPM"
+        elif filename == "control":
+            self.type = "deb"
+    def extract(self, fld):
+        "Extract a one-line field, possibly embedded as a magic comment."
+        if self.type == "RPM":
+            return grep("^#?"+fld+":\s(.*)", self.filename)
+        elif self.type == "deb":
+            return grep("^(?:XBS-)?"+fld+": (.*)", self.filename)
+    def rpm_get_multiline(self, fieldname):
+        "Grab everything from leader line to just before the next leader line."
         global desc
-        fp = open(specfile)
+        fp = open(self.filename)
         desc = ""
         gather = False
         while True:
@@ -170,13 +183,59 @@ def get_metadata(fieldname):
             if line.startswith("%" + fieldname):
                 gather = True
                 continue
-            elif not line.strip():
+            elif line[0] == "%":
                 gather = False
             if gather:
                 desc += line
+        fp.close()
         return desc
-    else:
-        return grep("^#?"+fieldname+": (.*)",specfile)
+    def package(self):
+        "Get the package name."
+        if self.type == "RPM":
+            return self.extract("Name")
+        elif self.type == "deb":
+            return self.extract("Package")
+    def version(self):
+        "Get the package version (without Debian suffix)."
+        v = self.extract("Version")
+        if self.type == "deb":
+            return v.split("-")[0]
+        else:
+            return v
+    def homepage(self):
+        "Get the project home page"
+        if self.type == "RPM":
+            return self.extract("url")
+        elif self.type == "deb":
+            return self.extract("XBS-Home-Page")
+    def summary(self):
+        "Get the one-line project summary."
+        if self.type == "RPM":
+            return self.extract("Summary")
+        elif self.type == "deb":
+            return self.extract("Description")
+    def description(self):
+        "Get the multiline project description."
+        if self.type == "RPM":
+            return self.rpm_get_multiline("description")
+        elif self.type == "deb":
+            # FIXME: not yet implemented
+            return self.deb_get_multiline("Description:")
+    def changelog(self):
+        "Get the full project changelog."
+        if self.type == "RPM":
+            return self.rpm_get_multiline("changelog")
+        elif self.type == "deb":
+            # FIXME: not yet implemented
+            return self.deb_get_multiline("Changelog:")
+    def arch(self):
+        "Get the build architecture."
+        if self.type == "RPM":
+            return self.extract("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
+        elif self.type == "deb":
+            arch = self.extract("Architecture")
+            if not arch:
+                croak("this control file lacks an Architecture field")
 
 #
 # Main sequence
@@ -218,23 +277,25 @@ try:
     # Where to get the metadata
     specfiles = glob.glob("*.spec")
     if len(specfiles) == 1:
-        specfile = specfiles[0]
+        specfile = Specfile(specfiles[0])
+    elif os.path.exists("control"):
+        specfile = Specfile("control")
     else:
-        croak("there must be exactly one specfile in the directory!")
+        croak("must be exactly one RPM or dpkg specfile in the directory!")
 
     # Get the package name
     if not package:
-        package = get_metadata("name")
+        package = specfile.package()
     if not package:
         croak("can't get package name!")
 
     # Extract the package vers from the specfile or Makefile
-    specvers = get_metadata("version")
+    specvers = specfile.version()
     makevers = None
     if os.path.exists("Makefile"):
         makevers = grep("^VERS[A-Z]* *= *(.*)", "Makefile")
         # Maybe it's a shell command intended to extract version from specfile
-        if makevers[0] == '$':
+        if makevers and makevers[0] == '$':
             makevers = commands.getoutput(makevers[7:-1])
     if specvers != makevers:
         croak("specfile version %s != Makefile version %s"%(specvers,makevers))
@@ -246,7 +307,7 @@ try:
         version = specvers
 
     # Specfiles may set their own destinations
-    local_destinations = get_metadata("destinations")
+    local_destinations = specfile.extract("Destinations")
     if local_destinations:
         local_destinations = map(lambda x: x.strip(), local_destinations.split(","))
         destinations += local_destinations
@@ -257,12 +318,17 @@ try:
 
     # Extract remaining variables for templating
     if not homepage:
-        homepage = get_metadata("URL")
+        homepage = specfile.homepage()
     if not date:
         date = time.asctime()
+    if not summary:
+        summary = specfile.summary()
     if not description:
-        description = get_metadata("description").strip()
-    arch = get_metadata("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
+        description = specfile.description().strip()
+    if not arch:
+        arch = specfile.arch()
+    if not keywords:
+        keywords = specfile.extract("Keywords")
 
     #
     # Now compute the names of deliverables
@@ -301,18 +367,13 @@ try:
     # Sanity checks
     if not os.path.exists(tarball):
         croak("no tarball %s!" % tarball)
-    if not os.path.exists(specfile):
-        croak("no specfile %s, can't build RPMs!" % specfile)
-    if not get_metadata("BuildRoot"):
-        croak("specfile %s doesn't have a BuildRoot!" % specfile)
+    if specfile.type == "RPM" and not specfile.extract("BuildRoot"):
+        croak("specfile %s doesn't have a BuildRoot!" % specfile.filename)
 
     # RPMs first.
     if options.force or (not os.path.exists(binrpm) or not os.path.exists(srcrpm)):
         print "# Building RPMs..."
-        if get_metadata("target") == "noarch":
-            do_or_die("buildrpms %s noarch %s" % (tarball, suppress))
-        else:
-            do_or_die("buildrpms %s %s" % (tarball, suppress))
+        do_or_die("buildrpms %s %s" % (tarball, suppress))
 
     # Now that we have RPMs, extract the changelog information
     changelog = commands.getoutput("rpm --changelog -qp " + binrpm)
@@ -328,7 +389,6 @@ try:
     # Next, the LSM if needed
     if options.force or (not os.path.exists(lsm) and 'ibiblio' in channels):
         print "# Building LSM..."
-        keywords = get_metadata("keywords")
         if keywords:
             do_or_die("rpm2lsm -k '" + keywords +  "' " + binrpm + " >" + lsm)
         else:
@@ -378,7 +438,7 @@ try:
     # The freshmeat announcement
     if options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
         print "# Building ANNOUNCE.FRESHMEAT..."
-        if not get_metadata("URL"):
+        if not homepage:
             print "# Can't announce to freshmeat without a primary website!"
         else:
             focus = raw_input("# freshmeat.net release focus: ")
@@ -387,7 +447,7 @@ try:
             elif focus.lower() not in map(lambda x: x.lower(), freshmeat_focus_types):
                 croak("not a valid freshmeat.net release focus!")
             ofp = open("ANNOUNCE.FRESHMEAT", "w")
-            ofp.write("Project: %s\n"%(get_metadata("freshmeat-name") or package))
+            ofp.write("Project: %s\n"%(specfile.extract("freshmeat-name") or package))
             ofp.write("Version: %s\n"% version)
             ofp.write("Release-Focus: %s\n" % focus)
             ofp.write("Home-Page-URL: %s\n" % homepage)
