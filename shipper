@@ -139,7 +139,7 @@ def upload(destination, files):
             # Unfortunately, sftp(1) is rather brain-dead -- no
             # way to ignore failure on a remove, and refuses to
             # do renames with an obscure error message.
-            remote = os.path.join(directory, package, file)
+            remote = os.path.join(directory, package, os.path.basename(file))
             upload_or_die("scp " + file + " " + host + ":" + remote+".new;")
             upload_or_die("ssh %s 'mv -f %s.new %s'" % (host, remote, remote))
     else:
@@ -495,11 +495,6 @@ try:
         if webfiles:
             web_only_deliverables += webfiles
 
-        # Compute final deliverables
-        all_deliverables = map(lambda x: x[0], download_only_deliverables + web_only_deliverables)
-        download_deliverables = map(lambda x: x[0], download_only_deliverables)
-        web_deliverables = map(lambda x: x[0], web_only_deliverables)
-
         # If a web page doesn't already exist, make two versions.
         # One has a resource table listing all deliverables, for ordinary
         # websites. The other one omits downloadables; this is for sites
@@ -593,6 +588,11 @@ try:
         #
         # Now actually ship
         #
+
+        # Compute final deliverables
+        all_deliverables = map(lambda x: x[0], download_only_deliverables + web_only_deliverables)
+        download_deliverables = map(lambda x: x[0], download_only_deliverables)
+        web_deliverables = map(lambda x: x[0], web_only_deliverables)
 
         # Shipping methods for public destinations.
         def freshmeat():
