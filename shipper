@@ -512,6 +512,7 @@ try:
             make_index_page(web_only_deliverables, "index.page-nodownloads")
             delete_at_end.append("index.html-nodownloads")
             delete_at_end.append("index.html")
+            upload_or_die("ln -f index.html-downloads index.html")
 
         # Now that the web page has been generated, it can add itself to the
         # deliverables without having it show up in the resource table.
@@ -603,7 +604,7 @@ try:
             upload("ftp://incoming.redhat.com", download_deliverables)
         def berlios():
             upload("ftp://ftp.berlios.de/incoming", download_deliverables)
-            upload_or_die("cp index.html-nodownloads index.html")
+            upload_or_die("ln -f index.html-nodownloads index.html")
             berlios_webdir = \
                            "shell.berlios.de:/home/groups/" \
                            + (berlios_name or package) \
@@ -626,7 +627,7 @@ try:
                 else:
                     do_or_die(command)
             elif destination not in hardwired:
-                upload_or_die("cp index.html-downloads index.html")
+                upload_or_die("ln -f index.html-downloads index.html")
                 upload(destination, all_deliverables)
     finally:
         cleanup = "rm -f " + " ".join(delete_at_end)
