@@ -44,6 +44,11 @@ fi
 if [ -f Makefile ]
 then
     version=`sed -n '/^VERS[A-Z]* *= *\([^	 ]*\)/s//\1/p' <Makefile`
+    # Maybe it's a shell command intended to extract version from specfile
+    if expr "${version}" : '$.*' >/dev/null
+    then
+	version=`echo "$version" | sed -n '/\$(shell \(.*\))/s//\1/p' | sh`
+    fi
 else
     echo "shipit: can't get package ${package} version"
     exit 1
