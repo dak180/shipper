@@ -652,7 +652,7 @@ try:
                         print "# This release has aleady been tagged."
                     else:
                         print "# I will copy and tag this release."
-                        upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tag_message, version))
+                        upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
     finally:
         cleanup = "rm -f " + " ".join(delete_at_end)
         if options.noupload:
