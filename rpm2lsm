@@ -44,7 +44,7 @@ description=`rpm --queryformat="%{description}" -qp $rpm | fmt -w 65 | sed '2,$s
 fullname=`cat /etc/passwd | awk -F : "/^${USER}/ "'{print $5}'`
 fullname="${USER}@${HOSTNAME} ($fullname)"
 
-if [ -z "$author"]
+if [ -z "$author" ]
 then 
     if [ -f AUTHORS ]
     then
