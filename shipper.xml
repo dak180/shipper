@@ -162,14 +162,17 @@ consistency-checked.</para>
 
 <para><application>shipper</application> gets most of the rest of the
 data it uses to decide what to do from headers in the specfile.
-The following table lists all the variables:</para>
+The following table lists all the variables and their corresponding
+specfile fields. <application>shipper</application> uses the RPM spec
+file fields: the Debian entries are informational only.</para>
 
 <informaltable>
-<tgroup cols="3">
+<tgroup cols="4">
 <thead>
 <row>
 <entry>Variable</entry>
 <entry>RPM specfile field</entry>
+<entry>Debian specfile field</entry>
 <entry>Meaning</entry>
 </row>
 </thead>
@@ -177,6 +180,7 @@ The following table lists all the variables:</para>
 <row>
 <entry><varname>destinations</varname></entry>
 <entry>#Destinations:</entry>
+<entry>XBS-Destinations:</entry>
 <entry>
 <para>A list of remote directories to ship to using
 <citerefentry>
@@ -201,6 +205,7 @@ not run.</para>
 <row>
 <entry><varname>whoami</varname></entry>
 <entry align='center'>-</entry>
+<entry align='center'>-</entry>
 <entry>
 <para>A plausible email address for the user.  If not specified in the
 config file, it's generated from
@@ -209,6 +214,7 @@ config file, it's generated from
 </row>
 <row>
 <entry><varname>date</varname></entry>
+<entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
 <para>The program's startup time. This can be used in the web page and
@@ -223,6 +229,7 @@ set it for you.</para>
 <row>
 <entry><varname>indextemplate</varname></entry>
 <entry align='center'>-</entry>
+<entry align='center'>-</entry>
 <entry>
 <para>Template HTML from which to generate index.html for shipping.  There is a
 default which generates a very simple page containing a title, a 
@@ -234,6 +241,7 @@ is run.</para>
 <row>
 <entry><varname>mailtemplate</varname></entry>
 <entry align='center'>-</entry>
+<entry align='center'>-</entry>
 <entry>
 <para>Template text from which to generate the file ANNOUNCE.EMAIL to be
 shipped to destinations that are mailto URLs.  There is a default which
@@ -244,14 +252,17 @@ project web page, and the last entry in the project changelog.</para>
 <row>
 <entry><varname>package</varname></entry>
 <entry>Name:</entry>
+<entry>Package:</entry>
 <entry>
 <para>Project name, used to generate the stem part of the names of RPMs and
 other deliverables that <application>shipper</application>
-builds.</para>
+builds. If the specfile is a Debian control file, the Debian-specific
+part of the version number (after the dash) is removed.</para>
 </entry>
 </row>
 <row>
 <entry><varname>version</varname></entry>
+<entry>Version:</entry>
 <entry>Version:</entry>
 <entry>
 <para>Project version, used in generating the names of RPMs and
@@ -262,6 +273,7 @@ builds.</para>
 <row>
 <entry><varname>homepage</varname></entry>
 <entry>URL:</entry>
+<entry>XBS-Home-Page:</entry>
 <entry>
 <para>Project home page URL. Used when generating project 
 announcements.</para>
@@ -270,6 +282,7 @@ announcements.</para>
 <row>
 <entry><varname>arch</varname></entry>
 <entry>BuildArch:</entry>
+<entry>Architecture:</entry>
 <entry>
 <para>Build architecture.  If this field is <quote>noarch</quote>, 
 noarch rather than binary RPMs will be built.</para>
@@ -278,6 +291,7 @@ noarch rather than binary RPMs will be built.</para>
 <row>
 <entry><varname>keywords</varname></entry>
 <entry>#Keywords:</entry>
+<entry>XBS-Keywords:</entry>
 <entry>
 <para>Topic keywords. Used when generating LSM files.</para>
 </entry>
@@ -285,6 +299,7 @@ noarch rather than binary RPMs will be built.</para>
 <row>
 <entry><varname>freshmeat_name</varname></entry>
 <entry>#Freshmeat-Name:</entry>
+<entry>XBS-Freshmeat-Name:</entry>
 <entry>
 <para>Freshmeat shortname, used in generating freshmeat.net
 announcements. If this isn't present, it defaults to the project
@@ -292,8 +307,17 @@ name; you only need to set it if they differ.</para>
 </entry>
 </row>
 <row>
+<entry><varname>summary</varname></entry>
+<entry>Summary</entry>
+<entry>Description:</entry>
+<entry>
+<para>The one-line project summary field from your specfile.</para>
+</entry>
+</row>
+<row>
 <entry><varname>description</varname></entry>
 <entry>%description</entry>
+<entry>Description:</entry>
 <entry>
 <para>The Description field from your specfile.</para>
 </entry>
@@ -301,6 +325,7 @@ name; you only need to set it if they differ.</para>
 <row>
 <entry><varname>changelog</varname></entry>
 <entry>%changelog</entry>
+<entry align='center'>-</entry>
 <entry>
 <para>The entire changelog section from your specfile.</para>
 </entry>
@@ -308,6 +333,7 @@ name; you only need to set it if they differ.</para>
 <row>
 <entry><varname>lastchange</varname></entry>
 <entry>%changelog</entry>
+<entry align='center'>-</entry>
 <entry>
 <para>The most recent entry from your specfile changelog, without
 its date/author/release header.</para>
@@ -315,6 +341,7 @@ its date/author/release header.</para>
 </row>
 <row>
 <entry><varname>resourcetable</varname></entry>
+<entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
 <para>The HTML table of links to downloadable resources.  This
