@@ -87,11 +87,21 @@ def croak(msg):
 #
 
 def do_or_die(cmd):
-    "Either execute a command or fail noisily"
+    "Either execute a command or fail noisily, letting output go to stdout."
     if options.verbose:
         print "***", cmd
     if os.system(cmd):
         croak("command '%s' failed!" % cmd)
+
+def trap_or_die(cmd):
+    "Either execute a command or fail noisily, capturing output."
+    if options.verbose:
+        print "***", cmd
+    (status, output) =  commands.getstatusoutput(cmd)
+    if status:
+        croak("command '%s' failed!" % cmd)
+    else:
+        return output
 
 def upload_or_die(cmd):
     if options.noupload:
@@ -356,8 +366,8 @@ try:
 
     # These are all potential deliverable files that include the version number
     tarball   = package + "-" + version + ".tar.gz"
-    srcrpm    = package + "-" + version + "-1.src.rpm"
     binrpm    = package + "-" + version + "-1." + arch + ".rpm"
+    srcrpm    = package + "-" + version + "-1.src.rpm"
     zip       = package + "-" + version + ".zip"
     lsm       = package + "-" + version + ".lsm"
 
@@ -367,8 +377,6 @@ try:
         ("README",	"roadmap file"),
         (tarball,	"source tarball"),
         (zip,   	"ZIP archive"),
-        (binrpm,	"installable RPM"),	# Generated
-        (srcrpm,	"source RPM"),		# Generated
         ("ChangeLog",	"change log"),
         ("CHANGES",	"change log"),		# Generated
         ("NEWS",	"Project news"),
@@ -395,53 +403,71 @@ try:
     # Build deliverables
     #
 
-    suppress = " >/dev/null 2>&1"
-    if options.verbose:
-        suppress = ""
-
     # Sanity checks
     if not os.path.exists(tarball):
         croak("no tarball %s!" % tarball)
     if metadata.type == "RPM" and not metadata.extract("BuildRoot"):
         croak("specfile %s doesn't have a BuildRoot!" % metadata.filename)
 
-    def newer(f1, f2):
-        return os.path.exists(f1) and (os.stat(f1).st_mtime > os.stat(f2).st_mtime)
-
-    # Compute the deliverables, we need this even if not rebuilding the index
-    web_deliverables = []
-    # Anything in the list of standard deliverables is eligible.
-    for (file, explanation) in stock_deliverables:
-        if os.path.exists(file):
-            web_deliverables.append((file, explanation))
-    # So is anything with an HTML extendion
-    for file in glob.glob('*.html'):
-        if file == 'index.html':
-            continue
-        stem = file[:-4]
-        for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
-            if os.path.exists(stem + ext):
-                explanation = "HTML rendering of " + stem + ext
-                break
-        else:
-            explanation = "HTML page."
-        web_deliverables.append((file, explanation))
-    # Compute final deliverables
-    deliverables = map(lambda x: x[0], web_deliverables)+["index.html"]
-
     try:
         delete_at_end = []
+        rpmlist = []
 
-        # RPMs first.
-        if options.force or \
-               (not os.path.exists(binrpm) or not os.path.exists(srcrpm)):
-            print "# Building RPMs..."
-            if newer(srcrpm, tarball) and newer(binrpm, tarball):
-                print "RPMs are up to date"
+        def newer(f1, f2):
+            return os.path.exists(f1) and (os.stat(f1).st_mtime > os.stat(f2).st_mtime)
+
+        #
+        # Generate RPMs first, the list of these is variable and needs to go
+        # into deliverables.
+        #
+        print "# Building RPMs..."
+        output = trap_or_die("buildrpms %s" % tarball)
+        if options.verbose:
+            sys.stdout.write(output)
+        # Extract names of RPMs actually generated.
+        # Later in the code we presume that binrpm matches one
+        # of these, the base-subpackage binary RPM.  Others
+        # might be, for example, a -devel RPM.
+        for line in output.split("\n"):
+            if line.startswith("Wrote: "):
+                rpm = os.path.basename(line[6:])
+                delete_at_end.append(rpm)
+                rpmlist.append(rpm)
+        if options.verbose:
+            print "RPMS:", ", ".join(rpmlist)
+
+        #
+        # Compute the deliverables, we need this even if not rebuilding
+        # the index.
+        #
+        web_deliverables = []
+        # Anything in the list of standard deliverables is eligible.
+        for (file, explanation) in stock_deliverables:
+            if os.path.exists(file):
+                web_deliverables.append((file, explanation))
+        # So are any RPMS we generated
+        for rpm in rpmlist:
+            if rpm == binrpm:
+                web_deliverables.append((rpm, "installable binary RPM"))
+            elif rpm == srcrpm:
+                web_deliverables.append((rpm, "source RPM"))
             else:
-                do_or_die("buildrpms %s %s" % (tarball, suppress))
-                delete_at_end.append(srcrpm)
-                delete_at_end.append(binrpm)
+                web_deliverables.append((rpm, "auxiliary RPM"))
+        # So is anything with an HTML extension
+        for file in glob.glob('*.html'):
+            if file == 'index.html':
+                continue
+            stem = file[:-4]
+            for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
+                if os.path.exists(stem + ext):
+                    explanation = "HTML rendering of " + stem + ext
+                    break
+            else:
+                explanation = "HTML page."
+            web_deliverables.append((file, explanation))
+        # Compute final deliverables
+        all_deliverables = map(lambda x: x[0], web_deliverables)+["index.html"]
+        base_deliverables = (tarball,) + tuple(rpmlist)
 
         # Next, the LSM if needed
         if 'ibiblio' in channels and \
@@ -540,9 +566,9 @@ try:
         hardwired = {
             'freshmeat'	: (lambda: freshmeat_ship(("ANNOUNCE.FRESHMEAT",))),
             'ibiblio'	: (lambda: upload("ftp://ibiblio.org/incoming/linux",
-                                          (tarball, binrpm, srcrpm, lsm))),
+                                          base_deliverables + (lsm,))),
             'redhat'	: (lambda: upload("ftp://incoming.redhat.com", 
-                                          (tarball, binrpm, srcrpm))),
+                                          base_deliverables)),
         }
 
 
@@ -551,7 +577,7 @@ try:
         # will be in place when announcements are generated.
         for destination in destinations:
             if destination.startswith("ftp:"):
-                upload(destination, (tarball, binrpm, srcrpm,))
+                upload(destination, base_deliverables)
             elif destination.startswith("mailto:"):
                 print "# Mailing to %s" % destination
                 command = "sendmail -i -oem -f %s %s <ANNOUNCE.EMAIL" % (whoami, destination[7:])
@@ -560,7 +586,7 @@ try:
                 else:
                     do_or_die(command)
             else:
-                upload(destination, deliverables)
+                upload(destination, all_deliverables)
 
         # Now ship to public channels
         for channel in channels:
