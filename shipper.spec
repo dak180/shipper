@@ -1,5 +1,5 @@
 Name: shipper
-Version: 0.8
+Version: 0.9
 Release: 1
 URL: http://www.catb.org/~esr/shipper/
 Source0: %{name}-%{version}.tar.gz
@@ -46,6 +46,13 @@ cp shipper.1 rpm2lsm.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 %{_mandir}/man1/rpm2lsm.1*
 
 %changelog
+* Thu Feb 10 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.9-1
+- The Channels variable is gone. There are no longer default public channels;
+  you put the ones you want in your Destinations variable.  For safety's sake
+  the force (-f) option is also gone; generated deliverables are now built 
+  unconditionally, and you must explicitly make sure no index.html exists 
+  in order to get one generated.  There is now a "berlios" channel.
+
 * Tue Feb  1 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.8-1
 - Strip trailing edit-mode lines out of RPM spec files.
 
