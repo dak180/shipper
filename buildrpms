@@ -7,6 +7,7 @@
 #  Written by Sean Reifschneider <jafo-rpms@tummy.com>, 2003
 
 TARBALL=$1		#  tarball to build from
+ARCH=$2
 
 #  set up temporary directory
 TMPDIR=`pwd`/rpm-build.$$
@@ -24,8 +25,14 @@ sed "s|~/.rpmmacros|$MACROFILE|" /usr/lib/rpm/rpmrc >"$RCFILE"
 echo "%_topdir $TMPDIR" >"$MACROFILE"
 echo "%_topdir $TMPDIR" >"$MACROFILE"
 
+if [ "$ARCH" ]
+then
+    ARCH="--target $ARCH"
+fi
+
 #  build RPMs
-rpmbuild --rcfile "$RCFILE" -ta $TARBALL
+rpmbuild --rcfile "$RCFILE" $ARCH -ta $TARBALL
+status=$?
 
 #  copy RPMs to this directory
 cp "$TMPDIR"/RPMS/*/*.rpm .
@@ -33,3 +40,5 @@ cp "$TMPDIR"/SRPMS/*.rpm .
 
 #  clean up build directory
 [ ! -z "$TMPDIR" -a "$TMPDIR" != / ] && rm -rf "$TMPDIR"
+
+exit $?
