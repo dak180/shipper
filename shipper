@@ -205,7 +205,7 @@ class Specfile:
     def homepage(self):
         "Get the project home page"
         if self.type == "RPM":
-            return self.extract("url")
+            return self.extract("URL")
         elif self.type == "deb":
             return self.extract("XBS-Home-Page")
     def summary(self):
