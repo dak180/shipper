@@ -303,6 +303,11 @@ then
     read releasefocus
 fi
 
+if [ "$freshmeatonly" ]
+then
+    noupload=""
+fi
+
 if [ $noupload ]
 then
     dumpopt=-N
