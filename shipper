@@ -94,6 +94,7 @@ def do_or_die(cmd):
 def upload(destination, files):
     # Upload a file via ftp or sftp, handles 
     print "# Uploading to %s" % destination
+    files = filter(os.path.exists, files)
     if destination.startswith("ftp://"):
         destination = destination[6:].split("/")
         host = destination.pop(0)
@@ -101,31 +102,33 @@ def upload(destination, files):
         commands = ["lftp", "open -u anonymous," + whoami + " " + host + "\n"]
         if directory:
             commands.append("cd " + directory + "\n")
-        found = ""
-        for file in files:
-            if os.path.exists(file):
-                found += " " + file
-        commands.append("mput" + found + "\n")
+        commands.append("mput " + " ".join(files) + "\n")
         commands.append("close\n")
+        if options.noupload:
+            print "".join(commands)
+        else:
+            pfp = os.popen(commands.pop(0), "w")
+            pfp.writelines(commands)
+            pfp.close()
     else:
         (host, directory) = destination.split(":")
-        directory = os.path.join(directory, package)
-        commands = ["sftp -C " + host]
-        if directory:
-            commands.append("cd " + directory + "\r\n")
         for file in files:
-            if os.path.exists(file):
-                commands.append("put -P " + file + " " + file + ".new\r\n")
-                commands.append("rm " + file + "\r\n")
-                commands.append("rename " + file + ".new " + file + "\r\n")
-        commands.append("bye")
-    # Here goes the actual upload
-    if options.noupload:
-        print "".join(commands)
-    else:
-        pfp = os.popen(commands.pop(0), "w")
-        pfp.writelines(commands)
-        pfp.close()
+            remote = os.path.join(directory, package, file)
+            # This is a really ugly way to deal with the problem
+            # of write-protected files in the remote directory.
+            # Unfortunately, sftp(1) is rather brain-dead -- no
+            # way to ignore failure on a remove, and refuses to
+            # do renames with an obscure error message.
+            command = "scp " + file + " " + host + ":" + remote+".new;"
+            if options.noupload:
+                print command
+            else:
+                do_or_die(command)
+            command = "ssh %s 'mv -f %s.new %s'" % (host, remote, remote)
+            if options.noupload:
+                print command
+            else:
+                do_or_die(command)
 
 def freshmeat_ship(manifest):
     "Ship a specified update to freshmeat."
