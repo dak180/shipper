@@ -1,0 +1,95 @@
+#/bin/sh
+#
+# rpm2lsm -- generate Linux Software Map file from RPM meta information
+#
+# Assumption:
+# 1. You ship source code in a single compressed tarball with a GNUish name.
+#
+# Requires fmt(1).
+
+while getopts a:m:k:p: c; do
+  case $c in
+   'a') author=$OPTARG;;
+   'm') maintainer=$OPTARG;;
+   'k') keywords=$OPTARG;;
+   'p') platforms=$OPTARG;;
+   '?') echo "rpm2lsm: invalid switch specified - aborting."; exit 1;;
+  esac
+done
+shift `expr $OPTIND - 1`
+rpm=$1
+
+
+
+# Mine out all the single-token fields we'll need
+set -- `rpm --queryformat="%{name} %{version} %{release}" -qp $rpm`
+name=$1
+version=$2
+release=$3
+
+# Extract and reformat the desciption
+description=`rpm --queryformat="%{description}" -qp $rpm | fmt -w 65 | sed '2,$s/^/                /'`
+
+# Who am I?
+fullname=`cat /etc/passwd | awk -F : "/^${USERNAME}/ "'{print $5}'`
+fullname="${USERNAME}@${HOSTNAME} ($fullname)"
+
+if [ -z "$author"]
+then
+    author=$fullname
+fi
+
+# Fill in keywords if present
+if [ -n "$keywords" ]
+then
+    keywords="Keywords:       $keywords\n"
+fi
+
+# Default the maintainer field properly
+if [ -z "$maintainer" ]
+then
+    maintainer=`rpm --queryformat="%{packager}" -qp $rpm`
+    if [ "$maintainer" = "(none)" ]
+    then
+        maintainer=$author
+    fi
+fi
+
+# The date
+date=`date '+%Y-%m-%d'`
+
+cat >/usr/tmp/rpm2lsm.head.$$ <<EOF
+Begin3
+Title:		%{name}
+Version:	%{version}
+Entered-date:	${date}
+Description:	${description}
+${keywords}Author: 	${author}
+Maintained-by:	${maintainer}
+Primary-site:	%{url}
+EOF
+
+# File patterns that we ship 
+tarballs="${name}-${version}.tar.gz ${name}-${version}.tgz"
+rpms=${name}-${version}-${release}.*.rpm
+
+trap 0 2 15 "/usr/tmp/rpm2lsm.*.$$"
+for file in $tarballs $rpms
+do
+    if [ -f $file ]
+    then
+        set -- `du $file`; size=$1
+        echo "		${size}	${file}" >>/usr/tmp/rpm2lsm.head.$$
+    fi
+done
+
+cat >/usr/tmp/rpm2lsm.tail.$$ <<EOF
+Platforms:      ${platforms:-All}
+Copying-policy:	%{license}
+End
+EOF
+
+format=`cat /usr/tmp/rpm2lsm.head.$$ /usr/tmp/rpm2lsm.tail.$$`
+rpm --queryformat="$format" -qp $rpm
+
+
