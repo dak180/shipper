@@ -632,6 +632,16 @@ try:
             elif destination not in hardwired:
                 upload_or_die("ln -f index.html-downloads index.html")
                 upload(destination, all_deliverables)
+
+        # Shipping has succeeded.  If we're in the trunk of an SVN repository,
+        # we want to tag what just got shipped as an external release (unless
+        # the tag already exists).
+        tagname = "tags/release-" + version
+        if os.path.basename(os.getcwd()) == 'trunk' \
+        		and os.path.exists(".svn") \
+                        and os.path.exists("../tags") \
+                        and not os.path.exists("../tags/" + tagname):
+            do_or_die("cd .. && svn copy trunk %s && svn -m 'Tagged for external release %s' commit" % (tagname, version))
     finally:
         cleanup = "rm -f " + " ".join(delete_at_end)
         if options.noupload:

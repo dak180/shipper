@@ -109,9 +109,17 @@ that would have been used to ship them.  The command <command>shipper
 posting announcements.</para>
 
 <para>When uploads are complete, <application>shipper</application>
-cleans up after itself by deleting any deliverables it created for
-this run.  Deliverables that were found and up to date are not
-removed.</para>
+looks at where it is running.  If it is in the trunk of a Subversion
+repository (that is, the current directory is name
+<filename>trunk</filename> and has a subdirectory named
+<filename>.svn</filename>) and there is a <filename>tags</filename>
+peer directory, and the tags directory does not have a subdirectory
+named "release-$version", then <application>shipper</application>
+copies and tags the contents of trunk.</para>
+
+<para>Finally, <application>shipper</application> cleans up after
+itself by deleting any deliverables it created for this run.
+Deliverables that were found and up to date are not removed.</para>
 
 <para>Finally, note that <application>shipper</application> makes one
 important assumption about the structure of your website(s).  Beneath
