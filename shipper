@@ -110,7 +110,7 @@ def upload_or_die(cmd):
     else:
         do_or_die(cmd)
 
-def upload(destination, files):
+def upload(destination, files, subdir=package):
     # Upload a file via ftp or sftp, handles 
     print "# Uploading to %s" % destination
     files = filter(os.path.exists, files)
@@ -139,7 +139,7 @@ def upload(destination, files):
             # Unfortunately, sftp(1) is rather brain-dead -- no
             # way to ignore failure on a remove, and refuses to
             # do renames with an obscure error message.
-            remote = os.path.join(directory, package, os.path.basename(file))
+            remote = os.path.join(directory, subdir, os.path.basename(file))
             upload_or_die("scp " + file + " " + host + ":" + remote+".new;")
             upload_or_die("ssh %s 'mv -f %s.new %s'" % (host, remote, remote))
     else:
@@ -604,12 +604,13 @@ try:
             upload("ftp://incoming.redhat.com", download_deliverables)
         def berlios():
             upload("ftp://ftp.berlios.de/incoming", download_deliverables)
-            upload_or_die("ln -f index.html-nodownloads index.html")
+            if os.path.exists("index.html-nodownloads"):
+                upload_or_die("ln -f index.html-nodownloads index.html")
             berlios_webdir = \
                            "shell.berlios.de:/home/groups/" \
                            + (berlios_name or package) \
                            + "/htdocs"
-            upload(berlios_webdir, web_deliverables)
+            upload(berlios_webdir, web_deliverables, subdir="")
         hardwired = ("freshmeat", "ibiblio", "redhat", "berlios")
 
         # OK, ship everything.
