@@ -49,7 +49,7 @@ BuildRoot field. <application>shipper</application> also calls
 deduce what it should do rather than requiring you to tell it.  In
 order to do this, it relies on your project obeying standard GNU-like
 naming conventions.  It also relies on being able to mine project
-metadata out of a package spec file.  (Presently the only variety of
+metadata out of a package specfile.  (Presently the only variety of
 package specfile supported is an RPM spec; this may change in the future,
 when we fully support shipping Debian packages.)</para>
 
@@ -525,6 +525,16 @@ generated into the local deliverable ANNOUNCE.FRESHMEAT.</para>
 </entry>
 </row>
 <row>
+<entry>cAos</entry>
+<entry>SRPM</entry>
+<entry>-</entry>
+<entry>
+<para>If the <varname>cAos_id</varname> variable is set, indicating
+that the user has upload privileges for the cAos repository, then
+an SRPM is shipped to that repository on each release.</para>
+</entry>
+</row>
+<row>
 <entry>Generic Web site</entry>
 <entry>README, tarball, zipfile, RPMs, CHANGES, NEWS, HISTORY, *.html, 
 BUGS, TODO.</entry>
@@ -617,6 +627,10 @@ script was originally by Sean Reifschneider.</para>
 <para>There is a project web page at
 <ulink
 url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink>.</para>
+</refsect1>
+
+<refsect1><title>Bugs</title>
+<para>The cAos channel is untested.</para>
 </refsect1>
 
 <refsect1><title>See Also</title>

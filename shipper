@@ -60,6 +60,9 @@ Here are the most recent changes:
                              shipper, acting for %(whoami)s
 """
 
+# Credentials 
+cAos_id = None		# Set this to enable the cAos channel
+
 # It's unpleasant that we have to include these here, but
 # the freshmeat release focus has to be validated even if the
 # user is offline and the XML-RPC service not accessible.
@@ -139,6 +142,17 @@ def freshmeat_ship(manifest):
         print command
     else:
         do_or_die(command)
+
+def cAos_ship(manifest):
+    "Ship files to the cAos rsync repository if we have an ID there."
+    if cAos_id:
+        cmd = "rsync %s  %s@temple.caosity.org::%s" % (" ".join(manifest), cAos_id, cAos_id)
+        if options.noupload:
+            print command
+        else:
+            do_or_die(command)
+    else:
+        print "cAos upload skipped, no cAos ID."
 
 #
 # Metadata extraction
@@ -426,7 +440,9 @@ try:
                                       (tarball, binrpm, srcrpm, lsm))),
         'redhat'        : (lambda: upload("ftp://incoming.redhat.com/libc6", 
                                       (tarball, binrpm, srcrpm))),
+        'cAos'     	: (lambda: cAos_ship((srcrpm,))),
     }
+
 
     # First ship to private channels.
     # Order is important here, we need to hit the user's primary website first
