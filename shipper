@@ -168,7 +168,7 @@ class Specfile:
     def extract(self, fld):
         "Extract a one-line field, possibly embedded as a magic comment."
         if self.type == "RPM":
-            return grep("^#?"+fld+":\s(.*)", self.filename)
+            return grep("^#?"+fld+":\s*(.*)", self.filename)
         elif self.type == "deb":
             return grep("^(?:XBS-)?"+fld+": (.*)", self.filename)
     def rpm_get_multiline(self, fieldname):
