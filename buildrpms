@@ -7,7 +7,6 @@
 #  Written by Sean Reifschneider <jafo-rpms@tummy.com>, 2003
 
 TARBALL=$1		#  tarball to build from
-ARCH=$2
 
 #  set up temporary directory
 TMPDIR=`pwd`/rpm-build.$$
@@ -24,11 +23,6 @@ RCFILE="$TMPDIR"/rpmrc
 sed "s|~/.rpmmacros|$MACROFILE|" /usr/lib/rpm/rpmrc >"$RCFILE"
 echo "%_topdir $TMPDIR" >"$MACROFILE"
 echo "%_topdir $TMPDIR" >"$MACROFILE"
-
-if [ "$ARCH" ]
-then
-    ARCH="--target $ARCH"
-fi
 
 #  build RPMs
 rpmbuild --rcfile "$RCFILE" $ARCH -ta $TARBALL
