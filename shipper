@@ -100,26 +100,6 @@ def upload(destination, files):
             pfp.write("bye")
             pfp.close()
 
-def freshmeat_announce(files):
-    "Ship announcement to freshmeat.  Uses various computed globals."
-    focus = raw_input("Release focus: ")
-    command = "freshmeat-submit -n -r '%s'" % focus 
-    freshmeat_name = get_metadata("freshmeat-name")
-    if freshmeat_name:
-        command += " -p %s" % freshmeat_name
-    if os.path.exists(tarball): 
-        command += " --gzipped-tar-url=" + homepage + tarball
-    if os.path.exists(binrpm):
-        command += " --rpm-url=" + homepage + binrpm 
-    elif os.path.exists(srcrpm): 
-        command += " --rpm-url=" + homepage + binrpm 
-    elif os.path.exists(noarchrpm):
-        command += " --rpm-url=" + homepage + noarchrpm 
-    if os.path.exists("CHANGES"):
-        command += " --changelog-url=" + homepage + "CHANGES"
-    command += " " + queryable[0]
-    do_or_die(command)
-
 def grep(pattern, file):
     "Mine for a specified pattern in a file."
     fp = open(file)
@@ -309,23 +289,44 @@ if options.force or not os.path.exists("index.html"):
     ofp.close()
 
 # Next the CHANGES file
-if not options.force or os.path.exists("CHANGES"):
+if options.force or not os.path.exists("CHANGES"):
     print "Building CHANGES..."
     ofp = open("CHANGES", "w")
     ofp.write("                     Changelog for " + package + "\n\n")
     ofp.write(changelog)
     ofp.close()
 
+# The freshmeat announcement
+if options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
+    focus = raw_input("Release focus: ")
+    ofp = open("ANNOUNCE.FRESHMEAT", "w")
+    ofp.write("Project: %s\n" % (get_metadata("freshmeat-name") or package))
+    ofp.write("Version: %s\n"% version)
+    ofp.write("Release-Focus: %s\n" % focus)
+    ofp.write("Home-Page-URL: %s\n" % homepage)
+    if os.path.exists(tarball):
+        ofp.write("Gzipped-Tar-URL: %s\n" % os.path.join(homepage, tarball))
+    if os.path.exists(zip):
+        ofp.write("Zipped-Tar-URL: %s\n" % os.path.join(homepage, zip))
+    if os.path.exists("CHANGES"):
+        ofp.write("Changelog-URL: %s\n" % os.path.join(homepage, "CHANGES"))
+    if os.path.exists(binrpm):
+        ofp.write("RPM-URL: %s\n" % os.path.join(homepage, binrpm))
+    # freshmeat.net doesn't like bulleted entries.
+    freshmeatlog = lastchange[2:].replace("\n  ", "\n")
+    ofp.write("\n" + freshmeatlog)
+    ofp.close()
+
 # Finally, email notification
-if options.force or not os.path.exists("ANNOUNCEMENT"):
-    print "Building ANNOUNCEMENT..."
-    ofp = open("ANNOUNCEMENT", "w")
+if options.force or not os.path.exists("ANNOUNCE.EMAIL"):
+    print "Building ANNOUNCE.EMAIL..."
+    ofp = open("ANNOUNCE.EMAIL", "w")
     ofp.write(mailtemplate % globals())
     ofp.close()
 
 # Shipping methods, locations, and deliverables for well-known public channels.
 hardwired = {
-    'freshmeat' : (freshmeat_announce,
+    'freshmeat' : (lambda: do_or_die("freshmeat-submit <ANNOUNCE.FRESHMEAT"),
                    tarball, binrpm, srcrpm, zip),
     'ibiblio'   : (lambda fn: upload("ftp://ibiblio.org/incoming/linux", fn),
                    tarball, binrpm, srcrpm, lsm),

@@ -185,9 +185,9 @@ will generate one from the changelog entries in the RPM spec file.</para>
 </entry>
 </row>
 <row>
-<entry>ANNOUNCEMENT</entry>
+<entry>ANNOUNCE.EMAIL</entry>
 <entry>
-<para>If there is no ANNOUNCEMENT file, <application>shipper</application>
+<para>If there is no ANNOUNCE.EMAIL file, <application>shipper</application>
 will generate one to be emailed to destinations that are mailto URLs.</para>
 </entry>
 </row>
@@ -304,7 +304,7 @@ is run.</para>
 
 <term>mailtemplate</term>
 <listitem>
-<para>Template text from which to generate the file ANNOUNCEMENT to be
+<para>Template text from which to generate the file ANNOUNCE.EMAIL to be
 shipped to destinations that are mailto URLs.  There is a default which
 generates a very simple email containing a subject, a pointer to the 
 project web page, and the last entry in the project changelog.
@@ -357,7 +357,7 @@ and binary RPMs to the Red Hat submission directory via FTP.</para>
 </row>
 <row>
 <entry>freshmeat</entry>
-<entry>tarball, zipfile, RPMs</entry>
+<entry>ANNOUNCE.FRESHMEAT</entry>
 <entry>-</entry>
 <entry>
 <para>If the freshmeat channel is enabled (it is by default),
@@ -367,7 +367,8 @@ announcement on freshmeat.net using
 announcement will include URLs for whichever of the following
 deliverables are shipped, using the URL field from your specfile: tarball,
 zipfile, RPMs, CHANGES.  The user will be
-prompted for a Freshmeat release-focus.</para>
+prompted for a Freshmeat release-focus.  This announcement is
+generated into the local deliverable ANNOUNCE.FRESHMEAT.</para>
 </entry>
 </row>
 <row>
@@ -406,10 +407,10 @@ declare them by putting FTP urls in the
 </row>
 <row>
 <entry>Email address</entry>
-<entry>ANNOUNCEMENT</entry>
+<entry>ANNOUNCE.EMAIL</entry>
 <entry>mailto URL</entry>
 <entry>
-<para>The contents of the generated ANNOUNCEMENT file is emailed to
+<para>The contents of the generated ANNOUNCE.EMAIL file is emailed to
 each email address specified as a channel.</para>
 
 <para>No email channels are set up by default.  You must
