@@ -120,7 +120,7 @@ def upload(destination, files):
             pfp.close()
     elif destination.find("::") > -1:
         upload_or_die("rsync " + " ".join(files) + " " + destination)
-    else:
+    elif destination.find(":") > -1:
         (host, directory) = destination.split(":")
         for file in files:
             # This is a really ugly way to deal with the problem
@@ -131,6 +131,8 @@ def upload(destination, files):
             remote = os.path.join(directory, package, file)
             upload_or_die("scp " + file + " " + host + ":" + remote+".new;")
             upload_or_die("ssh %s 'mv -f %s.new %s'" % (host, remote, remote))
+    else:
+        sys.stderr.write("Don't know what to do with destination %s!")
 
 def freshmeat_ship(manifest):
     "Ship a specified update to freshmeat."
@@ -489,8 +491,10 @@ try:
                 while True:
                     focus = raw_input("# freshmeat.net release focus (? for list): ")
                     if focus == '?':
-                        for (i, f) in enumerate(freshmeat_focus_types):
+                        i = 0
+                        for f in freshmeat_focus_types:
                             print "%d: %s" % (i, f)
+                            i += 1
                     elif focus in "0123456789":
                         print "# OK:", freshmeat_focus_types[int(focus)]
                         break
@@ -561,7 +565,7 @@ try:
             print "# Shipping to public channel", channel
             apply(hardwired[channel])
     finally:
-        cleanup = "rm " + " ".join(delete_at_end)
+        cleanup = "rm -f " + " ".join(delete_at_end)
         if options.noupload:
             print cleanup
         else:
