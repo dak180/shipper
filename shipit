@@ -6,15 +6,16 @@
 # siteurl	= site URL of your Web distribution directory 
 # webaccount	= how ssh gets to your account on the Web host
 # webdir	= the distribution directory on that host
-# arch  	= archiecture, for binary-RPM purposes
+# arch  	= architecture, for binary-RPM purposes
 # indextemplate = template for the generated index page.
 #
 . ${HOME}/.shipit
 
 notify=echo
-while getopts dhk:wpr:fF: c;
+while getopts a:dhk:wpr:fF: c;
 do
   case $c in
+   'a') target="$OPTARG" ;;
    'd') noupload=echo dumpcmds=yes notify=: ;;	# List upload commands
    'h') hide=yes ;;
    'k') keywords="$OPTARG" ;;
@@ -228,6 +229,16 @@ then
     sed <"${package}.spec" >>CHANGES -e '1,/%changelog/d'
 fi
 
+# Make RPMS, if possible.  Relies on make dist creating a tarball
+# with an embedded spec file.
+make dist
+if [ "$target" ]
+then
+    buildrpms --target ${target} ${tarball} || exit 1
+else
+    buildrpms ${tarball} || exit 1
+fi
+
 # Generate an LSM file if we have an RPM file to do it from
 if [ -f ${queryable} ]
 then
@@ -296,22 +307,21 @@ then
     noupload=""
 fi
 
-rm -f CHANGES $lsm
-
 if [ $noupload ]
 then
     dumpopt=-N
+else
+    if [ -f $queryable ]
+    then
+	if [ "$hide" ]
+	then
+	    freshmeatopts="$freshmeatopts --hide=Y"
+	fi
+	freshmeat-submit -n -r "${releasefocus}" ${freshmeatopts} ${dumpopt} ${locs} ${queryable}
+    fi
+    rm -f CHANGES $lsm
 fi
 
-if [ "$hide" ]
-then
-    freshmeatopts="$freshmeatopts --hide=Y"
-fi
-
-if [ -f $queryable -a ! "$pagedump" ]
-then
-    freshmeat-submit -n -r "${releasefocus}" ${freshmeatopts} ${dumpopt} ${locs} ${queryable}
-fi
 
 echo "Upload finished"
 # End
