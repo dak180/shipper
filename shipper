@@ -87,7 +87,7 @@ def do_or_die(cmd):
 
 def upload(destination, files):
     # Upload a file via ftp or sftp, handles 
-    print "Uploading to %s" % destination
+    print "# Uploading to %s" % destination
     if destination.startswith("ftp://"):
         destination = destination[6:].split("/")
         host = destination.pop(0)
@@ -104,8 +104,6 @@ def upload(destination, files):
                 found += " " + file
         commands.append("mput" + found)
         commands.append("close")
-    elif destination.startswith("mailto:"):
-        commands = ["echo 'Not yet supported'"]
     else:
         commands = ["sftp -C " + destination]
         for file in files:
@@ -225,6 +223,8 @@ try:
     else:
         version = specvers
 
+    print"# Uploading version %s of %s" % (version, package)
+
     # These are all potential deliverable files that include the version number
     arch = get_metadata("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
     tarball   = package + "-" + version + ".tar.gz"
@@ -277,7 +277,7 @@ try:
 
     # RPMs first.
     if options.force or (not os.path.exists(binrpm) or not os.path.exists(srcrpm)):
-        print "Building RPMs..."
+        print "# Building RPMs..."
         if get_metadata("target") == "noarch":
             do_or_die("buildrpms %s noarch %s" % (tarball, suppress))
         else:
@@ -296,7 +296,7 @@ try:
 
     # Next, the LSM if needed
     if options.force or (not os.path.exists(lsm) and 'ibiblio' in channels):
-        print "Building LSM..."
+        print "# Building LSM..."
         keywords = get_metadata("keywords")
         if keywords:
             do_or_die("rpm2lsm -k '" + keywords +  "' " + binrpm + " >" + lsm)
@@ -305,7 +305,7 @@ try:
 
     # Next the index page if it doesn't exist
     if options.force or not os.path.exists("index.html"):
-        print "Building index page..."
+        print "# Building index page..."
         resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
         for (file, explanation) in web_deliverables:
             if os.path.exists(file) and not file.endswith(".lsm"):
@@ -328,7 +328,7 @@ try:
 
     # Next the CHANGES file
     if options.force or not os.path.exists("CHANGES"):
-        print "Building CHANGES..."
+        print "# Building CHANGES..."
         ofp = open("CHANGES", "w")
         ofp.write("                     Changelog for " + package + "\n\n")
         ofp.write(changelog)
@@ -336,10 +336,10 @@ try:
 
     # The freshmeat announcement
     if options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
-        print "Building ANNOUNCE.FRESHMEAT..."
-        focus = raw_input("freshmeat.net release focus: ")
+        print "# Building ANNOUNCE.FRESHMEAT..."
+        focus = raw_input("# freshmeat.net release focus: ")
         if focus in "0123456789":
-            print "OK:", freshmeat_focus_types[int(focus)]
+            print "# OK:", freshmeat_focus_types[int(focus)]
         elif focus.lower() not in map(lambda x: x.lower(), freshmeat_focus_types):
             croak("not a valid freshmeat.net release focus!")
         ofp = open("ANNOUNCE.FRESHMEAT", "w")
@@ -362,7 +362,7 @@ try:
 
     # Finally, email notification
     if options.force or not os.path.exists("ANNOUNCE.EMAIL"):
-        print "Building ANNOUNCE.EMAIL..."
+        print "# Building ANNOUNCE.EMAIL..."
         ofp = open("ANNOUNCE.EMAIL", "w")
         ofp.write(mailtemplate % globals())
         ofp.close()
@@ -376,29 +376,25 @@ try:
                                       (tarball, binrpm, srcrpm))),
     }
 
-    if not options.noupload:
-        print"Uploading version %s of %s" % (version, package)
-
     # First ship to private channels.
     # Order is important here, we need to hit the user's primary website first
     # so everything will be in place when announcements are generated.
     for destination in destinations:
         if destination.startswith("ftp:"):
-            manifest = (tarball, binrpm, srcrpm,)
+            upload(destination, (tarball, binrpm, srcrpm,))
         elif destination.startswith("mailto:"):
-            manifest = ("ANNOUNCE.EMAIL")
+            do_or_die("sendmail -i -oem %s <ANNOUNCE.ENAIL" % destination[7:])
         else:
-            manifest = map(lambda x: x[0], web_deliverables)
-        upload(destination, manifest)
+            upload(destination, map(lambda x: x[0], web_deliverables))
 
     # Now ship to to public channels
     for channel in channels:
         if channel in hardwired:
             apply(hardwired[channel])
 
-    print "Done"
+    print "# Done"
 except KeyboardInterrupt:
-    print "Bye!"
+    print "# Bye!"
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
