@@ -108,14 +108,12 @@ that would have been used to ship them.  The command <command>shipper
 <application>shipper</application> can begin uploading files and
 posting announcements.</para>
 
-<para>When uploads are complete, <application>shipper</application>
-looks at where it is running.  If it is in the trunk of a Subversion
-repository (that is, the current directory is name
-<filename>trunk</filename> and has a subdirectory named
-<filename>.svn</filename>) and there is a <filename>tags</filename>
-peer directory, and the tags directory does not have a subdirectory
-named "release-$version", then <application>shipper</application>
-copies and tags the contents of trunk.</para>
+<pata>After deliverables have shipped successfully, 
+<application>shipper</application> determines if the directory it
+is in is a working copy in a version-control system that supports 
+release tagging.  If so, it tries to tag the release just shipped.
+See <xref id='postinstall'/> for discussion of what version-control
+systems are supported and what actions will be taken.</para>
 
 <para>Finally, <application>shipper</application> cleans up after
 itself by deleting any deliverables it created for this run.
@@ -674,6 +672,32 @@ declare them by putting rsync addresses in the
 </tbody>
 </tgroup>
 </informaltable>
+</refsect1>
+
+<refsect1 id='postinstall'><title>After Deliverables have Shipped</title>
+
+<para>Currently, the only version-control system supported for tagging
+after shipping is Subversion.</para>
+
+<para>When uploads are complete, <application>shipper</application>
+looks at where it is running.  If it is in the trunk of a Subversion
+repository (that is, the current directory is name
+<filename>trunk</filename> and has a subdirectory named
+<filename>.svn</filename>) and there is a <filename>tags</filename>
+peer directory, and the tags directory does not have a subdirectory
+named "release-$version", then <application>shipper</application>
+copies and tags the contents of trunk.</para>
+
+<para>You can change this action by setting the variable
+<varname>subversion_tag_template</varname>. If you set it to None,
+release tagging will be suppressed entirely.  If you set it to a
+nonempty string, that will become the template for the name of the
+tag directory.  "%s" in the string will be replaced with the
+version number.</para>
+
+<para>You can also customize the log message by setting the variable
+<varname>tag_message</varname>.  See the default with <command>shipper
+-N</command>; the %s in it will be replaced with the version.</para>
 </refsect1>
 
 <refsect1><title>Command-line Options</title>
