@@ -49,6 +49,22 @@ Here are the most recent changes:
                              shipper, acting for %(whoami)s
 """
 
+# It's unpleasant that we have to include these here, but
+# the freshmeat release focus has to be validated even if the
+# user is offline and the XML-RPC service not accessible.
+freshmeat_focus_types = (
+"N/A",
+"Initial freshmeat announcement",
+"Documentation",
+"Code cleanup",
+"Minor feature enhancements",
+"Major feature enhancements",
+"Minor bugfixes",
+"Major bugfixes",
+"Minor security fixes",
+"Major security fixes",
+)
+
 date = None		# User has not yet set a date
 homepage = None		# Nor a home page
 description = None	# Nor a description
@@ -298,7 +314,11 @@ if options.force or not os.path.exists("CHANGES"):
 
 # The freshmeat announcement
 if options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
-    focus = raw_input("Release focus: ")
+    focus = raw_input("freshmeat.net release focus: ")
+    if focus in "0123456789":
+        print "OK:", freshmeat_focus_types[int(focus)]
+    elif focus.lower() not in map(lambda x: x.lower(), freshmeat_focus_types):
+        croak("not a valid freshmeat.net release focus!")
     ofp = open("ANNOUNCE.FRESHMEAT", "w")
     ofp.write("Project: %s\n" % (get_metadata("freshmeat-name") or package))
     ofp.write("Version: %s\n"% version)
