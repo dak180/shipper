@@ -49,7 +49,8 @@ BuildRoot field. <application>shipper</application> also calls
 deduce what it should do rather than requiring you to tell it.  In
 order to do this, it relies on your project obeying standard GNU-like
 naming conventions.  It also relies on being able to mine project
-metadata out of an RPM spec file.  (This may change in the future,
+metadata out of a package spec file.  (Presently the only variety of
+package specfile supported is an RPM spec; this may change in the future,
 when we fully support shipping Debian packages.)</para>
 
 <para>In normal use, you need set only one configuration variable,
@@ -80,7 +81,7 @@ channel.</para>
 project name and version, then to check that the minimum set of files that
 <application>shipper</application> requires to continue is in place.
 To start with, <application>shipper</application> needs a source
-tarball and an RPM spec file. Once it knows those are in place, it
+tarball and a specfile. Once it knows those are in place, it
 can extract various pieces of information it will need to do its
 real work. It also reads in a handful of configuration variables.</para>
 
@@ -129,100 +130,54 @@ noisily.</para>
 
 <refsect1><title>How Shipper Deduces What To Do</title>
 
-<para>The only piece of information <application>shipper</application>
-starts with is the project name (the variable
-<varname>package</varname>). which defaults to the basename of the
-current directory.  It then looks for an an RPM specfile, which is
-assumed to be named <filename>${package}.spec</filename>.</para>
+<para>The behavior of shipper depends on a handful of internal
+variables.  Some of these variables have defaults computed at startup
+time.  All can be set or overridden in the per-user
+<filename>~/.shipper</filename> file, and overridden in any
+per-project <filename>.shipper</filename> file.  Both files are Python
+code and the syntax of variable settings is Python's.</para>
 
-<para>Next step is to find the project version (the variable
-<varname>package</varname>).  This is extracted from the RPM spec
-file, or by looking for a makefile macro with a name beginning with
-VERS; if the value of that macro is a shell command wrapped in $(shell
-...), it is executed and the output is captured to yield the version.
-If both versions are present, they are consistency-checked.</para>
+<para>If a variable is set in a config file, that value is locked in
+(except for the <varname>destinations</varname> variable which can be
+appended to from a specfile, see below) Variables that are
+<emphasis>not</emphasis> set in a config file may be set by the values
+of fields in your project specfile.</para>
+
+<para>For basic use, it is only necessary to set one such variable:
+<varname>destinations</varname>, the list of destinations to ship to.
+Normally you'll set this globally, pointing all your projects at a
+single distribution website, in a configuration file; it is also possible
+to add destinations on a per-project basis by giving a comma-separated
+list in a #Destinations: comment in the specfile.</para>
+
+<para>The first thing shipper looks for is a specfile in the
+current directory; there must be exactly one.  It extracts the project
+name from the Name field.  Next step is to find the project version
+(the variable <varname>package</varname>).  This is extracted from the
+specfile, or by looking for a makefile macro with a name
+beginning with VERS; if the value of that macro is a shell command
+wrapped in $(shell ...), it is executed and the output is captured to
+yield the version.  If both versions are present, they are
+consistency-checked.</para>
 
 <para><application>shipper</application> gets most of the rest of the
-data it uses to decide what to do from headers in the RPM spec file.
-Here is a table:</para>
+data it uses to decide what to do from headers in the specfile.
+The following table lists all the variables:</para>
 
 <informaltable>
 <tgroup cols="3">
 <thead>
 <row>
-<entry>Header</entry>
 <entry>Variable</entry>
+<entry>RPM specfile field</entry>
 <entry>Meaning</entry>
 </row>
 </thead>
 <tbody>
 <row>
-<entry>Name:</entry>
-<entry><varname>package</varname></entry>
+<entry><varname>destinations</varname></entry>
+<entry>#Destinations:</entry>
 <entry>
-<para>Project name, used to generate the stem part of the names of RPMs and
-other deliverables that <application>shipper</application>
-builds.</para>
-</entry>
-</row>
-<row>
-<entry>Version:</entry>
-<entry><varname>version</varname></entry>
-<entry>
-<para>Project version, used in generating the names of RPMs and
-other deliverables that <application>shipper</application>
-builds.</para>
-</entry>
-</row>
-<row>
-<entry>URL:</entry>
-<entry><varname>homepage</varname></entry>
-<entry>
-<para>Project home page URL. Used when generating project 
-announcements.</para>
-</entry>
-</row>
-<row>
-<entry>BuildArch:</entry>
-<entry><varname>arch</varname></entry>
-<entry>
-<para>Build architecture.  If this field is <quote>noarch</quote>, 
-noarch rather than binary RPMs will be built.</para>
-</entry>
-</row>
-<row>
-<entry>#Keywords:</entry>
-<entry><varname>keywords</varname></entry>
-<entry>
-<para>Topic keywords. Used when generating LSM files.</para>
-</entry>
-</row>
-<row>
-<entry>#Freshmeat-Name:</entry>
-<entry><varname>freshmeat_name</varname></entry>
-<entry>
-<para>Freshmeat shortname, used in generating freshmeat.net
-announcements. If this isn't present, it defaults to the project
-name; you only need to set it if they differ.</para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-
-<para>The behavior of shipper also depends on some configuration
-variables.  Some of these variables have computed defaults.  All can
-be set in the per-user <filename>~/.shipper</filename> file, and
-overridden in any per-project <filename>.shipper</filename> file.
-Both files are Python code and the syntax of variable settings is
-Python's.  For basic use, it is only necessary to set one such 
-variable: <varname>destinations</varname>, the list of destinations
-to ship to.</para>
-
-<variablelist>
-<varlistentry>
-<term>destinations</term>
-<listitem>
 <para>A list of remote directories to ship to using
 <citerefentry>
 <refentrytitle>scp</refentrytitle> <manvolnum>1</manvolnum>
@@ -237,35 +192,145 @@ either a [user@]site:path destination that
 can use. Note that actual project directories are computed by
 appending the value of <varname>package</varname> to
 the destination you're shipping to.</para>
-</listitem>
-</varlistentry>
 
-<varlistentry>
-<term>indextemplate</term>
-<listitem>
-<para>Template HTML from which to generate an index web page.  There is a
+<para><emphasis role='bold'>There is no default.</emphasis>.  If you
+do not set this variable, <application>shipper</application> will
+not run.</para>
+</entry>
+</row>
+<row>
+<entry><varname>whoami</varname></entry>
+<entry align='center'>-</entry>
+<entry>
+<para>A plausible email address for the user.  If not specified in the
+config file, it's generated from
+<envar>$USERNAME</envar> and <envar>$HOSTNAME</envar>.</para>
+</entry>
+</row>
+<row>
+<entry><varname>date</varname></entry>
+<entry align='center'>-</entry>
+<entry>
+<para>The program's startup time. This can be used in the web page and
+email announcement templates.</para>
+
+<para>You can use the Python function time.strftime("...") in your
+<filename>~/.shipper</filename> file to format this date to your
+taste.  If you don't set this in the config file, the program will
+set it for you.</para>
+</entry>
+</row>
+<row>
+<entry><varname>indextemplate</varname></entry>
+<entry align='center'>-</entry>
+<entry>
+<para>Template HTML from which to generate index.html for shipping.  There is a
 default which generates a very simple page containing a title, a 
 date, and a table listing downloadable resources.  This is used when
 shipping to a web directory, if no index page exists when shipper
 is run.</para>
-</listitem>
-</varlistentry>
-<varlistentry>
-
-<term>mailtemplate</term>
-<listitem>
+</entry>
+</row>
+<row>
+<entry><varname>mailtemplate</varname></entry>
+<entry align='center'>-</entry>
+<entry>
 <para>Template text from which to generate the file ANNOUNCE.EMAIL to be
 shipped to destinations that are mailto URLs.  There is a default which
 generates a very simple email containing a subject, a pointer to the 
-project web page, and the last entry in the project changelog.
-.</para>
-</listitem>
-</varlistentry>
-</variablelist>
+project web page, and the last entry in the project changelog.</para>
+</entry>
+</row>
+<row>
+<entry><varname>package</varname></entry>
+<entry>Name:</entry>
+<entry>
+<para>Project name, used to generate the stem part of the names of RPMs and
+other deliverables that <application>shipper</application>
+builds.</para>
+</entry>
+</row>
+<row>
+<entry><varname>version</varname></entry>
+<entry>Version:</entry>
+<entry>
+<para>Project version, used in generating the names of RPMs and
+other deliverables that <application>shipper</application>
+builds.</para>
+</entry>
+</row>
+<row>
+<entry><varname>homepage</varname></entry>
+<entry>URL:</entry>
+<entry>
+<para>Project home page URL. Used when generating project 
+announcements.</para>
+</entry>
+</row>
+<row>
+<entry><varname>arch</varname></entry>
+<entry>BuildArch:</entry>
+<entry>
+<para>Build architecture.  If this field is <quote>noarch</quote>, 
+noarch rather than binary RPMs will be built.</para>
+</entry>
+</row>
+<row>
+<entry><varname>keywords</varname></entry>
+<entry>#Keywords:</entry>
+<entry>
+<para>Topic keywords. Used when generating LSM files.</para>
+</entry>
+</row>
+<row>
+<entry><varname>freshmeat_name</varname></entry>
+<entry>#Freshmeat-Name:</entry>
+<entry>
+<para>Freshmeat shortname, used in generating freshmeat.net
+announcements. If this isn't present, it defaults to the project
+name; you only need to set it if they differ.</para>
+</entry>
+</row>
+<row>
+<entry><varname>description</varname></entry>
+<entry>%description</entry>
+<entry>
+<para>The Description field from your specfile.</para>
+</entry>
+</row>
+<row>
+<entry><varname>changelog</varname></entry>
+<entry>%changelog</entry>
+<entry>
+<para>The entire changelog section from your specfile.</para>
+</entry>
+</row>
+<row>
+<entry><varname>lastchange</varname></entry>
+<entry>%changelog</entry>
+<entry>
+<para>The most recent entry from your specfile changelog, without
+its date/author/release header.</para>
+</entry>
+</row>
+<row>
+<entry><varname>resourcetable</varname></entry>
+<entry align='center'>-</entry>
+<entry>
+<para>The HTML table of links to downloadable resources.  This
+variable is only computed if the index page is built.  Any setting
+of it in the startup files is ignored.</para>
+</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
 
-<para>It will usually suffice to set <varname>destinations</varname>
-in your <filename>~/.shipper</filename> file, and leave everything
-else defaulted.</para>
+<para>All these variables are available for substitution at the time a
+web page or email announcement is generated. In general, any variable
+you set in your <filename>~/.shipper</filename> file will be available
+at the time the web page or email announcement is generated.  Use the
+Python "%(variable)s" syntax, not shell-substitution syntax.</para>
 
 </refsect1>
 
@@ -374,7 +439,7 @@ file for it.</para>
 <entry>CHANGES</entry>
 <entry>
 <para>If there is no CHANGES file, <application>shipper</application>
-will generate one from the changelog entries in the RPM spec file.</para>
+will generate one from the changelog entries in the specfile.</para>
 </entry>
 </row>
 <row>
@@ -519,89 +584,6 @@ rebuilding of local deliverables even if they already exist.  The -v
 option makes <application>shipper</application> chatty about what it's
 doing.  The -h option prints a usage message and exits.</para>
 
-</refsect1>
-
-<refsect1><title>Template variables</title>
-
-<para>Some variables are available for substitution at the time a web
-page or email announcement is generated.  Here they are:</para>
-
-<informaltable>
-<tgroup cols="2">
-<thead>
-<row>
-<entry>Variable</entry>
-<entry>Meaning</entry>
-</row>
-</thead>
-<tbody>
-<row>
-<entry><varname>package</varname></entry>
-<entry>
-<para>The project name.</para>
-</entry>
-</row>
-<row>
-<entry><varname>version</varname></entry>
-<entry>
-<para>The release version.</para>
-</entry>
-</row>
-<row>
-<entry><varname>date</varname></entry>
-<entry>
-<para>The date this page was generated. You can use the Python
-function time.strftime() in your <filename>~/.shipper</filename> file
-to format this date to your taste.</para>
-</entry>
-</row>
-<row>
-<entry><varname>homepage</varname></entry>
-<entry>
-<para>Project home page, from the URL field in the specfile.</para>
-</entry>
-</row>
-<row>
-<entry><varname>description</varname></entry>
-<entry>
-<para>The Description field from your spec file.</para>
-</entry>
-</row>
-<row>
-<entry><varname>changelog</varname></entry>
-<entry>
-<para>The entire changelog section from your spec file.</para>
-</entry>
-</row>
-<row>
-<entry><varname>lastchange</varname></entry>
-<entry>
-<para>The most recent entry from your specfile changelog, without
-its date/author/release header.</para>
-</entry>
-</row>
-<row>
-<entry><varname>whoami</varname></entry>
-<entry>
-<para>A plausible email address for the user, generated from
-<envar>$USERNAME</envar> and <envar>$HOSTNAME</envar>.</para>
-</entry>
-</row>
-<row>
-<entry><varname>resourcetable</varname></entry>
-<entry>
-<para>The HTML table of links to downloadable resources.  This
-variable is only defined if the index page is built.</para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-
-<para>In general, any variable you set in your
-<filename>~/.shipper</filename> file will be available at the time the
-web page or email announcement is generated.  Use the Python
-"%(variable)s" syntax, not shell-substitution syntax.</para>
 </refsect1>
 
 <refsect1><title>Makefile hooks</title>
