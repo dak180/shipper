@@ -26,7 +26,7 @@ do
 done
 shift `expr $OPTIND - 1`
 
-if [ ! "$releasefocus" ]
+if [ ! "$releasefocus" -a ! "$pagedump" ]
 then
     echo -n "Release Focus: "
     read releasefocus
@@ -146,8 +146,14 @@ function genpage() {
 	version=$2
 	release=$3
 
-	# Extract and reformat the desciption from the RPM
-	description=`rpm --queryformat="%{description}" -qp $rpm`
+	if [ -f blurb.html ]
+	then
+	    # Maybe there's a blurb here?
+	    description=`cat blurb.html`
+	else
+	    # Extract and reformat the desciption from the RPM
+	    description=`rpm --queryformat="%{description}" -qp $rpm`
+	fi
     elif [ -f "${package}.lsm" ]
     then
 	 description=`(
@@ -284,7 +290,7 @@ then
     dumpopt=-N
 fi
 
-if [ -f $queryable ]
+if [ -f $queryable -a ! "$pagedump" ]
 then
     freshmeat-submit -n -r "${releasefocus}" ${freshmeatopts} ${dumpopt} ${locs} ${queryable}
 fi
