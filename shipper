@@ -300,7 +300,7 @@ try:
 
     # Sanity checks
     if not os.path.exists(tarball):
-        croak("no tarball %s, check your make dist command!" % tarball)
+        croak("no tarball %s!" % tarball)
     if not os.path.exists(specfile):
         croak("no specfile %s, can't build RPMs!" % specfile)
     if not get_metadata("BuildRoot"):
