@@ -301,6 +301,7 @@ try:
         if keywords:
             do_or_die("rpm2lsm -k '" + keywords +  "' " + binrpm + " >" + lsm)
         else:
+            print "# Warning: LSM being built with no keywords." 
             do_or_die("rpm2lsm " + binrpm + ">" + lsm)
 
     # Next the index page if it doesn't exist
