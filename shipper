@@ -60,9 +60,6 @@ Here are the most recent changes:
                              shipper, acting for %(whoami)s
 """
 
-# Credentials 
-cAos_id = None		# Set this to enable the cAos channel
-
 # It's unpleasant that we have to include these here, but
 # the freshmeat release focus has to be validated even if the
 # user is offline and the XML-RPC service not accessible.
@@ -94,6 +91,12 @@ def do_or_die(cmd):
     if os.system(cmd):
         croak("command '%s' failed!" % cmd)
 
+def upload_or_die(cmd):
+    if options.noupload:
+        print command
+    else:
+        do_or_die(command)
+
 def upload(destination, files):
     # Upload a file via ftp or sftp, handles 
     print "# Uploading to %s" % destination
@@ -113,46 +116,25 @@ def upload(destination, files):
             pfp = os.popen(commands.pop(0), "w")
             pfp.writelines(commands)
             pfp.close()
+    elif destination.find("::") > -1:
+        upload_or_die("rsync " + " ".join(files) + " " + destination)
     else:
         (host, directory) = destination.split(":")
         for file in files:
-            remote = os.path.join(directory, package, file)
             # This is a really ugly way to deal with the problem
             # of write-protected files in the remote directory.
             # Unfortunately, sftp(1) is rather brain-dead -- no
             # way to ignore failure on a remove, and refuses to
             # do renames with an obscure error message.
-            command = "scp " + file + " " + host + ":" + remote+".new;"
-            if options.noupload:
-                print command
-            else:
-                do_or_die(command)
-            command = "ssh %s 'mv -f %s.new %s'" % (host, remote, remote)
-            if options.noupload:
-                print command
-            else:
-                do_or_die(command)
+            remote = os.path.join(directory, package, file)
+            upload_or_die("scp " + file + " " + host + ":" + remote+".new;")
+            upload_or_die("ssh %s 'mv -f %s.new %s'" % (host, remote, remote)
 
 def freshmeat_ship(manifest):
     "Ship a specified update to freshmeat."
     if options.verbose:
         print "Announcing to freshmeat..."
-    command = "freshmeat-submit <" + manifest[0]
-    if options.noupload:
-        print command
-    else:
-        do_or_die(command)
-
-def cAos_ship(manifest):
-    "Ship files to the cAos rsync repository if we have an ID there."
-    if cAos_id:
-        cmd = "rsync %s  %s@temple.caosity.org::%s" % (" ".join(manifest), cAos_id, cAos_id)
-        if options.noupload:
-            print command
-        else:
-            do_or_die(command)
-    else:
-        print "cAos upload skipped, no cAos ID."
+    upload_or_die("freshmeat-submit <" + manifest[0])
 
 #
 # Metadata extraction
@@ -440,7 +422,6 @@ try:
                                       (tarball, binrpm, srcrpm, lsm))),
         'redhat'        : (lambda: upload("ftp://incoming.redhat.com/libc6", 
                                       (tarball, binrpm, srcrpm))),
-        'cAos'     	: (lambda: cAos_ship((srcrpm,))),
     }
 
 

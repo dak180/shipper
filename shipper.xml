@@ -525,16 +525,6 @@ generated into the local deliverable ANNOUNCE.FRESHMEAT.</para>
 </entry>
 </row>
 <row>
-<entry>cAos</entry>
-<entry>SRPM</entry>
-<entry>-</entry>
-<entry>
-<para>If the <varname>cAos_id</varname> variable is set, indicating
-that the user has upload privileges for the cAos repository, then
-an SRPM is shipped to that repository on each release.</para>
-</entry>
-</row>
-<row>
 <entry>Generic Web site</entry>
 <entry>README, tarball, zipfile, RPMs, CHANGES, NEWS, HISTORY, *.html, 
 BUGS, TODO.</entry>
@@ -578,6 +568,19 @@ each email address specified as a channel.</para>
 
 <para>No email channels are set up by default.  You must
 declare them by putting mailto: urls in the
+<varname>destinations</varname> variable.</para>
+</entry>
+</row>
+<row>
+<entry>rsync unit</entry>
+<entry>SRPM</entry>
+<entry>rsync address ([user@]host::unit)</entry>
+<entry>
+<para>An SRPMs is shipped to each destination that is rcognized as 
+an rsync address (by the double colon).</para>
+
+<para>No rsync channels are set up by default.  You must
+declare them by putting rsync addresses in the
 <varname>destinations</varname> variable.</para>
 </entry>
 </row>
@@ -630,7 +633,7 @@ url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink
 </refsect1>
 
 <refsect1><title>Bugs</title>
-<para>The cAos channel is untested.</para>
+<para>The rysnc channel type is untested.</para>
 </refsect1>
 
 <refsect1><title>See Also</title>
