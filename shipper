@@ -449,9 +449,9 @@ try:
             do_or_die("rpm2lsm " + binrpm + ">" + lsm)
 
     # Next the index page if it doesn't exist.
+    web_deliverables = []
     if homepage and (options.force or not os.path.exists("index.html")):
         print "# Building index page..."
-        web_deliverables = []
         # Anything in the list of standard deliverables is eligible.
         for (file, explanation) in stock_deliverables:
             if os.path.exists(file):
@@ -560,7 +560,8 @@ try:
             command = "sendmail -i -oem -f %s %s <ANNOUNCE.EMAIL" % (whoami, destination[7:])
             if options.noupload:
                 print command
-            do_or_die(command)
+            else:
+                do_or_die(command)
         else:
             upload(destination, web_deliverables)
 
