@@ -148,10 +148,13 @@ of fields in your project specfile.</para>
 
 <para>For basic use, it is only necessary to set one such variable:
 <varname>destinations</varname>, the list of destinations to ship to.
-Normally you'll set this globally, pointing all your projects at a
-single distribution website, in a configuration file; it is also possible
-to add destinations on a per-project basis by giving a comma-separated
-list in a #Destinations: comment in the specfile.</para>
+Normally you'll set this globally, pointing all your projects at your
+main distribution website, in your <filename>~/.shipper</filename>
+file; it is also possible to add destinations on a per-project basis
+by giving a comma-separated list in a #Destinations: comment in the
+specfile.  You can set the variable in a per-project
+<filename>.shipper</filename> to ignore your global destination
+list.</para>
 
 <para>The first thing shipper looks for is a specfile in the
 current directory; there must be exactly one.  It extracts the project
@@ -339,25 +342,32 @@ name; you only need to set it if they differ.</para>
 </row>
 <row>
 <entry><varname>changelog</varname></entry>
-<entry>%changelog</entry>
+<entry>%changelog or ChangeLog</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>The entire changelog section from your specfile.</para>
+<para>If a <filename>ChangeLog</file> file exists iin the project
+directory, its entire contents.  Otherwise, if it exists,
+the entire changelog section from the specfile.</para>
 </entry>
 </row>
 <row>
 <entry><varname>lastchange</varname></entry>
-<entry>%changelog</entry>
+<entry>%changelog or ChaneLog</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>The most recent entry from your specfile changelog, without
-its date/author/release header.</para>
+<para>
+If the source of your changlog was your specfile, this is the
+most recent entry from your changelog without
+its date/author/release header.  If the source was Changelog, a 
+line of text directing the user to see the ChangeLog file. 
+This becomes the Changes field in your freshmeat.net announcement,
+and freshmeat.net doesn't like the bulleted format of GNU ChangeLog
+entries.</para>
 </entry>
 </row>
 <row>
-<entry><varname>resourcetable</varname></entry>
-<entry align='center'>-</entry>
-<entry align='center'>-</entry>
+<entry><varname>resourcetable</varname></entry> <entry
+align='center'>-</entry> <entry align='center'>-</entry>
 <entry>
 <para>The HTML table of links to downloadable resources.  This
 variable is only computed if the index page is built.  Any setting
@@ -413,6 +423,12 @@ starts up:</para>
 <entry>NEWS</entry>
 <entry>
 <para>Project news file.</para>
+</entry>
+</row>
+<row>
+<entry>ChangLog</entry>
+<entry>
+<para>Project change log.</para>
 </entry>
 </row>
 <row>
@@ -480,8 +496,9 @@ file for it.</para>
 <row>
 <entry>CHANGES</entry>
 <entry>
-<para>If there is no CHANGES file, <application>shipper</application>
-will generate one from the changelog entries in the specfile.</para>
+<para>If there is no ChangeLog file, <application>shipper</application>
+will generate a CHANGES from the changelog entries in the specfile and
+ship that.</para>
 </entry>
 </row>
 <row>

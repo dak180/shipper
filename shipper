@@ -189,7 +189,10 @@ class Specfile:
             if gather:
                 desc += line
         fp.close()
-        return desc.strip() + "\n"
+        if desc:
+            return desc.strip() + "\n"
+        else:
+            return None
     def package(self):
         "Get the package name."
         if self.type == "RPM":
@@ -226,9 +229,6 @@ class Specfile:
         "Get the full project changelog."
         if self.type == "RPM":
             return self.rpm_get_multiline("changelog")
-        elif self.type == "deb":
-            # FIXME: not yet implemented
-            return self.deb_get_multiline("Changelog:")
     def arch(self):
         "Get the build architecture."
         if self.type == "RPM":
@@ -337,15 +337,27 @@ try:
         keywords = specfile.extract("Keywords")
     if not freshmeat_name:
         freshmeat_name = specfile.extract("freshmeat-name")
+
+    # Finally, derive the change log
+    changelog = lastchange = None
     changelog = specfile.changelog()
-    lastchange = ""
-    for line in changelog.split("\n"):
-        if not lastchange and (not line.strip() or line[0] == '*'):
-            continue
-        elif line.strip():
-            lastchange += line + "\n"
-        else:
-            break
+    if changelog:
+        lastchange = ""
+        for line in changelog.split("\n"):
+            if not lastchange and (not line.strip() or line[0] == '*'):
+                continue
+            elif line.strip():
+                lastchange += line + "\n"
+            else:
+                break
+    if changelog and os.path.exists("ChangeLog"):
+        print "warning: ChangeLog file overrides specfile changelog!"
+    if os.path.exists("ChangeLog"):
+        ifp = open("ChangeLog", "r")
+        changelog = ifp.read()
+        ifp.close()
+        # freshmeat.net doesn't like the ChangeLog format.
+        lastchange = "See the ChangeLog file for recent changes."
 
     #
     # Now compute the names of deliverables
@@ -361,16 +373,17 @@ try:
     # Map web deliverables to explanations for the resource table
     # Stuff not included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
     stock_deliverables = [
-        ("README", "roadmap file"),
-        (tarball,  "source tarball"),
-        (zip,      "ZIP archive"),
-        (binrpm,   "installable RPM"),		# Generated
-        (srcrpm,   "source RPM"),			# Generated
-        ("CHANGES","Changelog file"),		# Generated
-        ("NEWS",   "Project news"),
-        ("HISTORY","Project history"),
-        ("BUGS",   "Known bugs"),
-        ("TODO",   "To-do file"),
+        ("README",	"roadmap file"),
+        (tarball,	"source tarball"),
+        (zip,   	"ZIP archive"),
+        (binrpm,	"installable RPM"),	# Generated
+        (srcrpm,	"source RPM"),		# Generated
+        ("ChangeLog",	"change log"),
+        ("CHANGES",	"change log"),		# Generated
+        ("NEWS",	"Project news"),
+        ("HISTORY",	"Project history"),
+        ("BUGS",	"Known bugs"),
+        ("TODO",	"To-do file"),
         ]
 
     #
@@ -448,7 +461,7 @@ try:
         web_deliverables = map(lambda x: x[0], web_deliverables)+["index.html"]
 
     # Next the CHANGES file
-    if options.force or not os.path.exists("CHANGES"):
+    if not path.exists("ChangeLog") and (options.force or not os.path.exists("CHANGES")):
         print "# Building CHANGES..."
         ofp = open("CHANGES", "w")
         ofp.write("                     Changelog for " + package + "\n\n")
