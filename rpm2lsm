@@ -41,8 +41,8 @@ release=$3
 description=`rpm --queryformat="%{description}" -qp $rpm | fmt -w 65 | sed '2,$s/^/                /'`
 
 # Who am I?
-fullname=`cat /etc/passwd | awk -F : "/^${USERNAME}/ "'{print $5}'`
-fullname="${USERNAME}@${HOSTNAME} ($fullname)"
+fullname=`cat /etc/passwd | awk -F : "/^${USER}/ "'{print $5}'`
+fullname="${USER}@${HOSTNAME} ($fullname)"
 
 if [ -z "$author"]
 then 
