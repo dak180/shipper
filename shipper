@@ -8,14 +8,14 @@ import sys, os, readline, re, commands, time, glob, optparse, stat
 # State variables
 #
 destinations = []	# List of remote directories to update
-channels = ['ibiblio', 'redhat', 'freshmeat']
 whoami = None		# Who am I? (Used for FTP logins)
 date = None		# User has not yet set a date
 package = None   	# Nor a package name
 homepage = None		# Nor a home page
 arch = None       	# The machine architecture
 keywords = None  	# Keywords for LSMs
-freshmeat_name = None	# Name of the project ob Freshmeat
+freshmeat_name = None	# Name of the project on Freshmeat
+berlios_name = None	# Name of the project on derlios,de
 changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
 summary = None   	# One-line summary of the package
@@ -142,13 +142,26 @@ def upload(destination, files):
             upload_or_die("scp " + file + " " + host + ":" + remote+".new;")
             upload_or_die("ssh %s 'mv -f %s.new %s'" % (host, remote, remote))
     else:
-        sys.stderr.write("Don't know what to do with destination %s!")
+        sys.stderr.write("Don't know what to do with destination %s!\n" % destination)
 
 def freshmeat_ship(manifest):
     "Ship a specified update to freshmeat."
     if options.verbose:
         print "Announcing to freshmeat..."
     upload_or_die("freshmeat-submit <" + manifest[0])
+
+def make_index_page(deliverables, version):
+    "Make index page, listing specified set deliverables, if it doesn't exist."
+    print "# Building %s..." % version
+    global resourcetable
+    resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
+    for (file, explanation) in deliverables:
+        resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
+    resourcetable += "</table>"
+    # OK, now build the index page itself
+    ofp = open("index.html-" + version, "w")
+    ofp.write(indextemplate % globals())
+    ofp.close()
 
 #
 # Metadata extraction
@@ -244,16 +257,13 @@ try:
     parser.add_option("-N", "--nobuild",
                       action="store_true", dest="nobuild", default=False,
                       help="dump configuration only, no builds or uploads")
-    parser.add_option("-f", "--force",
-                      action="store_true", dest="force", default=False,
-                      help="force rebuilding of all local deliverables")
     (options, args) = parser.parse_args()
 
     #
     # Extract metadata and compute control information
     #
 
-    def disable(s): channels.remove(s)
+    def disable(s): destinations.remove(s)
 
     # Security check, don't let an attacker elevate privileges 
     def securecheck(file):
@@ -312,8 +322,6 @@ try:
     if local_destinations:
         local_destinations = map(lambda x: x.strip(), local_destinations.split(","))
         destinations += local_destinations
-    if not destinations:
-        print "warning: destinations empty, shipping to public channels only."
 
     print"# Uploading version %s of %s" % (version, package)
 
@@ -332,6 +340,9 @@ try:
         keywords = metadata.extract("Keywords")
     if not freshmeat_name:
         freshmeat_name = metadata.extract("Freshmeat-Name")
+    if not berlios_name:
+        berlios_name = metadata.extract("Berlios-Name")
+    resourcetable = ""
 
     # Finally, derive the change log and lastchange entry;
     # we'll need the latter for freshmeat.net
@@ -376,10 +387,8 @@ try:
 
     # Map web deliverables to explanations for the resource table
     # Stuff not included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
-    stock_deliverables = [
+    web_only_stock_deliverables = [
         ("README",	"roadmap file"),
-        (tarball,	"source tarball"),
-        (zip,   	"ZIP archive"),
         ("ChangeLog",	"change log"),
         ("CHANGES",	"change log"),		# Generated
         ("NEWS",	"Project news"),
@@ -387,14 +396,19 @@ try:
         ("BUGS",	"Known bugs"),
         ("TODO",	"To-do file"),
         ]
+    download_stock_deliverables = [
+        (tarball,	"source tarball"),
+        (zip,   	"ZIP archive"),
+        ]
 
     #
     # Might be time to dump
     #
     if options.nobuild:
-        for variable in ('destinations', 'channels', 'whoami', 'date', 
-                         'package', 'homepage', 'arch', 'keywords', \
-                         'freshmeat_name', 'summary'):
+        for variable in ('destinations', 'whoami', 'date', 
+                         'package', 'homepage', 'arch', 'keywords', 
+                         'freshmeat_name', 'berlios_name', 'summary',
+                         'webfiles'):
             print "%s = %s" % (variable, `eval(variable)`)
         for variable in ('description', 'changelog', 'lastchange', 'mailtemplate', 'indextemplate'):
             if not eval(variable):
@@ -411,6 +425,8 @@ try:
         croak("no tarball %s!" % tarball)
     if metadata.type == "RPM" and not metadata.extract("BuildRoot"):
         croak("specfile %s doesn't have a BuildRoot!" % metadata.filename)
+    if not destinations:
+        croak("the Destinations list is empty; nothing to do.")
 
     try:
         delete_at_end = []
@@ -443,21 +459,29 @@ try:
         # Compute the deliverables, we need this even if not rebuilding
         # the index.
         #
-        web_deliverables = []
-        # Anything in the list of standard deliverables is eligible.
-        for (file, explanation) in stock_deliverables:
+        # Anything in the list of standard download deliverables is eligible.
+        download_only_deliverables = []
+        for (file, explanation) in download_stock_deliverables:
             if os.path.exists(file):
-                web_deliverables.append((file, explanation))
+                download_only_deliverables.append((file, explanation))
         # So are any RPMS we generated
         for rpm in rpmlist:
             if rpm == binrpm:
-                web_deliverables.append((rpm, "installable binary RPM"))
+                download_only_deliverables.append((rpm, "installable binary RPM"))
             elif rpm == srcrpm:
-                web_deliverables.append((rpm, "source RPM"))
+                download_only_deliverables.append((rpm, "source RPM"))
             else:
-                web_deliverables.append((rpm, "auxiliary RPM"))
-        # So is anything with an HTML extension
-        for file in glob.glob('*.html'):
+                download_only_deliverables.append((rpm, "auxiliary RPM"))
+
+        # Anything in the list of standard web deliverables is eligible.
+        web_only_deliverables = []
+        for (file, explanation) in web_only_stock_deliverables:
+            if os.path.exists(file):
+                web_only_deliverables.append((file, explanation))
+        if os.path.exists("index.html"):
+            web_only_deliverables.append(("index.html", "index web page"))
+        # So is anything with an HTML, Javascript, or CSS extension
+        for file in glob.glob('*.html') + glob.glob('*.js') + glob.glob('*.css'):
             if file == 'index.html':
                 continue
             stem = file[:-4]
@@ -467,14 +491,31 @@ try:
                     break
             else:
                 explanation = "HTML page."
-            web_deliverables.append((file, explanation))
+            web_only_deliverables.append((file, explanation))
+        # Configuration variable can specify more
+        if webfiles:
+            web_only_deliverables += webfiles
+
         # Compute final deliverables
-        all_deliverables = map(lambda x: x[0], web_deliverables)+["index.html"]
-        base_deliverables = (tarball,) + tuple(rpmlist)
+        all_deliverables = map(lambda x: x[0], download_only_deliverables + web_only_deliverables)
+        download_deliverables = map(lambda x: x[0], download_only_deliverables)
+        web_deliverables = map(lambda x: x[0], web_only_deliverables)
+
+        # If a web page doesn't already exist, make two versions.
+        # One has a resource table listing all deliverables, for ordinary
+        # websites. The other one omits downloadables; this is for sites
+        # like berlios and sourceforge, where downloads live on a separate
+        # server.
+        if homepage and not os.path.exists("index.html"):
+            make_index_page(download_only_deliverables + web_only_deliverables,
+                            "index.html-downloads")
+            delete_at_end.append("index.html-downloads")
+            make_index_page(web_only_deliverables, "index.page-nodownloads")
+            delete_at_end.append("index.html-nodownloads")
+            delete_at_end.append("index.html")
 
         # Next, the LSM if needed
-        if 'ibiblio' in channels and \
-               (options.force or not os.path.exists(lsm)):
+        if 'ibiblio' in destinations:
             print "# Building LSM..."
             if keywords:
                 do_or_die("rpm2lsm -k '"+keywords+"' "+binrpm+" >"+lsm)
@@ -483,24 +524,9 @@ try:
                 do_or_die("rpm2lsm " + binrpm + ">" + lsm)
             delete_at_end.append(lsm)
 
-        # Next the index page if it doesn't exist.
-        if homepage and (options.force or not os.path.exists("index.html")):
-            print "# Building index page..."
-            # Now build the resource table
-            resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
-            for (file, explanation) in web_deliverables:
-                resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
-            resourcetable += "</table>"
-            # OK, now build the index page itself
-            ofp = open("index.html", "w")
-            ofp.write(indextemplate % globals())
-            ofp.close()
-            delete_at_end.append("index.html")
-
         # Next the CHANGES file.  Build this only if (a) there is no ChangeLog,
         # and (b) there is a specfile %changelog.
-        if not os.path.exists("ChangeLog") and \
-               (options.force or not os.path.exists("CHANGES")) and changelog:
+        if not os.path.exists("ChangeLog") and changelog:
             print "# Building CHANGES..."
             ofp = open("CHANGES", "w")
             ofp.write("                     Changelog for " + package + "\n\n")
@@ -509,8 +535,7 @@ try:
             delete_at_end.append("CHANGES")
 
         # The freshmeat announcement
-        if 'freshmeat' in channels \
-               and options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
+        if 'freshmeat' in destinations:
             print "# Building ANNOUNCE.FRESHMEAT..."
             if not homepage:
                 print "# Can't announce to freshmeat without a primary website!"
@@ -552,8 +577,7 @@ try:
 
         # Finally, email notification
 	maildests = filter(lambda x: x.startswith("mailto:"), destinations)
-        if maildests \
-               and (options.force or not os.path.exists("ANNOUNCE.EMAIL")):
+        if maildests:
             print "# Building ANNOUNCE.EMAIL..."
             ofp = open("ANNOUNCE.EMAIL", "w")
 	    ofp.write("To: " + ", ".join(map(lambda x: x[7:], maildests)) + "\n")
@@ -565,36 +589,41 @@ try:
         # Now actually ship
         #
 
-        # Shipping methods, locations, and deliverables for public channels.
-        hardwired = {
-            'freshmeat'	: (lambda: freshmeat_ship(("ANNOUNCE.FRESHMEAT",))),
-            'ibiblio'	: (lambda: upload("ftp://ibiblio.org/incoming/linux",
-                                          base_deliverables + (lsm,))),
-            'redhat'	: (lambda: upload("ftp://incoming.redhat.com", 
-                                          base_deliverables)),
-        }
+        # Shipping methods for public destinations.
+        def freshmeat():
+            freshmeat_ship(("ANNOUNCE.FRESHMEAT",))
+        def ibiblio():
+            upload("ftp://ibiblio.org/incoming/linux",
+                   download_deliverables + (lsm,))
+        def redhat():
+            upload("ftp://incoming.redhat.com", download_deliverables)
+        def berlios():
+            upload("ftp://ftp.berlios.de/incoming", download_deliverables)
+            upload_or_die("cp index.html-nodownloads index.html")
+            berlios_webdir = \
+                           "shell.berlios.de:/home/groups/" \
+                           + (berlios_name or package) \
+                           + "/htdocs"
+            upload(berlios_webdir, web_deliverables)
+        hardwired = ("freshmeat", "ibiblio", "redhat", "berlios")
 
-
-        # First ship to private channels.  Order is important here, we
-        # need to hit the user's primary website first so everything
-        # will be in place when announcements are generated.
+        # OK, ship everything.
         for destination in destinations:
-            if destination.startswith("ftp:"):
-                upload(destination, base_deliverables)
+            if destination in hardwired:
+                print "# Shipping to public destination", destination
+                eval(destination + "()")
+            elif destination.startswith("ftp:"):
+                upload(destination, download_deliverables)
             elif destination.startswith("mailto:"):
-                print "# Mailing to %s" % destination
+                print "# Mailing to %s" % destination[7:]
                 command = "sendmail -i -oem -f %s %s <ANNOUNCE.EMAIL" % (whoami, destination[7:])
                 if options.noupload:
                     print command
                 else:
                     do_or_die(command)
-            else:
+            elif destination not in hardwired:
+                upload_or_die("cp index.html-downloads index.html")
                 upload(destination, all_deliverables)
-
-        # Now ship to public channels
-        for channel in channels:
-            print "# Shipping to public channel", channel
-            apply(hardwired[channel])
     finally:
         cleanup = "rm -f " + " ".join(delete_at_end)
         if options.noupload:
