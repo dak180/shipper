@@ -491,7 +491,7 @@ try:
             print "# Can't announce to freshmeat without a changes field!"
         else:
             while True:
-                focus = raw_input("# freshmeat.net release focus (? for options): ")
+                focus = raw_input("# freshmeat.net release focus (? for list): ")
                 if focus == '?':
                     for (i, f) in enumerate(freshmeat_focus_types):
                         print "%d: %s" % (i, f)
