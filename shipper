@@ -87,7 +87,7 @@ def croak(msg):
 #
 
 def do_or_die(cmd):
-    "Wither execute a command or fail noisily"
+    "Either execute a command or fail noisily"
     if options.verbose:
         print "***", cmd
     if os.system(cmd):
@@ -107,7 +107,7 @@ def upload(destination, files):
         destination = destination[6:].split("/")
         host = destination.pop(0)
         directory = "/".join(destination)
-        commands = ["lftp", "open -u anonymous," + whoami + " " + host + "\n"]
+        commands = ["lftp\n", "open -u anonymous," + whoami + " " + host + "\n"]
         if directory:
             commands.append("cd " + directory + "\n")
         commands.append("mput " + " ".join(files) + "\n")
@@ -522,10 +522,12 @@ try:
                 delete_at_end.append("ANNOUNCE.FRESHMEAT")
 
         # Finally, email notification
-        if filter(lambda x: x.startswith("mailto:"), destinations) \
+	maildests = filter(lambda x: x.startswith("mailto:"), destinations)
+        if maildests \
                and (options.force or not os.path.exists("ANNOUNCE.EMAIL")):
             print "# Building ANNOUNCE.EMAIL..."
             ofp = open("ANNOUNCE.EMAIL", "w")
+	    ofp.write("To: " + ", ".join(map(lambda x: x[7:], maildests)) + "\n")
             ofp.write(mailtemplate % globals())
             ofp.close()
             delete_at_end.append("ANNOUNCE.FRESHMEAT")
@@ -539,7 +541,7 @@ try:
             'freshmeat'	: (lambda: freshmeat_ship(("ANNOUNCE.FRESHMEAT",))),
             'ibiblio'	: (lambda: upload("ftp://ibiblio.org/incoming/linux",
                                           (tarball, binrpm, srcrpm, lsm))),
-            'redhat'	: (lambda: upload("ftp://incoming.redhat.com/libc6", 
+            'redhat'	: (lambda: upload("ftp://incoming.redhat.com", 
                                           (tarball, binrpm, srcrpm))),
         }
 
