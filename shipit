@@ -12,16 +12,16 @@
 . ${HOME}/.shipit
 
 notify=echo
-while getopts a:dhk:wpr:fF: c;
+while getopts dhk:wpr:t:fF: c;
 do
   case $c in
-   'a') target="$OPTARG" ;;
    'd') noupload=echo dumpcmds=yes notify=: ;;	# List upload commands
    'h') hide=yes ;;
    'k') keywords="$OPTARG" ;;
    'w') noupload=: pagedump=yes notify=: ;;	# List generated web page
    'p') primary=: ;;				# Changes only primary site
    'r') releasefocus="$OPTARG";;
+   'a') target="$OPTARG" ;;
    'f') freshmeatonly=yes noupload=echo ;;
    'F') freshmeatopts="$OPTARG" ;;
    '?') echo "shipit: invalid switch specified - aborting."; exit 1;;
@@ -302,11 +302,6 @@ then
     locs="$locs --changelog-url=${projecturl}CHANGES"
 fi
 
-if [ $freshmeatonly ]
-then
-    noupload=""
-fi
-
 if [ $noupload ]
 then
     dumpopt=-N
@@ -317,10 +312,10 @@ else
 	then
 	    freshmeatopts="$freshmeatopts --hide=Y"
 	fi
-	freshmeat-submit -n -r "${releasefocus}" ${freshmeatopts} ${dumpopt} ${locs} ${queryable}
     fi
     rm -f CHANGES $lsm
 fi
+$noupload freshmeat-submit -n -r "${releasefocus}" ${freshmeatopts} ${dumpopt} ${locs} ${queryable}
 
 
 echo "Upload finished"
