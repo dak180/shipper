@@ -460,8 +460,9 @@ try:
         # Compute final deliverables
         web_deliverables = map(lambda x: x[0], web_deliverables)+["index.html"]
 
-    # Next the CHANGES file
-    if not path.exists("ChangeLog") and (options.force or not os.path.exists("CHANGES")):
+    # Next the CHANGES file.  Build this only if (a) there is no ChangeLog,
+    # and (b) there is a specfile %changelog.
+    if not os.path.exists("ChangeLog") and (options.force or not os.path.exists("CHANGES")) and changelog:
         print "# Building CHANGES..."
         ofp = open("CHANGES", "w")
         ofp.write("                     Changelog for " + package + "\n\n")

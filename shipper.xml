@@ -67,7 +67,7 @@ such as having the program generate project web pages for you.</para>
 <para><application>shipper</application> pushes
 <emphasis>deliverables</emphasis> out to
 <emphasis>channels</emphasis>.  Deliverables include: source tarballs,
-source zip archives, source RPMs, binary RPMs, CHANGES files, README
+source zip archives, source RPMs, binary RPMs, ChangeLog files, README
 files, LSM files, and various other project metadata files.  Channels
 include both <emphasis>private channels</emphasis> like websites, FTP
 archive sites and mailing lists, and <emphasis>public
@@ -345,7 +345,7 @@ name; you only need to set it if they differ.</para>
 <entry>%changelog or ChangeLog</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>If a <filename>ChangeLog</file> file exists iin the project
+<para>If a <filename>ChangeLog</filename> file exists in the project
 directory, its entire contents.  Otherwise, if it exists,
 the entire changelog section from the specfile.</para>
 </entry>
@@ -426,7 +426,7 @@ starts up:</para>
 </entry>
 </row>
 <row>
-<entry>ChangLog</entry>
+<entry>ChangeLog</entry>
 <entry>
 <para>Project change log.</para>
 </entry>
@@ -496,9 +496,9 @@ file for it.</para>
 <row>
 <entry>CHANGES</entry>
 <entry>
-<para>If there is no ChangeLog file, <application>shipper</application>
-will generate a CHANGES from the changelog entries in the specfile and
-ship that.</para>
+<para>If there is no ChangeLog file but there was a %changelog in your
+specfile, <application>shipper</application> will generate a CHANGES
+from the changelog entries in the specfile and ship that.</para>
 </entry>
 </row>
 <row>
