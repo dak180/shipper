@@ -264,19 +264,18 @@ try:
         date = time.asctime()
     if not description:
         description = get_metadata("description").strip()
+    arch = get_metadata("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
 
     #
     # Now compute the names of deliverables
     #
 
     # These are all potential deliverable files that include the version number
-    arch = get_metadata("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
     tarball   = package + "-" + version + ".tar.gz"
     srcrpm    = package + "-" + version + "-1.src.rpm"
     binrpm    = package + "-" + version + "-1." + arch + ".rpm"
     zip       = package + "-" + version + ".zip"
-    lsm       = package + ".lsm"
-    html      = package + ".html"
+    lsm       = package + "-" + version + ".lsm"
 
     # Map web deliverables to explanations for the resource table
     # Stuff niot included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
