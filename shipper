@@ -188,7 +188,7 @@ class Specfile:
             if gather:
                 desc += line
         fp.close()
-        return desc
+        return desc.strip() + "\n"
     def package(self):
         "Get the package name."
         if self.type == "RPM":
@@ -253,6 +253,9 @@ try:
     parser.add_option("-n", "--noupload",
                       action="store_true", dest="noupload", default=False,
                       help="don't do uploads, just build deliverables")
+    parser.add_option("-N", "--nobuild",
+                      action="store_true", dest="nobuild", default=False,
+                      help="dump configuration only, no builds or uploads")
     parser.add_option("-f", "--force",
                       action="store_true", dest="force", default=False,
                       help="force rebuilding of all local deliverables")
@@ -324,11 +327,22 @@ try:
     if not summary:
         summary = specfile.summary()
     if not description:
-        description = specfile.description().strip()
+        description = specfile.description()
     if not arch:
         arch = specfile.arch()
     if not keywords:
         keywords = specfile.extract("Keywords")
+    if not freshmeat_name:
+        freshmeat_name = specfile.extract("freshmeat-name")
+    changelog = specfile.changelog()
+    lastchange = ""
+    for line in changelog.split("\n"):
+        if not lastchange and (not line.strip() or line[0] == '*'):
+            continue
+        elif line.strip():
+            lastchange += line + "\n"
+        else:
+            break
 
     #
     # Now compute the names of deliverables
@@ -342,7 +356,7 @@ try:
     lsm       = package + "-" + version + ".lsm"
 
     # Map web deliverables to explanations for the resource table
-    # Stuff niot included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
+    # Stuff not included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
     stock_deliverables = [
         ("README", "roadmap file"),
         (tarball,  "source tarball"),
@@ -356,6 +370,20 @@ try:
         ("TODO",   "To-do file"),
         ]
 
+    #
+    # Might be time to dump
+    #
+    if options.nobuild:
+        for variable in ('destinations', 'whoami', 'date', 'package', \
+                         'homepage', 'arch', 'keywords', 'freshmeat_name', \
+                         'summary'):
+            print "%s = %s" % (variable, `eval(variable)`)
+        for variable in ('description', 'changelog', 'lastchange', 'mailtemplate', 'indextemplate'):
+            if not eval(variable):
+                print "No %s" % variable
+            else:
+                print "%s = <<EOF\n%sEOF" % (variable, eval(variable))
+        sys.exit(0)
     #
     # Build deliverables
     #
@@ -374,17 +402,6 @@ try:
     if options.force or (not os.path.exists(binrpm) or not os.path.exists(srcrpm)):
         print "# Building RPMs..."
         do_or_die("buildrpms %s %s" % (tarball, suppress))
-
-    # Now that we have RPMs, extract the changelog information
-    changelog = commands.getoutput("rpm --changelog -qp " + binrpm)
-    lastchange = ""
-    for line in changelog.split("\n"):
-        if not lastchange and (not line.strip() or line[0] == '*'):
-            continue
-        elif line.strip():
-            lastchange += line + "\n"
-        else:
-            break
 
     # Next, the LSM if needed
     if options.force or (not os.path.exists(lsm) and 'ibiblio' in channels):
@@ -447,7 +464,7 @@ try:
             elif focus.lower() not in map(lambda x: x.lower(), freshmeat_focus_types):
                 croak("not a valid freshmeat.net release focus!")
             ofp = open("ANNOUNCE.FRESHMEAT", "w")
-            ofp.write("Project: %s\n"%(specfile.extract("freshmeat-name") or package))
+            ofp.write("Project: %s\n"%(freshmeat_name or package))
             ofp.write("Version: %s\n"% version)
             ofp.write("Release-Focus: %s\n" % focus)
             ofp.write("Home-Page-URL: %s\n" % homepage)

@@ -16,6 +16,7 @@
   <command>shipper</command>  
   <arg choice='opt'>-h</arg>
   <arg choice='opt'>-n</arg>
+  <arg choice='opt'>-N</arg>
   <arg choice='opt'>-f</arg>
   <arg choice='opt'>-v</arg>
 </cmdsynopsis>
@@ -83,7 +84,9 @@ project name and version, then to check that the minimum set of files that
 To start with, <application>shipper</application> needs a source
 tarball and a specfile. Once it knows those are in place, it
 can extract various pieces of information it will need to do its
-real work. It also reads in a handful of configuration variables.</para>
+real work. It also reads in a handful of configuration variables.
+The -N (nobuild) option caused to dump all configuration values and
+exit at that point.</para>
 
 <para>The first real work that gets done is finding or building local
 deliverables.  These are either <emphasis>generated
@@ -619,10 +622,12 @@ declare them by putting rsync addresses in the
 <refsect1><title>Command-line Options</title>
 
 <para>The -n option of <application>shipper</application> suppresses
-uploads, just building all deliverables locally.  The -f option forces
-rebuilding of local deliverables even if they already exist.  The -v
-option makes <application>shipper</application> chatty about what it's
-doing.  The -h option prints a usage message and exits.</para>
+uploads, just building all deliverables locally.  The -N option
+suppresses both uploads and builds, generating a configuration dumop
+instead.  The -f option forces rebuilding of local deliverables even
+if they already exist.  The -v option makes
+<application>shipper</application> chatty about what it's doing.  The
+-h option prints a usage message and exits.</para>
 
 </refsect1>
 
