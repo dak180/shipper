@@ -490,11 +490,18 @@ try:
         elif not lastchange:
             print "# Can't announce to freshmeat without a changes field!"
         else:
-            focus = raw_input("# freshmeat.net release focus: ")
-            if focus in "0123456789":
-                print "# OK:", freshmeat_focus_types[int(focus)]
-            elif focus.lower() not in map(lambda x: x.lower(), freshmeat_focus_types):
-                croak("not a valid freshmeat.net release focus!")
+            while True:
+                focus = raw_input("# freshmeat.net release focus (? for options): ")
+                if focus == '?':
+                    for (i, f) in enumerate(freshmeat_focus_types):
+                        print "%d: %s" % (i, f)
+                elif focus in "0123456789":
+                    print "# OK:", freshmeat_focus_types[int(focus)]
+                    break
+                elif focus.lower() in map(lambda x: x.lower(), freshmeat_focus_types):
+                    break
+                else:
+                    croak("not a valid freshmeat.net release focus!")
             ofp = open("ANNOUNCE.FRESHMEAT", "w")
             ofp.write("Project: %s\n"%(freshmeat_name or package))
             ofp.write("Version: %s\n"% version)
