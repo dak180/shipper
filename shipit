@@ -12,10 +12,12 @@
 . ${HOME}/.shipit
 
 notify=echo
-while getopts dwpr:fF: c;
+while getopts dhk:wpr:fF: c;
 do
   case $c in
    'd') noupload=echo dumpcmds=yes notify=: ;;	# List upload commands
+   'h') hide=yes ;;
+   'k') keywords="$OPTARG" ;;
    'w') noupload=: pagedump=yes notify=: ;;	# List generated web page
    'p') primary=: ;;				# Changes only primary site
    'r') releasefocus="$OPTARG";;
@@ -50,11 +52,11 @@ then
 	version=`echo "$version" | sed -n '/\$(shell \(.*\))/s//\1/p' | sh`
     fi
 else
-    echo "shipit: can't get package ${package} version"
+    echo "shipit: can't get package ${package} version" 1>&2
     exit 1
 fi
 
-echo "Uploading version ${version} of ${package}"
+echo "Uploading version ${version} of ${package}" 1>&2
 
 projecturl=${siteurl}${package}/
 
@@ -226,6 +228,12 @@ then
     sed <"${package}.spec" >>CHANGES -e '1,/%changelog/d'
 fi
 
+# Generate an LSM file if we have an RPM file to do it from
+if [ -f ${queryable} ]
+then
+    rpm2lsm -k "$keywords" $queryable >$lsm
+fi
+
 # First copy to primary website
 upload "READ.ME"  "READ.ME file"
 upload "README"   "README file"
@@ -288,11 +296,16 @@ then
     noupload=""
 fi
 
-rm -f CHANGES
+rm -f CHANGES $lsm
 
 if [ $noupload ]
 then
     dumpopt=-N
+fi
+
+if [ "$hide" ]
+then
+    freshmeatopts="$freshmeatopts --hide=Y"
 fi
 
 if [ -f $queryable -a ! "$pagedump" ]
