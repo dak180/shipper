@@ -98,33 +98,30 @@ def upload(destination, files):
         destination = destination[6:].split("/")
         host = destination.pop(0)
         directory = "/".join(destination)
-        commands = ["open -u anonymous," + whoami + " " + host]
+        commands = ["lftp", "open -u anonymous," + whoami + " " + host + "\n"]
         if directory:
-            commands.append("cd " + directory)
+            commands.append("cd " + directory + "\n")
         found = ""
         for file in files:
-            if not os.path.exists(file):
-                if options.verbose:
-                    print "Upload of %s to %s skipped." % (file, destination)
-            else:
+            if os.path.exists(file):
                 found += " " + file
-        commands.append("mput" + found)
-        commands.append("close")
+        commands.append("mput" + found + "\n")
+        commands.append("close\n")
     else:
-        commands = ["sftp -C " + destination]
+        (host, directory) = destination.split(":")
+        commands = ["sftp -C -b /dev/stdin " + host]
+        if directory:
+            commands.append("cd " + directory + "\r\n")
         for file in files:
-            if not os.path.exists(file):
-                if options.verbose:
-                    print "Upload of %s to %s skipped." % (file, destination)
-            else:
-                commands.append("put -P " + file + " " + file + ".new")
-                commands.append("mv " + file + ".new " + file)
+            if os.path.exists(file):
+                commands.append("put -P " + file + " " + file + ".new\r\n")
+                commands.append("rename " + file + ".new " + file + "\r\n")
         commands.append("bye")
     # Here goes the actual upload
     if options.noupload:
-        print "\n".join(commands)
+        print "".join(commands)
     else:
-        pfp = os.popen(commands.pop(0))
+        pfp = os.popen(commands.pop(0), "w")
         pfp.writelines(commands)
         pfp.close()
 
