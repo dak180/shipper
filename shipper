@@ -95,13 +95,14 @@ def upload(destination, files):
         commands = ["open -u anonymous," + whoami + " " + host]
         if directory:
             commands.append("cd " + directory)
+        found = ""
         for file in files:
             if not os.path.exists(file):
                 if options.verbose:
                     print "Upload of %s to %s skipped." % (file, destination)
             else:
-                commands.append("put " + file + " " + file + ".new")
-                commands.append("mv " + file + ".new " + file)
+                found += " " + file
+        commands.append("mput" + found)
         commands.append("close")
     elif destination.startswith("mailto:"):
         commands = ["echo 'Not yet supported'"]
