@@ -85,8 +85,8 @@ To start with, <application>shipper</application> needs a source
 tarball and a specfile. Once it knows those are in place, it
 can extract various pieces of information it will need to do its
 real work. It also reads in a handful of configuration variables.
-The -N (nobuild) option caused to dump all configuration values and
-exit at that point.</para>
+The -N (nobuild) option causes it to dump all configuration values and
+stop there.</para>
 
 <para>The first real work that gets done is finding or building local
 deliverables.  These are either <emphasis>generated
@@ -94,8 +94,17 @@ deliverables</emphasis> (like RPMs) that can be rebuilt automatically,
 or or <emphasis>stock deliverables</emphasis> (like a README file)
 that have to be changed by hand.  <application>shipper</application>
 rebuilds any generated deliverable that doesn't exist when it starts
-up.  The -f (force) option makes it rebuild all generated
-deliverables, even those that already exist.</para>
+up.  Building local deliverables is separated from uploading because
+it means that you can stop and inspect what you're going to ship
+before committing to an upload.</para>
+
+<para>The -n (noupload) option stops before uploading, leaving all
+local deliverables in place but displaying the exact upload commands
+that would have been used to ship them.  The -f (force) option forces
+a rebuild of all generated deliverables, even those that already
+exist.  The command <command>shipper -f -n</command> will show you
+exactly what <application>shipper</application> would do for a real
+upload.</para>
 
 <para>Once all local deliverables have been built,
 <application>shipper</application> can begin uploading files and
@@ -106,11 +115,6 @@ website will get updated each time <emphasis>before</emphasis>
 any submissions or announcements are sent to public sites like 
 ibiblio.org or freshmeat.net.</para>
 
-<para>Building local deliverables is separated from uploading because 
-it means that you can stop and inspect what you're going to ship
-before committing to an upload.  The -n (noupload) option stops before
-uploading, leaving all local deliverables in place but displaying the
-exact upload commands that would have been used to ship them.</para>
 
 <para>Finally, note that <application>shipper</application> makes one
 important assumption about the structure of your website(s).  Beneath
@@ -694,7 +698,8 @@ url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink
 </refsect1>
 
 <refsect1><title>Bugs</title>
-<para>The rysnc channel type is untested.</para>
+<para>The rsync channel type is untested.  Shipping Debian packages 
+should be supported.</para>
 </refsect1>
 
 <refsect1><title>See Also</title>

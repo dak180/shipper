@@ -338,8 +338,10 @@ try:
     if not freshmeat_name:
         freshmeat_name = specfile.extract("freshmeat-name")
 
-    # Finally, derive the change log
-    changelog = lastchange = None
+    # Finally, derive the change log and lastchange entry;
+    # we'll need the latter for freshmeat.net
+    freshmeat_lastchange = lastchange = changelog = None
+    # First, try getting it from the specfile
     changelog = specfile.changelog()
     if changelog:
         lastchange = ""
@@ -350,14 +352,24 @@ try:
                 lastchange += line + "\n"
             else:
                 break
+        # This usually produces a lastchange entry that freshmeat will take.
+        freshmeat_lastchange = lastchange
+    # ChangeLog, if present, takes precedence;
+    # we assume in this case that the specfile log is about packaging.
     if changelog and os.path.exists("ChangeLog"):
         print "warning: ChangeLog file overrides specfile changelog!"
     if os.path.exists("ChangeLog"):
         ifp = open("ChangeLog", "r")
         changelog = ifp.read()
         ifp.close()
-        # freshmeat.net doesn't like the ChangeLog format.
-        lastchange = "See the ChangeLog file for recent changes."
+        lastchange = ""
+        for line in changelog.split("\n"):
+            while line.strip() or not "*" in lastchange:
+                lastchange += line + "\n"
+            else:
+                break
+        # freshmeat.net doesn't like bulleted items in a changes field.
+        freshmeat_lastchange = "See the ChangeLog file for recent changes."
 
     #
     # Now compute the names of deliverables
@@ -474,6 +486,8 @@ try:
         print "# Building ANNOUNCE.FRESHMEAT..."
         if not homepage:
             print "# Can't announce to freshmeat without a primary website!"
+        elif not lastchange:
+            print "# Can't announce to freshmeat without a changes field!"
         else:
             focus = raw_input("# freshmeat.net release focus: ")
             if focus in "0123456789":
