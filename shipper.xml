@@ -66,10 +66,10 @@ such as having the program generate project web pages for you.</para>
 
 <para><application>shipper</application> pushes
 <emphasis>deliverables</emphasis> out to
-<emphasis>channels</emphasis>.  Deliverables include: source tarballs,
+<emphasis>destinations</emphasis>.  Deliverables include: source tarballs,
 source zip archives, source RPMs, binary RPMs, ChangeLog files, README
-files, LSM files, and various other project metadata files.  Channels
-include both <emphasis>private channels</emphasis> like websites, FTP
+files, LSM files, and various other project metadata files.  Destinations
+include both <emphasis>private destinations</emphasis> like websites, FTP
 archive sites and mailing lists, and <emphasis>public
 channels</emphasis> like ibiblio, freshmeat.net, and the submission
 queues for various well-known operating-system distributions. The
@@ -108,7 +108,7 @@ upload.</para>
 
 <para>Once all local deliverables have been built,
 <application>shipper</application> can begin uploading files and
-posting announcements. It does private channels first, then public
+posting announcements. It does private destinations first, then public
 channels.  This means, for example, that if you give
 <application>shipper</application> your personal website as a destination, the
 website will get updated each time <emphasis>before</emphasis>
@@ -457,7 +457,7 @@ starts up:</para>
 <entry>*.html</entry>
 <entry>
 <para>Any files with an .html extension will be shipped to all 
-website channels.</para>
+website destinations.</para>
 </entry>
 </row>
 </tbody>
@@ -480,7 +480,7 @@ exist when it starts up:</para>
 <row>
 <entry>index.html</entry>
 <entry>
-<para>An index web page, to be shipped to any website channel.</para>
+<para>An index web page, to be shipped to any website destination.</para>
 </entry>
 </row>
 <row>
@@ -527,11 +527,11 @@ will generate one to be emailed to destinations that are mailto URLs.</para>
 </informaltable>
 </refsect1>
 
-<refsect1><title>Shipping to Channels</title>
+<refsect1><title>Shipping to Destinations</title>
 <para>In operation, <application>shipper</application> walks through a
-list of channels, building the required deliverables for each one and
+list of destinations, building the required deliverables for each one and
 performing the required shipping actions to push them out to the
-channel.  Here are the channel types
+destination.  Here are the channel types
 <application>shipper</application> knows about:</para>
 
 <informaltable>
