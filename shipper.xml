@@ -63,6 +63,11 @@ certain conventional files in place.  It also relies on being able to
 mine project metadata out of ypour RPM spec file.  (This may change in
 the future, when we fully support shipping Debian packages.)</para>
 
+<para>The -n option of <application>shipper</application> suppresses
+uploads, just building all deliverables locally.  The -v option makes
+<application>shipper</application> chatty about what it's doing.  The
+-h option prints a usage message and exits.</para>
+
 <para><application>shipper</application>'s first step is to find the
 project name and version.  It gets the project name from the basename
 of the directory in which it is running.  It gets the version either
