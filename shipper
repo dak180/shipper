@@ -20,6 +20,7 @@ changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
 summary = None   	# One-line summary of the package
 description = None	# Nor a description
+webfiles = []		# Extra webfiles
 
 indextemplate = """
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -159,7 +160,7 @@ def make_index_page(deliverables, version):
         resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
     resourcetable += "</table>"
     # OK, now build the index page itself
-    ofp = open("index.html-" + version, "w")
+    ofp = open(version, "w")
     ofp.write(indextemplate % globals())
     ofp.close()
 
@@ -386,7 +387,7 @@ try:
     lsm       = package + "-" + version + ".lsm"
 
     # Map web deliverables to explanations for the resource table
-    # Stuff not included here: ANNOUNCE.EMAIL, ANNOUNCE.FRESHMEAT, lsm.
+    # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FRESHMEAT, lsm.
     web_only_stock_deliverables = [
         ("README",	"roadmap file"),
         ("ChangeLog",	"change log"),
@@ -478,10 +479,8 @@ try:
         for (file, explanation) in web_only_stock_deliverables:
             if os.path.exists(file):
                 web_only_deliverables.append((file, explanation))
-        if os.path.exists("index.html"):
-            web_only_deliverables.append(("index.html", "index web page"))
         # So is anything with an HTML, Javascript, or CSS extension
-        for file in glob.glob('*.html') + glob.glob('*.js') + glob.glob('*.css'):
+        for file in glob.glob('*.html')+glob.glob('*.js')+glob.glob('*.css'):
             if file == 'index.html':
                 continue
             stem = file[:-4]
@@ -514,6 +513,11 @@ try:
             delete_at_end.append("index.html-nodownloads")
             delete_at_end.append("index.html")
 
+        # Now that the web page has been generated, it can add itself to the
+        # deliverables without having it show up in the resource table.
+        if os.path.exists("index.html"):
+            web_only_deliverables.append(("index.html", "index web page"))
+
         # Next, the LSM if needed
         if 'ibiblio' in destinations:
             print "# Building LSM..."
@@ -536,7 +540,7 @@ try:
 
         # The freshmeat announcement
         if 'freshmeat' in destinations:
-            print "# Building ANNOUNCE.FRESHMEAT..."
+            print "# Building SHIPPER.FRESHMEAT..."
             if not homepage:
                 print "# Can't announce to freshmeat without a primary website!"
             elif not lastchange:
@@ -556,7 +560,7 @@ try:
                         break
                     else:
                         croak("not a valid freshmeat.net release focus!")
-                ofp = open("ANNOUNCE.FRESHMEAT", "w")
+                ofp = open("SHIPPER.FRESHMEAT", "w")
                 ofp.write("Project: %s\n"%(freshmeat_name or package))
                 ofp.write("Version: %s\n"% version)
                 ofp.write("Release-Focus: %s\n" % focus)
@@ -573,17 +577,17 @@ try:
                 freshmeatlog = lastchange[2:].replace("\n  ", "\n")
                 ofp.write("\n" + freshmeatlog)
                 ofp.close()
-                delete_at_end.append("ANNOUNCE.FRESHMEAT")
+                delete_at_end.append("SHIPPER.FRESHMEAT")
 
         # Finally, email notification
 	maildests = filter(lambda x: x.startswith("mailto:"), destinations)
         if maildests:
-            print "# Building ANNOUNCE.EMAIL..."
-            ofp = open("ANNOUNCE.EMAIL", "w")
+            print "# Building SHIPPER.EMAIL..."
+            ofp = open("SHIPPER.EMAIL", "w")
 	    ofp.write("To: " + ", ".join(map(lambda x: x[7:], maildests)) + "\n")
             ofp.write(mailtemplate % globals())
             ofp.close()
-            delete_at_end.append("ANNOUNCE.FRESHMEAT")
+            delete_at_end.append("SHIPPER.FRESHMEAT")
 
         #
         # Now actually ship
@@ -591,7 +595,7 @@ try:
 
         # Shipping methods for public destinations.
         def freshmeat():
-            freshmeat_ship(("ANNOUNCE.FRESHMEAT",))
+            freshmeat_ship(("SHIPPER.FRESHMEAT",))
         def ibiblio():
             upload("ftp://ibiblio.org/incoming/linux",
                    download_deliverables + (lsm,))
@@ -616,7 +620,7 @@ try:
                 upload(destination, download_deliverables)
             elif destination.startswith("mailto:"):
                 print "# Mailing to %s" % destination[7:]
-                command = "sendmail -i -oem -f %s %s <ANNOUNCE.EMAIL" % (whoami, destination[7:])
+                command = "sendmail -i -oem -f %s %s <SHIPPER.EMAIL" % (whoami, destination[7:])
                 if options.noupload:
                     print command
                 else:
@@ -634,8 +638,6 @@ try:
     print "# Done"
 except KeyboardInterrupt:
     print "# Bye!"
-
-
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
