@@ -321,23 +321,8 @@ try:
     # Finally, derive the change log and lastchange entry;
     # we'll need the latter for freshmeat.net
     freshmeat_lastchange = lastchange = changelog = None
-    # First, try getting it from the specfile
-    changelog = specfile.changelog
-    if changelog:
-        lastchange = ""
-        for line in changelog.split("\n"):
-            if not lastchange and (not line.strip() or line[0] == '*'):
-                continue
-            elif line.strip():
-                lastchange += line + "\n"
-            else:
-                break
-        # This usually produces a lastchange entry that freshmeat will take.
-        freshmeat_lastchange = lastchange
     # ChangeLog, if present, takes precedence;
-    # we assume in this case that the specfile log is about packaging.
-    if changelog and os.path.exists("ChangeLog"):
-        print "warning: ChangeLog file overrides specfile changelog!"
+    # we assume if both are present that the specfile log is about packaging.
     if os.path.exists("ChangeLog"):
         ifp = open("ChangeLog", "r")
         changelog = ifp.read()
@@ -350,6 +335,18 @@ try:
                 break
         # freshmeat.net doesn't like bulleted items in a changes field.
         freshmeat_lastchange = "See the ChangeLog file for recent changes."
+    elif self.changelog:
+        changelog = self.changelog
+        lastchange = ""
+        for line in changelog.split("\n"):
+            if not lastchange and (not line.strip() or line[0] == '*'):
+                continue
+            elif line.strip():
+                lastchange += line + "\n"
+            else:
+                break
+        # This usually produces a lastchange entry that freshmeat will take.
+        freshmeat_lastchange = lastchange
 
     #
     # Now compute the names of deliverables

@@ -346,7 +346,7 @@ name; you only need to set it if they differ.</para>
 </row>
 <row>
 <entry><varname>changelog</varname></entry>
-<entry>%changelog or ChangeLog</entry>
+<entry>ChangeLog or %changelog</entry>
 <entry align='center'>-</entry>
 <entry>
 <para>If a <filename>ChangeLog</filename> file exists in the project
@@ -356,7 +356,7 @@ the entire changelog section from the specfile.</para>
 </row>
 <row>
 <entry><varname>lastchange</varname></entry>
-<entry>%changelog or ChaneLog</entry>
+<entry>ChangeLog or %changelog</entry>
 <entry align='center'>-</entry>
 <entry>
 <para>
