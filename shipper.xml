@@ -696,7 +696,7 @@ overwrite <filename>index.html</filename>.</para>
 <citerefentry>
 <refentrytitle>rpm</refentrytitle><manvolnum>1</manvolnum>
 </citerefentry>
-build noatch rather than binary RPMs, insert the following header in
+build noarch rather than binary RPMs, insert the following header in
 your specfile:</para>
 
 <programlisting>
