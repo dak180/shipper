@@ -36,8 +36,22 @@ indextemplate = """
 </body>
 </html>
 """
+mailtemplate = """Subject: Announcing release %(version)s of %(package)s
 
-date = None		# User has not set a date
+Release %(version)s of %(package)s is now available at:
+
+	%(homepage)s
+
+Here are the most recent changes:
+
+%(lastchange)s
+--
+                             shipper, acting for %(whoami)s
+"""
+
+date = None		# User has not yet set a date
+homepage = None		# Nor a home page
+description = None	# Nor a description
 destinations = []	# List of remote directories to update
 extras = []     	# No extra deliverables, by default
 
@@ -90,20 +104,19 @@ def freshmeat_announce(files):
     "Ship announcement to freshmeat.  Uses various computed globals."
     focus = raw_input("Release focus: ")
     command = "freshmeat-submit -n -r '%s'" % focus 
-    projecturl = get_metadata("URL")
     freshmeat_name = get_metadata("freshmeat-name")
     if freshmeat_name:
         command += " -p %s" % freshmeat_name
     if os.path.exists(tarball): 
-        command += " --gzipped-tar-url=" + projecturl + tarball
+        command += " --gzipped-tar-url=" + homepage + tarball
     if os.path.exists(binrpm):
-        command += " --rpm-url=" + projecturl + binrpm 
+        command += " --rpm-url=" + homepage + binrpm 
     elif os.path.exists(srcrpm): 
-        command += " --rpm-url=" + projecturl + binrpm 
+        command += " --rpm-url=" + homepage + binrpm 
     elif os.path.exists(noarchrpm):
-        command += " --rpm-url=" + projecturl + noarchrpm 
+        command += " --rpm-url=" + homepage + noarchrpm 
     if os.path.exists("CHANGES"):
-        command += " --changelog-url=" + projecturl + "CHANGES"
+        command += " --changelog-url=" + homepage + "CHANGES"
     command += " " + queryable[0]
     do_or_die(command)
 
@@ -223,6 +236,7 @@ suppress = " >/dev/null 2>&1"
 if options.verbose:
     suppress = ""
 
+# Sanity checks
 if not os.path.exists(tarball):
     croak("no tarball %s, check your make dist command!" % tarball)
 if not os.path.exists(specfile):
@@ -231,6 +245,14 @@ if not get_metadata("BuildRoot"):
     croak("specfile %s doesn't have a BuildRoot!" % specfile)
 if 'freshmeat' in channels and not get_metadata("URL"):
     croak("can't announce to freshmeat without a primary website!")
+
+# Extract variables for templating
+if not homepage:
+    homepage = get_metadata("URL")
+if not date:
+    date = time.asctime()
+if not description:
+    description = get_metadata("description").strip()
 
 # RPMs first.
 if not os.path.exists(binrpm) or not os.path.exists(srcrpm):
@@ -278,10 +300,6 @@ if not os.path.exists("index.html"):
             explanation = "HTML page."
         resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
     resourcetable += "</table>"
-    # User might have set this 
-    if not date:
-        date = time.asctime()
-    description = get_metadata("description").strip()
     ofp = open("index.html", "w")
     ofp.write(indextemplate % globals())
     ofp.close()
@@ -292,6 +310,13 @@ if not os.path.exists("CHANGES"):
     ofp = open("CHANGES", "w")
     ofp.write("                     Changelog for " + package + "\n\n")
     ofp.write(changelog)
+    ofp.close()
+
+# Finally, email notification
+if not os.path.exists("ANNOUNCEMENT"):
+    print "Building ANNOUNCEMENT..."
+    ofp = open("ANNOUNCEMENT", "w")
+    ofp.write(mailtemplate % globals())
     ofp.close()
 
 # Shipping methods, locations, and deliverables for well-known public channels.

@@ -46,14 +46,15 @@ BuildRoot field. <application>shipper</application> also calls
 <emphasis>deliverables</emphasis> out to
 <emphasis>channels</emphasis>.  Deliverables include: source tarballs,
 source zip archives, source RPMs, binary RPMs, CHANGES files, README
-files, and LSM files.  Channels include both <emphasis>private
-channels</emphasis> like websites and FTP archive sites and
-<emphasis>public channels</emphasis> like ibiblio, freshmeat.net,
-and the submission queues for various well-known operating-system
-distributions. The shipper framework is extensible and it is
-relatively easy to add new channel types and new deliverables; in the
-future, we hope to support (for example) Debian packages as
-deliverables and SourceForge as a channel.</para>
+files, LSM files, and various other project metadata files.  Channels
+include both <emphasis>private channels</emphasis> like websites, FTP
+archive sites and mailing lists, and <emphasis>public
+channels</emphasis> like ibiblio, freshmeat.net, and the submission
+queues for various well-known operating-system distributions. The
+shipper framework is extensible and it is relatively easy to add new
+channel types and new deliverables; in the future, we hope to support
+(for example) Debian packages as deliverables and SourceForge as a
+channel.</para>
 
 <para>As much as possible, <application>shipper</application> tries to
 deduce what it should do rather than requiring you to tell it.  In
@@ -176,12 +177,16 @@ file for it.</para>
 will generate one from the changelog entries in the RPM spec file.</para>
 </entry>
 </row>
+<row>
+<entry>ANNOUNCEMENT</entry>
+<entry>
+<para>If there is no ANNOUNCEMENT file, <application>shipper</application>
+will generate one to be emailed to destinations that are mailto URLs.</para>
+</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
-
-
-
 
 <para>Metadata that is extracted from headers in the RPM spec file
 includes name, version, URL, arch, keywords, and freshmeat-name. 
@@ -286,73 +291,17 @@ default which generates a very simple page containing a title, a
 date, and a table listing downloadable resources.  This is used when
 shipping to a web directory, if no index page exists when shipper
 is run.</para>
+</listitem>
+</varlistentry>
+<varlistentry>
 
-<para>Some variables are available for substitution at the time the
-web page is generated.  Here they are:</para>
-
-<informaltable>
-<tgroup cols="2">
-<thead>
-<row>
-<entry>Variable</entry>
-<entry>Meaning</entry>
-</row>
-</thead>
-<tbody>
-<row>
-<entry><varname>package</varname></entry>
-<entry>
-<para>The project name.</para>
-</entry>
-</row>
-<row>
-<entry><varname>version</varname></entry>
-<entry>
-<para>The release version.</para>
-</entry>
-</row>
-<row>
-<entry><varname>date</varname></entry>
-<entry>
-<para>The date this page was generated. You can use the Python
-function time.strftime() in your <filename>~/.shipper</filename> to format
-this date to your taste.</para>
-</entry>
-</row>
-<row>
-<entry><varname>description</varname></entry>
-<entry>
-<para>The Description field from your spec file.</para>
-</entry>
-</row>
-<row>
-<entry><varname>changelog</varname></entry>
-<entry>
-<para>The entire changelog section from your spec file.</para>
-</entry>
-</row>
-<row>
-<entry><varname>lastchange</varname></entry>
-<entry>
-<para>The most recent entry from your specfile changelog, without
-its date/author/release header.</para>
-</entry>
-</row>
-<row>
-<entry><varname>resourcetable</varname></entry>
-<entry>
-<para>The HTML table of links to downloadable resources.</para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-
-<para>In general, any variable you set in your
-<filename>~/.shipper</filename> file will be available at the time
-the web page is generated.  Use the Python "%(variable)s" syntax,
-not shell-substitution syntax.</para>
-
+<term>mailtemplate</term>
+<listitem>
+<para>Template text from which to generate the file ANNOUNCEMENT to be
+shipped to destinations that are mailto URLs.  There is a default which
+generates a very simple email containing a subject, a pointer to the 
+project web page, and the last entry in the project changelog.
+.</para>
 </listitem>
 </varlistentry>
 </variablelist>
@@ -448,9 +397,105 @@ declare them by putting FTP urls in the
 <varname>destinations</varname> variable.</para>
 </entry>
 </row>
+<row>
+<entry>Email address</entry>
+<entry>ANNOUNCEMENT</entry>
+<entry>mailto URL</entry>
+<entry>
+<para>The contents of the generated ANNOUNCEMENT file is emailed to
+each email address specified as a channel.</para>
+
+<para>No email channels are set up by default.  You must
+declare them by putting mailto: urls in the
+<varname>destinations</varname> variable.</para>
+</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
+</refsect1>
+
+<refsect1><title>Template variables</title>
+
+<para>Some variables are available for substitution at the time a web
+page or email announcement is generated.  Here they are:</para>
+
+<informaltable>
+<tgroup cols="2">
+<thead>
+<row>
+<entry>Variable</entry>
+<entry>Meaning</entry>
+</row>
+</thead>
+<tbody>
+<row>
+<entry><varname>package</varname></entry>
+<entry>
+<para>The project name.</para>
+</entry>
+</row>
+<row>
+<entry><varname>version</varname></entry>
+<entry>
+<para>The release version.</para>
+</entry>
+</row>
+<row>
+<entry><varname>date</varname></entry>
+<entry>
+<para>The date this page was generated. You can use the Python
+function time.strftime() in your <filename>~/.shipper</filename> to format
+this date to your taste.</para>
+</entry>
+</row>
+<row>
+<entry><varname>homepage</varname></entry>
+<entry>
+<para>Project home page, from the URL field in the specfile.</para>
+</entry>
+</row>
+<row>
+<entry><varname>description</varname></entry>
+<entry>
+<para>The Description field from your spec file.</para>
+</entry>
+</row>
+<row>
+<entry><varname>changelog</varname></entry>
+<entry>
+<para>The entire changelog section from your spec file.</para>
+</entry>
+</row>
+<row>
+<entry><varname>lastchange</varname></entry>
+<entry>
+<para>The most recent entry from your specfile changelog, without
+its date/author/release header.</para>
+</entry>
+</row>
+<row>
+<entry><varname>whoami</varname></entry>
+<entry>
+<para>A plausible email address for the user, generated from
+<envar>$USERNAME</envar> and <envar>$HOSTNAME</envar>.</para>
+</entry>
+</row>
+<row>
+<entry><varname>resourcetable</varname></entry>
+<entry>
+<para>The HTML table of links to downloadable resources.  This
+variable is only defined if the index page is built.</para>
+</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<para>In general, any variable you set in your
+<filename>~/.shipper</filename> file will be available at the time
+the web page is generated.  Use the Python "%(variable)s" syntax,
+not shell-substitution syntax.</para>
 </refsect1>
 
 <refsect1><title>Makefile hooks</title>
@@ -469,7 +514,7 @@ will be rebuilt before being shipped.</para>
 
 <programlisting>
 ship: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>.html 
-	rm -f index.html *.lsm *.rpm CHANGES; shipper
+	rm -f index.html *.lsm *.rpm CHANGES ANNOUNCEMENT; shipper
 </programlisting>
 
 <para>You will want to change <emphasis>package</emphasis> to your 
