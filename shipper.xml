@@ -664,7 +664,7 @@ if they already exist.  The -v option makes
 
 </refsect1>
 
-<refsect1><title>Makefile hooks</title>
+<refsect1><title>Hints and Tips</title>
 <para>The following variable definition in your makefile will ensure
 that the makefile version is derived from (and thus always consistent
 with) the specfile version.</para>
@@ -684,8 +684,20 @@ release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis
 </programlisting>
 
 <para>You will want to change <emphasis>package</emphasis> to your 
-project name.</para>
+project name.  Note that you should not use this recipe if your
+project  has its own (non-generated) index page, as the -f option will
+overwrite <filename>index.html</filename>.</para>
 
+<para>To make
+<citerefentry>
+<refentrytitle>rpm</refentrytitle><manvolnum>1</manvolnum>
+</citerefentry>
+build noatch rather than binary RPMs, insert the following header in
+your specfile:</para>
+
+<programlisting>
+BuildArch: noarch
+</programlisting>
 </refsect1>
 
 <refsect1><title>Author</title>
