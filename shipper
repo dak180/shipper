@@ -449,26 +449,31 @@ try:
             print "# Warning: LSM being built with no keywords." 
             do_or_die("rpm2lsm " + binrpm + ">" + lsm)
 
-    # Next the index page if it doesn't exist.
+    # Compute the deliverables, we need this even if not rebuilding the index
     web_deliverables = []
+    print stock_deliverables
+    # Anything in the list of standard deliverables is eligible.
+    for (file, explanation) in stock_deliverables:
+        if os.path.exists(file):
+            web_deliverables.append((file, explanation))
+    # So is anything with an HTML extendion
+    for file in glob.glob('*.html'):
+        if file == 'index.html':
+            continue
+        stem = file[:-4]
+        for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
+            if os.path.exists(stem + ext):
+                explanation = "HTML rendering of " + stem + ext
+                break
+        else:
+            explanation = "HTML page."
+        web_deliverables.append((file, explanation))
+    # Compute final deliverables
+    web_deliverables = map(lambda x: x[0], web_deliverables)+["index.html"]
+
+    # Next the index page if it doesn't exist.
     if homepage and (options.force or not os.path.exists("index.html")):
         print "# Building index page..."
-        # Anything in the list of standard deliverables is eligible.
-        for (file, explanation) in stock_deliverables:
-            if os.path.exists(file):
-                web_deliverables.append((file, explanation))
-        # So is anything with an HTML extendion
-        for file in glob.glob('*.html'):
-            if file == 'index.html':
-                continue
-            stem = file[:-4]
-            for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
-                if os.path.exists(stem + ext):
-                    explanation = "HTML rendering of " + stem + ext
-                    break
-            else:
-                explanation = "HTML page."
-            web_deliverables.append((file, explanation))
         # Now that we've computed all deliverables, build the resource table
         resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
         for (file, explanation) in web_deliverables:
@@ -478,8 +483,6 @@ try:
         ofp = open("index.html", "w")
         ofp.write(indextemplate % globals())
         ofp.close()
-        # Compute final deliverables
-        web_deliverables = map(lambda x: x[0], web_deliverables)+["index.html"]
 
     # Next the CHANGES file.  Build this only if (a) there is no ChangeLog,
     # and (b) there is a specfile %changelog.
@@ -558,6 +561,7 @@ try:
         if destination.startswith("ftp:"):
             upload(destination, (tarball, binrpm, srcrpm,))
         elif destination.startswith("mailto:"):
+            print "# Mailing to %s" % destination
             command = "sendmail -i -oem -f %s %s <ANNOUNCE.EMAIL" % (whoami, destination[7:])
             if options.noupload:
                 print command
