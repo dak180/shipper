@@ -17,7 +17,6 @@
   <arg choice='opt'>-h</arg>
   <arg choice='opt'>-n</arg>
   <arg choice='opt'>-N</arg>
-  <arg choice='opt'>-f</arg>
   <arg choice='opt'>-v</arg>
 </cmdsynopsis>
 <cmdsynopsis>
@@ -55,7 +54,7 @@ package specfile supported is an RPM spec; this may change in the future,
 when we fully support shipping Debian packages.)</para>
 
 <para>In normal use, you need set only one configuration variable,
-which is the list of private destinations to ship to.  You may also
+which is the list of destinations to ship to.  You may also
 want to add some magic <quote>Keywords</quote> comments to your
 project specfiles.  Once you have <application>shipper</application>
 up and running, you can experiment with more advanced features
@@ -66,17 +65,18 @@ such as having the program generate project web pages for you.</para>
 
 <para><application>shipper</application> pushes
 <emphasis>deliverables</emphasis> out to
-<emphasis>destinations</emphasis>.  Deliverables include: source tarballs,
-source zip archives, source RPMs, binary RPMs, ChangeLog files, README
-files, LSM files, and various other project metadata files.  Destinations
-include both <emphasis>private destinations</emphasis> like websites, FTP
-archive sites and mailing lists, and <emphasis>public
-channels</emphasis> like ibiblio, freshmeat.net, and the submission
-queues for various well-known operating-system distributions. The
-shipper framework is extensible and it is relatively easy to add new
-channel types and new deliverables; in the future, we hope to support
-(for example) Debian packages as deliverables and SourceForge as a
-channel.</para>
+<emphasis>destinations</emphasis>.  Deliverables include: source
+tarballs, source zip archives, source RPMs, binary RPMs, ChangeLog
+files, README files, LSM files, and various other project metadata
+files.  Destinations include both <emphasis>private
+destinations</emphasis> like websites, FTP archive sites and mailing
+lists, and <emphasis>public destinations</emphasis> like ibiblio,
+freshmeat.net, berlios.de, and the submission queues for various
+well-known operating-system distributions. The shipper framework is
+extensible and it is relatively easy to add new destination types and
+new deliverables; in the future, we hope to support (for example)
+Debian packages as deliverables and SourceForge as a
+destination.</para>
 
 <para><application>shipper</application>'s first step is to find the
 project name and version, then to check that the minimum set of files that
@@ -100,20 +100,18 @@ before committing to an upload.</para>
 
 <para>The -n (noupload) option stops before uploading, leaving all
 local deliverables in place but displaying the exact upload commands
-that would have been used to ship them.  The -f (force) option forces
-a rebuild of all generated deliverables, even those that already
-exist.  The command <command>shipper -f -n</command> will show you
-exactly what <application>shipper</application> would do for a real
-upload.</para>
+that would have been used to ship them.  The command <command>shipper
+-n</command> will show you exactly what
+<application>shipper</application> would do for a real upload.</para>
 
 <para>Once all local deliverables have been built,
 <application>shipper</application> can begin uploading files and
 posting announcements. It does private destinations first, then public
-channels.  This means, for example, that if you give
+destinations.  This means, for example, that if you give
 <application>shipper</application> your personal website as a destination, the
 website will get updated each time <emphasis>before</emphasis>
 any submissions or announcements are sent to public sites like 
-ibiblio.org or freshmeat.net.</para>
+ibiblio.org, freshmeat.net, or berlios.de.</para>
 
 <para>When uploads are complete, <application>shipper</application>
 cleans up after itself by deleting any deliverables it created for
@@ -144,7 +142,7 @@ noisily.</para>
 <para>The behavior of shipper depends on a handful of internal
 variables.  Some of these variables have defaults computed at startup
 time.  All can be set or overridden in the per-user
-<filename>~/.shipper</filename> file, and overridden in any
+<filename>~/.shipper</filename> file, and overridden again in any
 per-project <filename>.shipper</filename> file.  Both files are Python
 code and the syntax of variable settings is Python's.</para>
 
@@ -157,12 +155,12 @@ of fields in your project specfile.</para>
 <para>For basic use, it is only necessary to set one such variable:
 <varname>destinations</varname>, the list of destinations to ship to.
 Normally you'll set this globally, pointing all your projects at your
-main distribution website, in your <filename>~/.shipper</filename>
-file; it is also possible to add destinations on a per-project basis
-by giving a comma-separated list in a #Destinations: comment in the
-specfile.  You can set the variable in a per-project
-<filename>.shipper</filename> to ignore your global destination
-list.</para>
+main distribution website and public drop sites like ibiblio, in your
+<filename>~/.shipper</filename> file.  It is also possible to add
+destinations on a per-project basis by giving a comma-separated list in a
+#Destinations: comment in the specfile.  You can set the variable in a
+per-project <filename>.shipper</filename> to ignore your global
+destination list.</para>
 
 <para>The first thing shipper looks for is a specfile in the
 current directory; there must be exactly one.  It extracts the project
@@ -196,7 +194,7 @@ file fields: the Debian entries are informational only.</para>
 <entry>#Destinations:</entry>
 <entry>XBS-Destinations:</entry>
 <entry>
-<para>A list of remote directories to ship to using
+<para>A list of destinations to ship to using
 <citerefentry>
 <refentrytitle>scp</refentrytitle> <manvolnum>1</manvolnum>
 </citerefentry>.  Each location is a place to drop deliverables:
@@ -207,25 +205,15 @@ either a [user@]site:path destination that
 <citerefentry>
 <refentrytitle>lftp</refentrytitle> <manvolnum>1</manvolnum>
 </citerefentry>
-can use. Note that actual project directories are computed by
+can use, or one of the special public destination names. Note that when
+the destination is a web or FP site
+actual project directory is computed by
 appending the value of <varname>package</varname> to
 the destination you're shipping to.</para>
 
 <para><emphasis role='bold'>There is no default.</emphasis>.  If you
 do not set this variable, <application>shipper</application> will
-ship only to public channels.</para>
-</entry>
-</row>
-<row>
-<entry><varname>channels</varname></entry>
-<entry align='center'>-</entry>
-<entry align='center'>-</entry>
-<entry>
-<para>The list of public channels to be shipped to after the private
-channels in the <varname>destination</varname> list. You can disable
-one or more of these in a config file by calling the function
-<function>disable()</function>; for example with
-<command>disable('freshmeat')</command>.</para>
+ship only to public destinations.</para>
 </entry>
 </row>
 <row>
@@ -333,6 +321,17 @@ name; you only need to set it if they differ.</para>
 </entry>
 </row>
 <row>
+<entry><varname>berlios_name</varname></entry>
+<entry>#Berlios-Name:</entry>
+<entry>XBS-Berlios-Name:</entry>
+<entry>
+<para>Berlios shortname, used in generating berlios.net
+announcements and computing the location of your project web
+directory. If this isn't present, it defaults to the project
+name; you only need to set it if they differ.</para>
+</entry>
+</row>
+<row>
 <entry><varname>summary</varname></entry>
 <entry>Summary</entry>
 <entry>Description:</entry>
@@ -366,7 +365,7 @@ the entire changelog section from the specfile.</para>
 <para>
 If the source of your changlog was your specfile, this is the
 most recent entry from your changelog without
-its date/author/release header.  If the source was Changelog, a 
+its date/author/release header.  If the source was Changelog, this is a 
 line of text directing the user to see the ChangeLog file. 
 This becomes the Changes field in your freshmeat.net announcement,
 and freshmeat.net doesn't like the bulleted format of GNU ChangeLog
@@ -458,9 +457,9 @@ starts up:</para>
 </entry>
 </row>
 <row>
-<entry>*.html</entry>
+<entry>*.html, *.css, *.js</entry>
 <entry>
-<para>Any files with an .html extension will be shipped to all 
+<para>Any files with an .html, .js, or .css extension will be shipped to all 
 website destinations.</para>
 </entry>
 </row>
@@ -497,7 +496,7 @@ deleted after a successful upload.</para>
 <row>
 <entry>LSM</entry>
 <entry>
-<para>If the ibiblio channel is enabled,
+<para>If the ibiblio destination is enabled,
 <application>shipper</application> will generate a Linux Software Map
 file for it.</para>
 </entry>
@@ -536,7 +535,7 @@ will generate one to be emailed to destinations that are mailto URLs.</para>
 <para>In operation, <application>shipper</application> walks through a
 list of destinations, building the required deliverables for each one and
 performing the required shipping actions to push them out to the
-destination.  Here are the channel types
+destination.  Here are the destination types
 <application>shipper</application> knows about:</para>
 
 <informaltable>
@@ -547,7 +546,7 @@ destination.  Here are the channel types
 <colspec align='left'/>
 <thead>
 <row>
-<entry>Channel Type</entry>
+<entry>Destination Type</entry>
 <entry>Deliverables</entry>
 <entry>Specified by</entry>
 <entry>Explanation</entry>
@@ -559,7 +558,7 @@ destination.  Here are the channel types
 <entry>tarball, RPMs, LSM file</entry>
 <entry>-</entry>
 <entry>
-<para>If the ibiblio channel is enabled (it is by default),
+<para>If the ibiblio destination is in your list,
 <application>shipper</application> will attempt to ship a source
 tarball, RPMs, and an an LSM file to ibiblio.org via FTP.  The LSM
 file will be automatically generated.</para>
@@ -570,9 +569,24 @@ file will be automatically generated.</para>
 <entry>RPMs</entry>
 <entry>-</entry>
 <entry>
-<para>If the Red Hat channel is enabled (it is by default),
+<para>If the Red Hat destination is on your list,
 <application>shipper</application> will attempt to ship source
 and binary RPMs to the Red Hat submission directory via FTP.</para>
+</entry>
+</row>
+<row>
+<entry>berlios</entry>
+<entry>tarball, zipfile, RPMs, README, CHANGES, NEWS, HISTORY, *.html, 
+BUGS, TODO.</entry>
+<entry>-</entry>
+<entry>
+<para>If the berlios destination is on your list,
+<application>shipper</application> will attempt to ship a tarball and source
+and binary RPMs to the berlios.de submission directory via FTP.  It
+will also attempt to upload all web deliverables (README, CHANGES,
+NEWS, HISTORY, *.html, BUGS, TODO) to the project's Berlios web
+directory.
+</para>
 </entry>
 </row>
 <row>
@@ -580,7 +594,7 @@ and binary RPMs to the Red Hat submission directory via FTP.</para>
 <entry>ANNOUNCE.FRESHMEAT</entry>
 <entry>-</entry>
 <entry>
-<para>If the freshmeat channel is enabled (it is by default),
+<para>If the freshmeat destination is on your list,
 <application>shipper</application> will attempt to post a release
 announcement on freshmeat.net using
 <citerefentry><refentrytitle>freshmeat-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
@@ -598,7 +612,7 @@ generated into the local deliverable ANNOUNCE.FRESHMEAT.</para>
 BUGS, TODO.</entry>
 <entry>scp destination ([user@]host:dir)</entry>
 <entry>
-<para>This channel type represents a website.
+<para>This destination type represents a website.
 <application>shipper</application> uses
 <citerefentry><refentrytitle>scp</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 to put deliverables on websites.  If the user part of the scp
@@ -632,9 +646,9 @@ declare them by putting FTP urls in the
 <entry>mailto URL</entry>
 <entry>
 <para>The contents of the generated ANNOUNCE.EMAIL file is emailed to
-each email address specified as a channel.</para>
+each email address specified as a destination.</para>
 
-<para>No email channels are set up by default.  You must
+<para>No email destinations are set up by default.  You must
 declare them by putting mailto: urls in the
 <varname>destinations</varname> variable.</para>
 </entry>
@@ -647,7 +661,7 @@ declare them by putting mailto: urls in the
 <para>An SRPM is shipped to each destination that is rcognized as 
 an rsync address (by the double colon).</para>
 
-<para>No rsync channels are set up by default.  You must
+<para>No rsync destinations are set up by default.  You must
 declare them by putting rsync addresses in the
 <varname>destinations</varname> variable.</para>
 </entry>
@@ -662,10 +676,9 @@ declare them by putting rsync addresses in the
 <para>The -n option of <application>shipper</application> suppresses
 uploads, just building all deliverables locally.  The -N option
 suppresses both uploads and builds, generating a configuration dumop
-instead.  The -f option forces rebuilding of local deliverables even
-if they already exist.  The -v option makes
-<application>shipper</application> chatty about what it's doing.  The
--h option prints a usage message and exits.</para>
+instead.  The -v option makes <application>shipper</application>
+chatty about what it's doing.  The -h option prints a usage message
+and exits.</para>
 
 </refsect1>
 
@@ -715,7 +728,7 @@ url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink
 </refsect1>
 
 <refsect1><title>Bugs</title>
-<para>The rsync channel type is untested.  Shipping Debian packages 
+<para>The rsync destination type is untested.  Shipping Debian packages 
 should be supported.</para>
 </refsect1>
 
