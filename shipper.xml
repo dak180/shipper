@@ -470,7 +470,8 @@ website destinations.</para>
 
 <para>Here are the generated deliverables that
 <application>shipper</application> will build and ship, if they don't
-exist when it starts up:</para>
+exist when it starts up.  Any of these that are created will be 
+deleted after a successful upload.</para>
 
 <informaltable>
 <tgroup cols="2">
