@@ -188,11 +188,11 @@ file fields: the Debian entries are informational only.</para>
 <para>A list of remote directories to ship to using
 <citerefentry>
 <refentrytitle>scp</refentrytitle> <manvolnum>1</manvolnum>
-</citerefentry>.  Each location is a to drop deliverables at:
+</citerefentry>.  Each location is a place to drop deliverables:
 either a [user@]site:path destination that
 <citerefentry>
 <refentrytitle>scp</refentrytitle> <manvolnum>1</manvolnum>
-</citerefentry>can use, or an FTP url that
+</citerefentry> can use, or an FTP url that
 <citerefentry>
 <refentrytitle>lftp</refentrytitle> <manvolnum>1</manvolnum>
 </citerefentry>
@@ -202,7 +202,19 @@ the destination you're shipping to.</para>
 
 <para><emphasis role='bold'>There is no default.</emphasis>.  If you
 do not set this variable, <application>shipper</application> will
-not run.</para>
+ship only to public channels.</para>
+</entry>
+</row>
+<row>
+<entry><varname>channels</varname></entry>
+<entry align='center'>-</entry>
+<entry align='center'>-</entry>
+<entry>
+<para>The list of public channels to be shipped to after the private
+channels in the <varname>destination</varname> list. You can disable
+one or more of these in a config file by calling the function
+<function>disable()</function>; for example with
+<command>disable('freshmeat')</command>.</para>
 </entry>
 </row>
 <row>

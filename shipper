@@ -8,6 +8,7 @@ import sys, os, readline, re, commands, time, glob, optparse
 # State variables
 #
 destinations = []	# List of remote directories to update
+channels = ['ibiblio', 'redhat', 'freshmeat']
 whoami = None		# Who am I? (Used for FTP logins)
 date = None		# User has not yet set a date
 package = None   	# Nor a package name
@@ -265,6 +266,8 @@ try:
     # Extract metadata and compute control information
     #
 
+    def disable(s): channels.remove(s)
+
     # Read in variable overrides
     home_profile = os.path.join(os.getenv('HOME'), ".shipper")
     if os.path.exists(home_profile):
@@ -315,7 +318,7 @@ try:
         local_destinations = map(lambda x: x.strip(), local_destinations.split(","))
         destinations += local_destinations
     if not destinations:
-        croak("no destinations specified!")
+        print "warning: destinations empty, shipping to public channels only."
 
     print"# Uploading version %s of %s" % (version, package)
 
@@ -374,9 +377,9 @@ try:
     # Might be time to dump
     #
     if options.nobuild:
-        for variable in ('destinations', 'whoami', 'date', 'package', \
-                         'homepage', 'arch', 'keywords', 'freshmeat_name', \
-                         'summary'):
+        for variable in ('destinations', 'channels', 'whoami', 'date', 
+                         'package', 'homepage', 'arch', 'keywords', \
+                         'freshmeat_name', 'summary'):
             print "%s = %s" % (variable, `eval(variable)`)
         for variable in ('description', 'changelog', 'lastchange', 'mailtemplate', 'indextemplate'):
             if not eval(variable):
@@ -494,10 +497,10 @@ try:
 
     # Shipping methods, locations, and deliverables for public channels.
     hardwired = {
-        'freshmeat.net' : (lambda: freshmeat_ship(("ANNOUNCE.FRESHMEAT",))),
-        'ibiblio'       : (lambda: upload("ftp://ibiblio.org/incoming/linux",
+        'freshmeat'	: (lambda: freshmeat_ship(("ANNOUNCE.FRESHMEAT",))),
+        'ibiblio'	: (lambda: upload("ftp://ibiblio.org/incoming/linux",
                                       (tarball, binrpm, srcrpm, lsm))),
-        'redhat'        : (lambda: upload("ftp://incoming.redhat.com/libc6", 
+        'redhat'	: (lambda: upload("ftp://incoming.redhat.com/libc6", 
                                       (tarball, binrpm, srcrpm))),
     }
 
@@ -516,10 +519,10 @@ try:
         else:
             upload(destination, web_deliverables)
 
-    # Now ship to to public channels
-    for (channel, shipper) in hardwired.items() :
+    # Now ship to public channels
+    for channel in channels:
         print "# Shipping to public channel", channel
-        apply(shipper)
+        apply(hardwired[channel])
 
     print "# Done"
 except KeyboardInterrupt:
