@@ -2,10 +2,10 @@
 #
 # rpm2lsm -- generate Linux Software Map file from RPM meta information
 #
-# Assumption:
-# 1. You ship source code in a single compressed tarball with a GNUish name.
+# Author:       Eric S. Raymond <esr@thyrsus.com>, 31 July 2002
+# Project page: http://www.tuxedo.org/~esr/
 #
-# Requires fmt(1).
+# Requires fmt(1), awk(1), and rpm(8).
 
 while getopts a:m:k:p: c;
 do
