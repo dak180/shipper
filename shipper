@@ -110,8 +110,10 @@ def upload_or_die(cmd):
     else:
         do_or_die(cmd)
 
-def upload(destination, files, subdir=package):
-    # Upload a file via ftp or sftp, handles 
+def upload(destination, files, subdir=None):
+    # Upload a file via ftp or sftp, handles
+    if subdir == None:
+        subdir=package
     print "# Uploading to %s" % destination
     files = filter(os.path.exists, files)
     if destination.startswith("ftp://"):
