@@ -7,7 +7,8 @@
 #
 # Requires fmt(1).
 
-while getopts a:m:k:p: c; do
+while getopts a:m:k:p: c;
+do
   case $c in
    'a') author=$OPTARG;;
    'm') maintainer=$OPTARG;;
@@ -18,8 +19,6 @@ while getopts a:m:k:p: c; do
 done
 shift `expr $OPTIND - 1`
 rpm=$1
-
-
 
 # Mine out all the single-token fields we'll need
 set -- `rpm --queryformat="%{name} %{version} %{release}" -qp $rpm`
@@ -58,7 +57,7 @@ fi
 # The date
 date=`date '+%Y-%m-%d'`
 
-cat >/usr/tmp/rpm2lsm.head.$$ <<EOF
+cat >/usr/tmp/rpm2lsm.$$ <<EOF
 Begin3
 Title:		%{name}
 Version:	%{version}
@@ -73,23 +72,21 @@ EOF
 tarballs="${name}-${version}.tar.gz ${name}-${version}.tgz"
 rpms=${name}-${version}-${release}.*.rpm
 
-trap 0 2 15 "/usr/tmp/rpm2lsm.*.$$"
+trap "rm -f /usr/tmp/rpm2lsm.$$"  0 2 15
 for file in $tarballs $rpms
 do
     if [ -f $file ]
     then
         set -- `du $file`; size=$1
-        echo "		${size}	${file}" >>/usr/tmp/rpm2lsm.head.$$
+        echo "		${size}	${file}" >>/usr/tmp/rpm2lsm.$$
     fi
 done
 
-cat >/usr/tmp/rpm2lsm.tail.$$ <<EOF
+cat >>/usr/tmp/rpm2lsm.$$ <<EOF
 Platforms:      ${platforms:-All}
 Copying-policy:	%{license}
 End
 EOF
 
-format=`cat /usr/tmp/rpm2lsm.head.$$ /usr/tmp/rpm2lsm.tail.$$`
+format=`cat /usr/tmp/rpm2lsm.$$`
 rpm --queryformat="$format" -qp $rpm
-
-
