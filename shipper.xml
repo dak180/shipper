@@ -576,7 +576,7 @@ declare them by putting mailto: urls in the
 <entry>SRPM</entry>
 <entry>rsync address ([user@]host::unit)</entry>
 <entry>
-<para>An SRPMs is shipped to each destination that is rcognized as 
+<para>An SRPM is shipped to each destination that is rcognized as 
 an rsync address (by the double colon).</para>
 
 <para>No rsync channels are set up by default.  You must
