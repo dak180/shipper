@@ -1,0 +1,315 @@
+#!/usr/bin/env python
+#
+# shipper -- a tool for shipping software
+
+import sys, os, readline, re, commands, time, glob, optparse
+
+#
+# Configuration variables
+#
+channels = ['ibiblio', 'redhat', 'freshmeat']
+indextemplate = """
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN'
+    'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html>
+<head>
+<link rel='stylesheet' href='/~esr/sitestyle.css' type='text/css' />
+<meta name='description' content='Resource page for %(package)s' />
+<meta name='generator' content='shipper' />
+<meta name='MSSmartTagsPreventParsing' content='TRUE' />
+<title>Resource page for %(package)s %(version)s</title>
+</head>
+<body>
+
+<h1>Resource page for %(package)s %(version)s</td></h1>
+
+<p>%(description)s</p>
+
+<br />
+%(resourcetable)s
+<br />
+
+<p>Last modified %(date)s.</p>
+
+</div>
+</body>
+</html>
+"""
+
+date = None		# User has not set a date
+destinations = []	# List of remote directories to update
+extras = []     	# No extra deliverables, by default
+
+def croak(msg):
+    sys.stderr.write("shipper: " + msg + "\n")
+    sys.exit(1)
+
+#
+# Shipping methods
+#
+
+def do_or_die(cmd):
+    "Wither execute a command or fail noisily"
+    if options.verbose:
+        print "***", cmd
+    if os.system(cmd):
+        croak("command '%s' failed!" % cmd)
+
+def upload(destination, files):
+    # Upload a file via ftp or sftp, handles 
+    if options.verbose:
+        print "Upload %s to %s" % (file, destination)
+    if not options.noupload:
+        if destination.startswith("ftp://"):
+            destination = destination[6:].split("/")
+            host = destination.pop(0)
+            directory = "/".join(destination)
+            commands = ["open -u anonymous," + whoami + " " + site]
+            if directory:
+                commands += "cd " + directory
+            for file in files:
+                if not os.path.exists(file):
+                    print "Upload of %s to %s skipped." % (file, destination)
+                else:
+                    commands.append("put " + file)
+            commands.append("close")
+            do_or_die("lftp -c "+join(" ",map(lambda x: " '%s'" % x,commands)))
+        else:
+            pfp = os.popen("sftp -C " + destination)
+            for file in files:
+                if not os.path.exists(file):
+                    print "Upload of %s to %s skipped." % (file, destination)
+                else:
+                    pfp.write("rm " + file + "\n")	# It's OK if this fails
+                    pfp.write("put -P " + file + "\n")
+            pfp.write("bye")
+            pfp.close()
+
+def freshmeat_announce(files):
+    "Ship announcement to freshmeat.  Uses various computed globals."
+    focus = raw_input("Release focus: ")
+    command = "freshmeat-submit -n -r '%s'" % focus 
+    projecturl = get_metadata("URL")
+    freshmeat_name = get_metadata("freshmeat-name")
+    if freshmeat_name:
+        command += " -p %s" % freshmeat_name
+    if os.path.exists(tarball): 
+        command += " --gzipped-tar-url=" + projecturl + tarball
+    if os.path.exists(binrpm):
+        command += " --rpm-url=" + projecturl + binrpm 
+    elif os.path.exists(srcrpm): 
+        command += " --rpm-url=" + projecturl + binrpm 
+    elif os.path.exists(noarchrpm):
+        command += " --rpm-url=" + projecturl + noarchrpm 
+    if os.path.exists("CHANGES"):
+        command += " --changelog-url=" + projecturl + "CHANGES"
+    command += " " + queryable[0]
+    do_or_die(command)
+
+def grep(pattern, file):
+    "Mine for a specified pattern in a file."
+    fp = open(file)
+    while True:
+        line = fp.readline()
+        if not line:
+            return None
+        m = re.search(pattern, line, re.I)
+        if m:
+            return m.group(1)
+    fp.close()
+
+def get_metadata(fieldname):
+    "Fetch package metadata."
+    # Someday we'll support getting metadata from Debian control files
+    if not os.path.exists(specfile):
+        return None
+    if fieldname in ("description", "changelog"):
+        # Grab everything from leader line to just before the next blank line
+        global desc
+        fp = open(specfile)
+        desc = ""
+        gather = False
+        while True:
+            line = fp.readline()
+            if not line:
+                break
+            if line.startswith("%" + fieldname):
+                gather = True
+                continue
+            elif not line.strip():
+                gather = False
+            if gather:
+                desc += line
+        return desc
+    else:
+        return grep("^#?"+fieldname+": (.*)",specfile)
+
+#
+# Main sequence
+#
+
+parser = optparse.OptionParser(usage="%prog: [-h] [-n] [-v]")
+parser.add_option("-v", "--verbose",
+                  action="store_true", dest="verbose", default=False,
+                  help="print progress messages to stdout")
+parser.add_option("-n", "--noupload",
+                  action="store_true", dest="noupload", default=False,
+                  help="don't do uploads, just build deliverables")
+(options, args) = parser.parse_args()
+
+# Read in variable overrides
+home_profile = os.path.join(os.getenv('HOME'), ".shipper")
+if os.path.exists(home_profile):
+    execfile(home_profile)
+here_profile = ".shipper"
+if os.path.exists(here_profile):
+    execfile(here_profile)
+
+# Set various sensible defaults
+package = os.path.basename(os.getcwd())
+whoami = os.getenv('USERNAME') + "@" + os.getenv('HOSTNAME')
+
+# Where to get the metadata
+specfile = package + ".spec"
+
+# Extract the package vers from the specfile or Makefile
+specvers = get_metadata("version")
+makevers = None
+if os.path.exists("Makefile"):
+    makevers = grep("^VERS[A-Z]* *= *(.*)", "Makefile")
+    # Maybe it's a shell command intended to extract version from specfile
+    if makevers[0] == '$':
+        makevers = commands.getoutput(makevers[7:-1])
+if specvers != makevers:
+    croak("specfile version %s != Makefile version %s" % (specvers, makevers))
+elif specvers == None:
+    croak("can't get package version")
+elif specvers[0] not in "0123456789":
+    croak("package version %s appears garbled" % specvers)
+else:
+    version = specvers
+
+# These are all the potential deliverable files that include the version number
+arch = get_metadata("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
+tarball   = package + "-" + version + ".tar.gz"
+srcrpm    = package + "-" + version + "-1.src.rpm"
+binrpm    = package + "-" + version + "-1." + arch + ".rpm"
+zip       = package + "-" + version + ".zip"
+lsm       = package + ".lsm"
+html      = package + ".html"
+
+# Map deliverable-type keys to explanations for the resource table
+deliverables = [
+    ("README", "roadmap file"),
+    (tarball,  "source tarball"),
+    (zip,      "ZIP archive"),
+    (binrpm,   "installable RPM"),		# Generated
+    (srcrpm,   "source RPM"),			# Generated
+    (lsm,      "Linux Software Map file"),	# Generated
+    ("CHANGES","Changelog file"),		# Generated
+    ("NEWS",   "Project news"),
+    ("HISTORY","Project history"),
+    ("BUGS",   "Known bugs"),
+    ("TODO",   "To-do file"),
+    ]
+deliverables += extras
+
+#
+# Build deliverables
+#
+
+suppress = " >/dev/null 2>&1"
+if options.verbose:
+    suppress = ""
+
+if not os.path.exists(tarball):
+    croak("no tarball %s, check your make dist command!" % tarball)
+if not os.path.exists(specfile):
+    croak("no specfile %s, can't build RPMs!" % specfile)
+if not get_metadata("BuildRoot"):
+    croak("specfile %s doesn't have a BuildRoot!" % specfile)
+if 'freshmeat' in channels and not get_metadata("URL"):
+    croak("can't announce to freshmeat without a primary website!")
+
+# RPMs first.
+if not os.path.exists(binrpm) or not os.path.exists(srcrpm):
+    print "Building RPMs..."
+    if get_metadata("target") == "noarch":
+        do_or_die("buildrpms %s noarch %s" % (tarball, suppress))
+    else:
+        do_or_die("buildrpms %s %s" % (tarball, suppress))
+
+# Now that we have RPMs, extract the changelog information
+changelog = commands.getoutput("rpm --changelog -qp " + binrpm)
+lastchange = ""
+for line in changelog.split("\n"):
+    if not lastchange and (not line.strip() or line[0] == '*'):
+        continue
+    elif line.strip():
+        lastchange += line + "\n"
+    else:
+        break
+
+# Next, the LSM if needed
+if not os.path.exists(lsm) and 'ibiblio' in channels:
+    keywords = get_metadata("keywords")
+    if keywords:
+        do_or_die("rpm2lsm -k '" + keywords +  "' " + binrpm + " >" + lsm)
+    else:
+        do_or_die("rpm2lsm " + binrpm + ">" + lsm)
+
+# Next the index page if it doesn't exist
+if not os.path.exists("index.html"):
+    print "Building index page..."
+    resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
+    for (file, explanation) in deliverables:
+        if os.path.exists(file) and not file.endswith(".lsm"):
+            resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
+    for file in glob.glob('*.html'):
+        if file == 'index.html':
+            continue
+        stem = file[:-4]
+        for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
+            if os.path.exists(stem + ext):
+                explanation = "HTML rendering of " + stem + ext
+                break
+        else:
+            explanation = "HTML page."
+        resourcetable+="<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
+    resourcetable += "</table>"
+    # User might have set this 
+    if not date:
+        date = time.asctime()
+    description = get_metadata("description").strip()
+    ofp = open("index.html", "w")
+    ofp.write(indextemplate % globals())
+    ofp.close()
+
+# Next the CHANGES file
+if not os.path.exists("CHANGES"):
+    print "Building CHANGES..."
+    ofp = open("CHANGES", "w")
+    ofp.write("                     Changelog for " + package + "\n\n")
+    ofp.write(changelog)
+    ofp.close()
+
+# Shipping methods, locations, and deliverables for well-known public channels.
+hardwired = {
+    'freshmeat' : (freshmeat_announce,
+                   tarball, binrpm, srcrpm, zip),
+    'ibiblio'   : (lambda fn: upload("ftp://ibiblio.org/incoming/linux", fn),
+                   tarball, binrpm, srcrpm, lsm),
+    'redhat'    : (lambda fn: upload("ftp://incoming.redhat.com/libc6", fn),
+                   tarball, binrpm, srcrpm),
+}
+
+if not options.noupload:
+    print"Uploading version %s of %s" % (version, package)
+
+
+
+# The following sets edit modes for GNU EMACS
+# Local Variables:
+# mode:python
+# End:
