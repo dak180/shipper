@@ -181,7 +181,10 @@ class Specfile:
             self.summary = self.extract("Summary")
             self.arch = self.extract("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
             self.description = self.rpm_get_multiline("description")
-            self.changelog = self.rpm_get_multiline("changelog")
+            changelines = self.rpm_get_multiline("changelog").split("\n")
+            while not changelines[-1] or changelines[-1].startswith("# "):
+                changelines.pop()
+            self.changelog = "\n".join(changelines)
         elif filename == "control":
             self.type = "deb"
             self.name = self.extract("Package")
