@@ -115,6 +115,10 @@ website will get updated each time <emphasis>before</emphasis>
 any submissions or announcements are sent to public sites like 
 ibiblio.org or freshmeat.net.</para>
 
+<para>When uploads are complete, <application>shipper</application>
+cleans up after itself by deleting any deliverables it created for
+this run.  Deliverables that were found and up to date are not
+removed.</para>
 
 <para>Finally, note that <application>shipper</application> makes one
 important assumption about the structure of your website(s).  Beneath
