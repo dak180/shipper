@@ -2,7 +2,7 @@
 #
 # shipper -- a tool for shipping software
 
-import sys, os, readline, re, commands, time, glob, optparse
+import sys, os, readline, re, commands, time, glob, optparse, stat
 
 #
 # State variables
@@ -268,12 +268,20 @@ try:
 
     def disable(s): channels.remove(s)
 
+    # Security check, don't let an attacker elevate privileges 
+    def securecheck(file):
+        if stat.S_IMODE(os.stat(file).st_mode) & 00002:
+            croak("%s must not be world-writeable!" % file)
+
     # Read in variable overrides
+    securecheck(".")
     home_profile = os.path.join(os.getenv('HOME'), ".shipper")
     if os.path.exists(home_profile):
+        securecheck(home_profile)
         execfile(home_profile)
     here_profile = ".shipper"
     if os.path.exists(here_profile):
+        securecheck(here_profile)
         execfile(here_profile)
 
     # Set various sensible defaults
