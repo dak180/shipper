@@ -29,12 +29,6 @@ do
 done
 shift `expr $OPTIND - 1`
 
-if [ ! "$releasefocus" -a ! "$pagedump" ]
-then
-    echo -n "Release Focus: "
-    read releasefocus
-fi
-
 # If the package name wasn't passed as an argument,
 # assume it's the basename of the enclosing directory.
 package=$1
@@ -300,6 +294,12 @@ fi
 if [ -f CHANGES ]
 then
     locs="$locs --changelog-url=${projecturl}CHANGES"
+fi
+
+if [ ! "$releasefocus" -a ! "$pagedump" ]
+then
+    echo -n "Release Focus: "
+    read releasefocus
 fi
 
 if [ $noupload ]
