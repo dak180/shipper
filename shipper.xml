@@ -16,6 +16,7 @@
   <command>shipper</command>  
   <arg choice='opt'>-h</arg>
   <arg choice='opt'>-n</arg>
+  <arg choice='opt'>-f</arg>
   <arg choice='opt'>-v</arg>
 </cmdsynopsis>
 <cmdsynopsis>
@@ -64,9 +65,10 @@ mine project metadata out of ypour RPM spec file.  (This may change in
 the future, when we fully support shipping Debian packages.)</para>
 
 <para>The -n option of <application>shipper</application> suppresses
-uploads, just building all deliverables locally.  The -v option makes
-<application>shipper</application> chatty about what it's doing.  The
--h option prints a usage message and exits.</para>
+uploads, just building all deliverables locally.  The -f option forces
+rebuilding of local deliverables even if they already exist.  The -v
+option makes <application>shipper</application> chatty about what it's
+doing.  The -h option prints a usage message and exits.</para>
 
 <para><application>shipper</application>'s first step is to find the
 project name and version.  It gets the project name from the basename
@@ -519,7 +521,7 @@ will be rebuilt before being shipped.</para>
 
 <programlisting>
 ship: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>.html 
-	rm -f index.html *.lsm *.rpm CHANGES ANNOUNCEMENT; shipper
+	shipper -f
 </programlisting>
 
 <para>You will want to change <emphasis>package</emphasis> to your 
