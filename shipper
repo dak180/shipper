@@ -336,7 +336,7 @@ try:
     if not keywords:
         keywords = specfile.extract("Keywords")
     if not freshmeat_name:
-        freshmeat_name = specfile.extract("freshmeat-name")
+        freshmeat_name = specfile.extract("Freshmeat-Name")
 
     # Finally, derive the change log and lastchange entry;
     # we'll need the latter for freshmeat.net
@@ -432,7 +432,7 @@ try:
         do_or_die("buildrpms %s %s" % (tarball, suppress))
 
     # Next, the LSM if needed
-    if options.force or (not os.path.exists(lsm) and 'ibiblio' in channels):
+    if 'ibiblio' in channels and (options.force or not os.path.exists(lsm)):
         print "# Building LSM..."
         if keywords:
             do_or_die("rpm2lsm -k '" + keywords +  "' " + binrpm + " >" + lsm)
@@ -440,8 +440,8 @@ try:
             print "# Warning: LSM being built with no keywords." 
             do_or_die("rpm2lsm " + binrpm + ">" + lsm)
 
-    # Next the index page if it doesn't exist
-    if options.force or not os.path.exists("index.html"):
+    # Next the index page if it doesn't exist.
+    if homepage and (options.force or not os.path.exists("index.html")):
         print "# Building index page..."
         web_deliverables = []
         # Anything in the list of standard deliverables is eligible.
@@ -482,7 +482,8 @@ try:
         ofp.close()
 
     # The freshmeat announcement
-    if options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
+    if 'freshmeat' in channels \
+           and options.force or not os.path.exists("ANNOUNCE.FRESHMEAT"):
         print "# Building ANNOUNCE.FRESHMEAT..."
         if not homepage:
             print "# Can't announce to freshmeat without a primary website!"
@@ -513,7 +514,8 @@ try:
             ofp.close()
 
     # Finally, email notification
-    if options.force or not os.path.exists("ANNOUNCE.EMAIL"):
+    if filter(lambda x: x.startswith("mailto:"), destinations) \
+           and (options.force or not os.path.exists("ANNOUNCE.EMAIL")):
         print "# Building ANNOUNCE.EMAIL..."
         ofp = open("ANNOUNCE.EMAIL", "w")
         ofp.write(mailtemplate % globals())

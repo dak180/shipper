@@ -674,12 +674,12 @@ VERS=$(shell sed &lt;*.spec -n -e '/Version: \(.*\)/s//\1/p')
 </programlisting>
 
 <para>A makefile production like the following will allow
-you to type <command>make ship</command> and be sure that all
+you to type <command>make release</command> and be sure that all
 the deliverables <application>shipper</application> knows about
 will be rebuilt before being shipped.</para>
 
 <programlisting>
-ship: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>.html 
+release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>.html 
 	shipper -f
 </programlisting>
 
