@@ -257,7 +257,7 @@ is run.</para>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>Template text from which to generate the file ANNOUNCE.EMAIL to be
+<para>Template text from which to generate the file SHIPPER.EMAIL to be
 shipped to destinations that are mailto URLs.  There is a default which
 generates a very simple email containing a subject, a pointer to the 
 project web page, and the last entry in the project changelog.</para>
@@ -457,7 +457,7 @@ starts up:</para>
 </entry>
 </row>
 <row>
-<entry>*.html, *.css, *.js</entry>
+<entry>*.{html,css,js}</entry>
 <entry>
 <para>Any files with an .html, .js, or .css extension will be shipped to all 
 website destinations.</para>
@@ -510,20 +510,22 @@ from the changelog entries in the specfile and ship that.</para>
 </entry>
 </row>
 <row>
-<entry>ANNOUNCE.FRESHMEAT</entry>
+<entry>SHIPPER.FRESHMEAT</entry>
 <entry>
-<para>If there is no ANNOUNCE.FRESHMEAT file,
-<application>shipper</application> will generate one. It will be a
-job card that can be fed to freshmeat.net's XML-RPC interface via
+<para>
+If freshmeat is in the user's destination list,
+<application>shipper</application> will generate a file called
+SHIPPER.FRESHMEAT. It will be a job card that can be fed to
+freshmeat.net's XML-RPC interface via
 <citerefentry><refentrytitle>freshmeat-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </entry>
 </row>
 <row>
-<entry>ANNOUNCE.EMAIL</entry>
+<entry>SHIPPER.EMAIL</entry>
 <entry>
-<para>If there is no ANNOUNCE.EMAIL file, <application>shipper</application>
-will generate one to be emailed to destinations that are mailto URLs.</para>
+<para>This what <application>shipper</application>
+generates to be emailed to destinations that are mailto URLs.</para>
 </entry>
 </row>
 </tbody>
@@ -576,7 +578,7 @@ and binary RPMs to the Red Hat submission directory via FTP.</para>
 </row>
 <row>
 <entry>berlios</entry>
-<entry>tarball, zipfile, RPMs, README, CHANGES, NEWS, HISTORY, *.html, 
+<entry>tarball, zipfile, RPMs, README, CHANGES, NEWS, HISTORY, *.{html,css,js}, 
 BUGS, TODO.</entry>
 <entry>-</entry>
 <entry>
@@ -584,14 +586,14 @@ BUGS, TODO.</entry>
 <application>shipper</application> will attempt to ship a tarball and source
 and binary RPMs to the berlios.de submission directory via FTP.  It
 will also attempt to upload all web deliverables (README, CHANGES,
-NEWS, HISTORY, *.html, BUGS, TODO) to the project's Berlios web
+NEWS, HISTORY, *.{html,css,js}, BUGS, TODO) to the project's Berlios web
 directory.
 </para>
 </entry>
 </row>
 <row>
 <entry>freshmeat</entry>
-<entry>ANNOUNCE.FRESHMEAT</entry>
+<entry>SHIPPER.FRESHMEAT</entry>
 <entry>-</entry>
 <entry>
 <para>If the freshmeat destination is on your list,
@@ -603,7 +605,7 @@ announcement will include URLs for whichever of the following
 deliverables are shipped, using the URL field from your specfile: tarball,
 zipfile, RPMs, CHANGES.  The user will be
 prompted for a Freshmeat release-focus.  This announcement is
-generated into the local deliverable ANNOUNCE.FRESHMEAT.</para>
+generated into the local deliverable SHIPPER.FRESHMEAT.</para>
 </entry>
 </row>
 <row>
@@ -642,10 +644,10 @@ declare them by putting FTP urls in the
 </row>
 <row>
 <entry>Email address</entry>
-<entry>ANNOUNCE.EMAIL</entry>
+<entry>SHIPPER.EMAIL</entry>
 <entry>mailto URL</entry>
 <entry>
-<para>The contents of the generated ANNOUNCE.EMAIL file is emailed to
+<para>The contents of the generated SHIPPER.EMAIL file is emailed to
 each email address specified as a destination.</para>
 
 <para>No email destinations are set up by default.  You must
@@ -658,7 +660,7 @@ declare them by putting mailto: urls in the
 <entry>SRPM</entry>
 <entry>rsync address ([user@]host::unit)</entry>
 <entry>
-<para>An SRPM is shipped to each destination that is rcognized as 
+<para>An SRPM is shipped to each destination that is recognized as 
 an rsync address (by the double colon).</para>
 
 <para>No rsync destinations are set up by default.  You must
