@@ -34,11 +34,14 @@ fi
 rpmbuild --rcfile "$RCFILE" $ARCH -ta $TARBALL
 status=$?
 
-#  copy RPMs to this directory
-cp "$TMPDIR"/RPMS/*/*.rpm .
-cp "$TMPDIR"/SRPMS/*.rpm .
+if [ $status = '0' ]
+then
+    # copy RPMs to this directory
+    cp "$TMPDIR"/RPMS/*/*.rpm .
+    cp "$TMPDIR"/SRPMS/*.rpm .
+fi
 
 #  clean up build directory
 [ ! -z "$TMPDIR" -a "$TMPDIR" != / ] && rm -rf "$TMPDIR"
 
-exit $?
+exit $status
