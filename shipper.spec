@@ -46,7 +46,7 @@ cp shipper.1 rpm2lsm.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 %{_mandir}/man1/rpm2lsm.1*
 
 %changelog
-* Thu Feb 10 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.9-1
+* Thu Mar 02 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.9-1
 - The Channels variable is gone. There are no longer default public channels;
   you put the ones you want in your Destinations variable.  For safety's sake
   the force (-f) option is also gone; generated deliverables are now built 
