@@ -278,6 +278,7 @@ for line in changelog.split("\n"):
 
 # Next, the LSM if needed
 if options.force or (not os.path.exists(lsm) and 'ibiblio' in channels):
+    print "Building LSM..."
     keywords = get_metadata("keywords")
     if keywords:
         do_or_die("rpm2lsm -k '" + keywords +  "' " + binrpm + " >" + lsm)
