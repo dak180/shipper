@@ -110,12 +110,13 @@ def upload(destination, files):
     else:
         (host, directory) = destination.split(":")
         directory = os.path.join(directory, package)
-        commands = ["sftp -C -b /dev/stdin " + host]
+        commands = ["sftp -C " + host]
         if directory:
             commands.append("cd " + directory + "\r\n")
         for file in files:
             if os.path.exists(file):
                 commands.append("put -P " + file + " " + file + ".new\r\n")
+                commands.append("rm " + file + "\r\n")
                 commands.append("rename " + file + ".new " + file + "\r\n")
         commands.append("bye")
     # Here goes the actual upload
