@@ -93,9 +93,9 @@ def do_or_die(cmd):
 
 def upload_or_die(cmd):
     if options.noupload:
-        print command
+        print cmd
     else:
-        do_or_die(command)
+        do_or_die(cmd)
 
 def upload(destination, files):
     # Upload a file via ftp or sftp, handles 
@@ -128,7 +128,7 @@ def upload(destination, files):
             # do renames with an obscure error message.
             remote = os.path.join(directory, package, file)
             upload_or_die("scp " + file + " " + host + ":" + remote+".new;")
-            upload_or_die("ssh %s 'mv -f %s.new %s'" % (host, remote, remote)
+            upload_or_die("ssh %s 'mv -f %s.new %s'" % (host, remote, remote))
 
 def freshmeat_ship(manifest):
     "Ship a specified update to freshmeat."
