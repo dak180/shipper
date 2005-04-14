@@ -108,11 +108,11 @@ that would have been used to ship them.  The command <command>shipper
 <application>shipper</application> can begin uploading files and
 posting announcements.</para>
 
-<pata>After deliverables have shipped successfully, 
+<para>After deliverables have shipped successfully, 
 <application>shipper</application> determines if the directory it
 is in is a working copy in a version-control system that supports 
 release tagging.  If so, it tries to tag the release just shipped.
-See <xref id='postinstall'/> for discussion of what version-control
+See <xref linkend='postinstall'/> for discussion of what version-control
 systems are supported and what actions will be taken.</para>
 
 <para>Finally, <application>shipper</application> cleans up after
@@ -213,8 +213,8 @@ appending the value of <varname>package</varname> to
 the destination you're shipping to.</para>
 
 <para><emphasis role='bold'>There is no default.</emphasis>.  If you
-do not set this variable, <application>shipper</application> will
-ship only to public destinations.</para>
+do not set this variable, <application>shipper</application> won't
+ship anything.</para>
 </entry>
 </row>
 <row>
@@ -611,7 +611,7 @@ generated into the local deliverable SHIPPER.FRESHMEAT.</para>
 </row>
 <row>
 <entry>Generic Web site</entry>
-<entry>README, tarball, zipfile, RPMs, CHANGES, NEWS, HISTORY, *.html, 
+<entry>README, tarball, zipfile, RPMs, CHANGES, NEWS, HISTORY, *.{html,css,js}, 
 BUGS, TODO.</entry>
 <entry>scp destination ([user@]host:dir)</entry>
 <entry>
@@ -704,7 +704,7 @@ version number.</para>
 
 <para>The -n option of <application>shipper</application> suppresses
 uploads, just building all deliverables locally.  The -N option
-suppresses both uploads and builds, generating a configuration dumop
+suppresses both uploads and builds, generating a configuration dump
 instead.  The -v option makes <application>shipper</application>
 chatty about what it's doing.  The -h option prints a usage message
 and exits.</para>
@@ -727,7 +727,7 @@ will be rebuilt before being shipped.</para>
 
 <programlisting>
 release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>.html 
-	shipper -f
+	shipper
 </programlisting>
 
 <para>You will want to change <emphasis>package</emphasis> to your 

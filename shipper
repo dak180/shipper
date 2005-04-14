@@ -307,15 +307,20 @@ try:
     if not package:
         croak("can't get package name!")
 
-    # Extract the package vers from the specfile or Makefile
+    # Extract the package version from the specfile or Makefile
     specvers = metadata.version
     makevers = None
+    makefile = None
     if os.path.exists("Makefile"):
-        makevers = grep("^VERS[A-Z]* *= *(.*)", "Makefile")
+        makefile = "Makefile"        
+    if os.path.exists("makefile"):
+        makefile = "makefile"
+    if makefile:
+        makevers = grep("^VERS[A-Z]* *= *(.*)", makefile)
         # Maybe it's a shell command intended to extract version from specfile
         if makevers and makevers[0] == '$':
             makevers = commands.getoutput(makevers[7:-1])
-    if specvers != makevers:
+    if makevers and specvers != makevers:
         croak("specfile version %s != Makefile version %s"%(specvers,makevers))
     elif specvers == None:
         croak("can't get package version")
@@ -562,19 +567,25 @@ try:
                         break
                     else:
                         croak("not a valid freshmeat.net release focus!")
+                # Download directory has to be computed differently at
+                # special destinations
+                if homepage.find("berlios"):
+                    download = "http://download.berlios.de/"+(freshmeat_name or package)
+                else:
+                    download = homepage
                 ofp = open("SHIPPER.FRESHMEAT", "w")
-                ofp.write("Project: %s\n"%(freshmeat_name or package))
-                ofp.write("Version: %s\n"% version)
+                ofp.write("Project: %s\n" % (freshmeat_name or package))
+                ofp.write("Version: %s\n" % version)
                 ofp.write("Release-Focus: %s\n" % focus)
                 ofp.write("Home-Page-URL: %s\n" % homepage)
                 if os.path.exists(tarball):
-                    ofp.write("Gzipped-Tar-URL: %s\n" % os.path.join(homepage,tarball))
+                    ofp.write("Gzipped-Tar-URL: %s\n" % os.path.join(download,tarball))
                 if os.path.exists(zip):
-                    ofp.write("Zipped-Tar-URL: %s\n" % os.path.join(homepage, zip))
+                    ofp.write("Zipped-Tar-URL: %s\n" % os.path.join(download, zip))
                 if os.path.exists("CHANGES"):
                     ofp.write("Changelog-URL: %s\n" % os.path.join(homepage, "CHANGES"))
                 if os.path.exists(binrpm):
-                    ofp.write("RPM-URL: %s\n" % os.path.join(homepage, binrpm))
+                    ofp.write("RPM-URL: %s\n" % os.path.join(download, binrpm))
                 # freshmeat.net doesn't like bulleted entries.
                 freshmeatlog = lastchange[2:].replace("\n  ", "\n")
                 ofp.write("\n" + freshmeatlog)

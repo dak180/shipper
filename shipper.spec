@@ -1,5 +1,5 @@
 Name: shipper
-Version: 0.9
+Version: 0.10
 Release: 1
 URL: http://www.catb.org/~esr/shipper/
 Source0: %{name}-%{version}.tar.gz
@@ -46,7 +46,11 @@ cp shipper.1 rpm2lsm.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 %{_mandir}/man1/rpm2lsm.1*
 
 %changelog
-* Thu Mar 02 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.9-1
+* Thu Apr 14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.10-1
+- Generate correct download directories in a Freshmeat announcement for a 
+  Berlios project.  Check version in makefile as well as Makefile.
+
+* Thu Mar  3 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.9-1
 - The Channels variable is gone. There are no longer default public channels;
   you put the ones you want in your Destinations variable.  For safety's sake
   the force (-f) option is also gone; generated deliverables are now built 
