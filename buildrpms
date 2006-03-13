@@ -1,12 +1,25 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  Build RPMs from the source in the current directory.  This script sets
 #  up an RPM "_topdir" and builds the RPMs under there, then copies the
 #  binary and source RPMs to the current directory.
 #
 #  Written by Sean Reifschneider <jafo-rpms@tummy.com>, 2003
+#  Heavily hacked by ESR, 2004-2006
+#
+# Just one option: -t to set the target architecture.
 
+# bash-dependent part starts here
+target=''
+while getopts "t:" options; do
+    case $options in
+    t) target="--target=$OPTARG";;
+    esac
+done
+
+shift $(($OPTIND - 1))
 TARBALL=$1		#  tarball to build from
+# bash-dependent part ends here
 
 #  set up temporary directory
 TMPDIR=`pwd`/rpm-build.$$
@@ -25,7 +38,7 @@ echo "%_topdir $TMPDIR" >"$MACROFILE"
 echo "%_topdir $TMPDIR" >"$MACROFILE"
 
 #  build RPMs
-rpmbuild --rcfile "$RCFILE" $ARCH -ta $TARBALL
+rpmbuild --rcfile "$RCFILE" $target -ta $TARBALL
 status=$?
 
 if [ $status = '0' ]
