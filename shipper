@@ -254,7 +254,7 @@ try:
     # Process options
     #
 
-    parser = optparse.OptionParser(usage="%prog: [-h] [-n] [-f] [-v]")
+    parser = optparse.OptionParser(usage="%prog: [-n] [-f] [-v]")
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose", default=False,
                       help="print progress messages to stdout")
