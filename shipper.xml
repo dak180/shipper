@@ -14,7 +14,6 @@
 
 <cmdsynopsis>
   <command>shipper</command>  
-  <arg choice='opt'>-h</arg>
   <arg choice='opt'>-n</arg>
   <arg choice='opt'>-N</arg>
   <arg choice='opt'>-v</arg>
