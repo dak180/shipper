@@ -37,9 +37,19 @@ sed "s|~/.rpmmacros|$MACROFILE|" /usr/lib/rpm/rpmrc >"$RCFILE"
 echo "%_topdir $TMPDIR" >"$MACROFILE"
 echo "%_topdir $TMPDIR" >"$MACROFILE"
 
-#  build RPMs
+#  build RPMs for basic architecture
 rpmbuild --rcfile "$RCFILE" $target -ta $TARBALL
 status=$?
+
+# We may want to build some other architectures as well.
+if [ "$target" = "" ]
+then
+    # On 64-bit x86, cross-build 32-bit RPMs as well
+    if [ `arch` = 'x86_64' -a -d '/usr/lib' ]
+    then
+	rpmbuild --rcfile "$RCFILE" --target=i386 -ta $TARBALL
+    fi
+fi
 
 if [ $status = '0' ]
 then
