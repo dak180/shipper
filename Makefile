@@ -26,7 +26,7 @@ shipper-$(VERS).tar.gz: $(SOURCES)
 	@rm -fr shipper-$(VERS)
 
 clean:
-	rm -f *.1 *.tar.gz
+	rm -f *.1 *.tar.gz *.rpm *.tar.gz
 
 dist: shipper-$(VERS).tar.gz
 

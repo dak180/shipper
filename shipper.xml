@@ -51,7 +51,7 @@ when we fully support shipping Debian packages.)</para>
 
 <para>In normal use, you need set only one configuration variable,
 which is the list of destinations to ship to.  You may also
-want to add some magic <quote>Keywords</quote> comments to your
+want to add some magic <quote>Project-Tags</quote> comments to your
 project specfiles.  Once you have <application>shipper</application>
 up and running, you can experiment with more advanced features
 such as having the program generate project web pages for you.</para>
@@ -297,11 +297,11 @@ noarch rather than binary RPMs will be built.</para>
 </entry>
 </row>
 <row>
-<entry><varname>keywords</varname></entry>
-<entry>#Keywords:</entry>
-<entry>XBS-Keywords:</entry>
+<entry><varname>project_tags</varname></entry>
+<entry>#Project-Tags:</entry>
+<entry>XBS-Project-Tags:</entry>
 <entry>
-<para>Topic tags.</para>
+<para>Topic tags, used on Freshmeat.</para>
 </entry>
 </row>
 <row>
@@ -735,6 +735,9 @@ abandoned.</para>
 
 <para>The "redhat" public destination is gone, as they mno longer accept
 RPM submissions.</para>
+
+<para>The <varname>keywords</varname> variable is gone alomg with LSM
+support.</para>
 </refsect1>
 
 <refsect1><title>Bugs</title>
