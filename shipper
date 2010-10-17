@@ -210,7 +210,7 @@ class Specfile:
             self.type = "deb"
             self.name = self.extract("Package")
             self.version = self.extract("Version").split("-")[0]
-            self.website = self.extract("XBS-Website")
+            self.website = self.extract("Homepage")
             self.summary = self.extract("Description")
             self.arch = self.extract("Architecture")
             if not self.arch:
