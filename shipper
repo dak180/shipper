@@ -579,11 +579,11 @@ try:
                 ofp.write("Project: %s\n" % (freshmeat_name or package))
                 ofp.write("Version: %s\n" % version)
                 ofp.write("Release-Focus: %s\n" % focus)
-                ofp.write("Home-Page-URL: %s\n" % homepage)
+                ofp.write("Website-URL: %s\n" % homepage)
                 if os.path.exists(tarball):
-                    ofp.write("Gzipped-Tar-URL: %s\n" % os.path.join(download,tarball))
+                    ofp.write("Tar/GZ-URL: %s\n" % os.path.join(download,tarball))
                 if os.path.exists(zip):
-                    ofp.write("Zipped-Tar-URL: %s\n" % os.path.join(download, zipfile))
+                    ofp.write("Zip-URL: %s\n" % os.path.join(download, zipfile))
                 if os.path.exists("CHANGES"):
                     ofp.write("Changelog-URL: %s\n" % os.path.join(homepage, "CHANGES"))
                 if os.path.exists(binrpm):
