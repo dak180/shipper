@@ -650,8 +650,8 @@ declare them by putting rsync addresses in the
 
 <refsect1 id='postinstall'><title>After Deliverables have Shipped</title>
 
-<para>Currently, the only version-control system supported for tagging
-after shipping is Subversion.</para>
+<para>Currently, the only version-control systems supported for tagging
+after shipping are Subversion and git.</para>
 
 <para>When uploads are complete, <application>shipper</application>
 looks at where it is running.  If it is in the trunk of a Subversion
@@ -659,17 +659,19 @@ repository (that is, the current directory is name
 <filename>trunk</filename> and has a subdirectory named
 <filename>.svn</filename>) and there is a <filename>tags</filename>
 peer directory, and the tags directory does not have a subdirectory
-named "release-$version", then <application>shipper</application>
-copies and tags the contents of trunk.</para>
+named "$version", then <application>shipper</application> copies and
+tags the contents of trunk.  If it is in a git repository (that is,
+there is a subdirectory named <filename>.git</filename>) it will git
+tag the release.</para>
 
 <para>You can change this action by setting the variable
-<varname>subversion_tag_template</varname>. If you set it to None,
+<varname>tag_template</varname>. If you set it to None,
 release tagging will be suppressed entirely.  If you set it to a
 nonempty string, that will become the template for the name of the
 tag directory.  "%s" in the string will be replaced with the
 version number.</para>
 
-<para>You can also customize the log message by setting the variable
+<para>You can also customize the actual log message by setting the variable
 <varname>tag_message</varname>.  See the default with <command>shipper
 -N</command>; the %s in it will be replaced with the version.</para>
 </refsect1>
@@ -730,7 +732,7 @@ script was originally by Sean Reifschneider.</para>
 url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink>.</para>
 </refsect1>
 
-<refsect1><title>Changes</title>
+<refsect1><title>Changes from previous versions</title>
 <para>Support for LSM files and shipping to the ibiblio submissions
 directory has been removed, as that portion of its archives is now
 mainly historical and no longer used for distribution (the last index
@@ -738,6 +740,9 @@ compilation was in 2007).</para>
 
 <para>Trying to deduce a default whoami gave bad results and has been
 abandoned.</para>
+
+<para>The old variable <varname>subversion_tag_template</varname> is now
+<varname>tag_template</varname>.</para>
 </refsect1>
 
 <refsect1><title>Bugs</title>

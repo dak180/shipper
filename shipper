@@ -23,7 +23,7 @@ description = None	# Nor a description
 webfiles = []		# Extra webfiles
 
 # Policy choices
-subversion_tag_template = "release-%s"
+tag_template = "%s"
 tag_message = "Tagged for external release %s"
 
 indextemplate = """
@@ -430,7 +430,7 @@ try:
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'homepage', 'arch', 'keywords', 
                          'freshmeat_name', 'berlios_name', 'summary',
-                         'webfiles', 'subversion_tag_template', 'tag_message'):
+                         'webfiles', 'tag_template', 'tag_message'):
             print "%s = %s" % (variable, `eval(variable)`)
         for variable in ('description', 'changelog', 'lastchange', 'mailtemplate', 'indextemplate'):
             if not eval(variable):
@@ -648,13 +648,16 @@ try:
                 upload_or_die("ln -f index.html-downloads index.html")
                 upload(destination, all_deliverables)
 
-        # Shipping has succeeded.  If we're in the trunk of an SVN repository,
-        # we want to tag what just got shipped as an external release (unless
-        # the tag already exists, or the user suppressed this behavior by
-        # setting subversion_tag_template to None or "").
+        # Shipping has succeeded.
+        
         if subversion_tag_template and tag_message:
             tagname = subversion_tag_template % version
             tag_message = tag_message % version
+
+            # If we're in the trunk of an SVN repository, we want to tag
+            # what just got shipped as an external release (unless the tag
+            # already exists, or the user suppressed this behavior by
+            # setting subversion_tag_template to None or "").
             if os.path.basename(os.getcwd())=='trunk' and os.path.exists(".svn"):
                 print "# This is a Subversion trunk directory..."
                 if os.path.exists("../tags"):
@@ -664,6 +667,13 @@ try:
                     else:
                         print "# I will copy and tag this release."
                         upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
+            if os.path.exists(".git"):
+                print "# This is a git repository..."
+                if os.path.exists(".git/refs/tags/" + tagname):
+                    print "# This release has aleady been tagged."
+                else:
+                    print "# I will tag this release."
+                    upload_or_die("git tag -a %s -m '%s'" % (tagname, tag_message))
     finally:
         cleanup = "rm -f " + " ".join(delete_at_end)
         if options.noupload:
