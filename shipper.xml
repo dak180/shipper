@@ -39,10 +39,7 @@ of shipping releases to as near zero as possible.</para>
 
 <para><application>buildrpms</application> is a helper script that
 builds source and binary RPMs from a specified tarball with a
-BuildRoot field. <application>shipper</application> also calls
-<citerefentry>
-<refentrytitle>rpm2lsm</refentrytitle>
-<manvolnum>1</manvolnum></citerefentry> to do part of its work.</para>
+BuildRoot field.</para>
 
 <para>As much as possible, <application>shipper</application> tries to
 deduce what it should do rather than requiring you to tell it.  In
@@ -66,16 +63,14 @@ such as having the program generate project web pages for you.</para>
 <emphasis>deliverables</emphasis> out to
 <emphasis>destinations</emphasis>.  Deliverables include: source
 tarballs, source zip archives, source RPMs, binary RPMs, ChangeLog
-files, README files, LSM files, and various other project metadata
-files.  Destinations include both <emphasis>private
-destinations</emphasis> like websites, FTP archive sites and mailing
-lists, and <emphasis>public destinations</emphasis> like ibiblio,
-freshmeat.net, berlios.de, and the submission queues for various
-well-known operating-system distributions. The shipper framework is
-extensible and it is relatively easy to add new destination types and
-new deliverables; in the future, we hope to support (for example)
-Debian packages as deliverables and SourceForge as a
-destination.</para>
+files, README files,and various other project metadata files.
+Destinations include both <emphasis>private destinations</emphasis>
+like websites, FTP archive sites and mailing lists, and
+<emphasis>public destinations</emphasis> like freshmeat.net,
+and berlios.de. The shipper framework is extensible
+and it is relatively easy to add new destination types and new
+deliverables; in the future, we hope to support (for example) Debian
+packages as deliverables and SourceForge as a destination.</para>
 
 <para><application>shipper</application>'s first step is to find the
 project name and version, then to check that the minimum set of files that
@@ -307,7 +302,7 @@ noarch rather than binary RPMs will be built.</para>
 <entry>#Keywords:</entry>
 <entry>XBS-Keywords:</entry>
 <entry>
-<para>Topic keywords. Used when generating LSM files.</para>
+<para>Topic tags.</para>
 </entry>
 </row>
 <row>
@@ -325,7 +320,7 @@ name; you only need to set it if they differ.</para>
 <entry>#Berlios-Name:</entry>
 <entry>XBS-Berlios-Name:</entry>
 <entry>
-<para>Berlios shortname, used in generating berlios.net
+<para>Berlios shortname, used in generating berlios.de
 announcements and computing the location of your project web
 directory. If this isn't present, it defaults to the project
 name; you only need to set it if they differ.</para>
@@ -494,14 +489,6 @@ deleted after a successful upload.</para>
 </entry>
 </row>
 <row>
-<entry>LSM</entry>
-<entry>
-<para>If the ibiblio destination is enabled,
-<application>shipper</application> will generate a Linux Software Map
-file for it.</para>
-</entry>
-</row>
-<row>
 <entry>CHANGES</entry>
 <entry>
 <para>If there is no ChangeLog file but there was a %changelog in your
@@ -555,17 +542,6 @@ destination.  Here are the destination types
 </row>
 </thead>
 <tbody>
-<row>
-<entry>ibiblio</entry>
-<entry>tarball, RPMs, LSM file</entry>
-<entry>-</entry>
-<entry>
-<para>If the ibiblio destination is in your list,
-<application>shipper</application> will attempt to ship a source
-tarball, RPMs, and an an LSM file to ibiblio.org via FTP.  The LSM
-file will be automatically generated.</para>
-</entry>
-</row>
 <row>
 <entry>redhat</entry>
 <entry>RPMs</entry>
@@ -755,6 +731,13 @@ script was originally by Sean Reifschneider.</para>
 url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink>.</para>
 </refsect1>
 
+<refsect1><title>Changes</title>
+<para>Support for LSM files and shipping to the ibiblio submissions
+directory has been removed, as that portion of its archives is now
+mainly historical and no longer used for distribution (the last index
+compilation was in 2007).</para>
+</refsect1>
+
 <refsect1><title>Bugs</title>
 <para>The rsync destination type is untested.  Shipping Debian packages 
 should be supported.</para>
@@ -769,10 +752,6 @@ should be supported.</para>
 </citerefentry>,
 <citerefentry>
 <refentrytitle>lftp</refentrytitle>
-<manvolnum>1</manvolnum>
-</citerefentry>,
-<citerefentry>
-<refentrytitle>rpm2lsm</refentrytitle>
 <manvolnum>1</manvolnum>
 </citerefentry>,
 <citerefentry>
