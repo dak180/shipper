@@ -15,10 +15,10 @@ BuildArch: noarch
 shipper is a power distribution tool for developers with multiple
 projects who do frequent releases.  It automates the tedious process
 of shipping a software release to several standard places, including
-ibiblio, the Red Hat submission directory, and your own hosted
-website.  It also knows how to post a release announcement to
-freshmeat.net via freshmeat-submit.  Two auxiliary tools, buildrpms
-and rpm2lsm, build RPMs and generate LSM files from them respectively.
+the Red Hat submission directory, and your own hosted website.  It
+also knows how to post a release announcement to freshmeat.net via
+freshmeat-submit.  An auxiliary tool, buildrpms, builds RPMs if
+required.
 
 %prep 
 %setup -q
@@ -40,10 +40,8 @@ cp shipper.1 rpm2lsm.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 %defattr(-,root,root,-)
 %doc README COPYING
 %{_bindir}/shipper
-%{_bindir}/rpm2lsm
 %{_bindir}/buildrpms
 %{_mandir}/man1/shipper.1*
-%{_mandir}/man1/rpm2lsm.1*
 
 %changelog
 * Thu Apr 14 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.10-1
