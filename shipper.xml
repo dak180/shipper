@@ -66,7 +66,7 @@ tarballs, source zip archives, source RPMs, binary RPMs, ChangeLog
 files, README files,and various other project metadata files.
 Destinations include both <emphasis>private destinations</emphasis>
 like websites, FTP archive sites and mailing lists, and
-<emphasis>public destinations</emphasis> like freshmeat.net,
+<emphasis>public destinations</emphasis> like freshmeat.net
 and berlios.de. The shipper framework is extensible
 and it is relatively easy to add new destination types and new
 deliverables; in the future, we hope to support (for example) Debian
