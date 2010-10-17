@@ -217,7 +217,7 @@ ship anything.</para>
 <entry align='center'>-</entry>
 <entry>
 <para>A plausible email address for the user. There is no default;
-if you don't configue this. shipper will exit with san error message.</para>
+if you don't configue this. shipper will exit with an error message.</para>
 </entry>
 </row>
 <row>
@@ -239,11 +239,11 @@ set it for you.</para>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>Template HTML from which to generate index.html for shipping.  There is a
-default which generates a very simple page containing a title, a 
-date, and a table listing downloadable resources.  This is used when
-shipping to a web directory, if no index page exists when shipper
-is run.</para>
+<para>Template HTML from which to generate index.html for shipping.
+There is a default which generates a very simple page containing a
+title, a date, and a table listing downloadable resources.  This is
+used when shipping to a web directory, if no index page exists when
+shipper is run.</para>
 </entry>
 </row>
 <row>
@@ -362,7 +362,7 @@ most recent entry from your changelog without
 its date/author/release header.  If the source was Changelog, this is a 
 line of text directing the user to see the ChangeLog file. 
 This becomes the Changes field in your freshmeat.net announcement,
-and freshmeat.net doesn't like the bulleted format of GNU ChangeLog
+as freshmeat.net doesn't like the bulleted format of GNU ChangeLog
 entries.</para>
 </entry>
 </row>
@@ -565,18 +565,17 @@ directory.
 <application>shipper</application> will attempt to post a release
 announcement on freshmeat.net using
 <citerefentry><refentrytitle>freshmeat-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-The
-announcement will include URLs for whichever of the following
-deliverables are shipped, using the URL field from your specfile: tarball,
-zipfile, RPMs, CHANGES.  The user will be
-prompted for a Freshmeat release-focus.  This announcement is
-generated into the local deliverable SHIPPER.FRESHMEAT.</para>
+The announcement will include URLs for whichever of the following
+deliverables are shipped, using the URL field from your specfile:
+tarball, zipfile, RPMs, CHANGES.  The user will be prompted for a
+Freshmeat release-focus.  This announcement is generated into the
+local deliverable SHIPPER.FRESHMEAT.</para>
 </entry>
 </row>
 <row>
 <entry>Generic Web site</entry>
-<entry>README, tarball, zipfile, RPMs, CHANGES, NEWS, HISTORY, *.{html,css,js}, 
-BUGS, TODO.</entry>
+<entry>README, tarball, zipfile, RPMs, CHANGES, NEWS, HISTORY,
+*.{html,css,js}, BUGS, TODO.</entry>
 <entry>scp destination ([user@]host:dir)</entry>
 <entry>
 <para>This destination type represents a website.
