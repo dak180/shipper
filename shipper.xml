@@ -150,11 +150,11 @@ of fields in your project specfile.</para>
 <para>For basic use, it is only necessary to set one such variable:
 <varname>destinations</varname>, the list of destinations to ship to.
 Normally you'll set this globally, pointing all your projects at your
-main distribution website and public drop sites like ibiblio, in your
+main distribution website and public drop sites, in your
 <filename>~/.shipper</filename> file.  It is also possible to add
-destinations on a per-project basis by giving a comma-separated list in a
-#Destinations: comment in the specfile.  You can set the variable in a
-per-project <filename>.shipper</filename> to ignore your global
+destinations on a per-project basis by giving a comma-separated list
+in a #Destinations: comment in the specfile.  You can set the variable
+in a per-project <filename>.shipper</filename> to ignore your global
 destination list.</para>
 
 <para>The first thing shipper looks for is a specfile in the current
