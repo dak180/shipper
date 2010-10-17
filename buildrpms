@@ -21,24 +21,8 @@ shift $(($OPTIND - 1))
 TARBALL=$1		#  tarball to build from
 # bash-dependent part ends here
 
-#  set up temporary directory
-TMPDIR=`pwd`/rpm-build.$$
-[ ! -z "$TMPDIR" -a "$TMPDIR" != / ] && rm -rf "$TMPDIR"
-mkdir -p "$TMPDIR"/BUILD
-mkdir -p "$TMPDIR"/RPMS
-mkdir -p "$TMPDIR"/SOURCES
-mkdir -p "$TMPDIR"/SPECS
-mkdir -p "$TMPDIR"/SRPMS
-
-#  set up rpmmacros file
-MACROFILE="$TMPDIR"/rpmmacros
-RCFILE="$TMPDIR"/rpmrc
-sed "s|~/.rpmmacros|$MACROFILE|" /usr/lib/rpm/rpmrc >"$RCFILE"
-echo "%_topdir $TMPDIR" >"$MACROFILE"
-echo "%_topdir $TMPDIR" >"$MACROFILE"
-
 #  build RPMs for basic architecture
-rpmbuild --rcfile "$RCFILE" $target -ta $TARBALL
+rpmbuild $target -ta $TARBALL
 status=$?
 
 # We may want to build some other architectures as well.
@@ -47,7 +31,7 @@ then
     # On 64-bit x86, cross-build 32-bit RPMs as well
     if [ `arch` = 'x86_64' -a -d '/usr/lib' ]
     then
-	rpmbuild --rcfile "$RCFILE" --target=i386 -ta $TARBALL
+	rpmbuild --target=i386 -ta $TARBALL
     fi
 fi
 
