@@ -465,7 +465,7 @@ try:
         # into deliverables.
         #
         print "# Building RPMs..."
-        output = trap_or_die("buildrpms %s" % tarball)
+        output = trap_or_die("rpmbuild -ta %s; cp ~/rpmbuild/RPMS/*/*.rpm ~/rpmbuild/SRPMS/*.rpm .; rm -fr ~/rpmbuild" % tarball)
         if options.verbose:
             sys.stdout.write(output)
         # Extract names of RPMs actually generated.

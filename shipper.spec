@@ -16,8 +16,7 @@ shipper is a power distribution tool for developers with multiple
 projects who do frequent releases.  It automates the tedious process
 of shipping a software release to several standard places, including
 Berlios and your own hosted website.  It also knows how to post a
-release announcement to freshmeat.net via freshmeat-submit.  An
-auxiliary tool, buildrpms, builds RPMs if required.
+release announcement to freshmeat.net via freshmeat-submit.
 
 %prep 
 %setup -q
@@ -29,7 +28,7 @@ make %{?_smp_mflags} shipper.1
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
 mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
-cp shipper buildrpms "$RPM_BUILD_ROOT"%{_bindir}
+cp shipper "$RPM_BUILD_ROOT"%{_bindir}
 cp shipper.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 
 %clean
@@ -39,7 +38,6 @@ cp shipper.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 %defattr(-,root,root,-)
 %doc README COPYING
 %{_bindir}/shipper
-%{_bindir}/buildrpms
 %{_mandir}/man1/shipper.1*
 
 %changelog

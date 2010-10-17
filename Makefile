@@ -6,12 +6,12 @@ MANDIR=$(DESTDIR)/usr/share/man/man1
 BINDIR=$(DESTDIR)/usr/bin
 
 DOCS    = README COPYING shipper.xml shipper.1
-SOURCES = shipper buildrpms Makefile $(DOCS) shipper.spec
+SOURCES = shipper Makefile $(DOCS) shipper.spec
 
 all: shipper-$(VERS).tar.gz
 
 install: shipper.1
-	cp shipper buildrpms $(BINDIR)
+	cp shipper $(BINDIR)
 	gzip <shipper.1 >$(MANDIR)/shipper.1.gz
 
 shipper.1: shipper.xml

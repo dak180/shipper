@@ -18,10 +18,6 @@
   <arg choice='opt'>-N</arg>
   <arg choice='opt'>-v</arg>
 </cmdsynopsis>
-<cmdsynopsis>
-  <command>buildrpms</command>
-  <arg choice='req'><replaceable>tarball</replaceable></arg>
-</cmdsynopsis>
 </refsynopsisdiv>
 
 <refsect1><title>Description</title>
@@ -36,10 +32,6 @@ is to arrange your shipping process in such a way that metadata like
 your project version only have to be kept in one place and modified
 once per release. The overall goal is to reduce the friction cost
 of shipping releases to as near zero as possible.</para>
-
-<para><application>buildrpms</application> is a helper script that
-builds source and binary RPMs from a specified tarball with a
-BuildRoot field.</para>
 
 <para>As much as possible, <application>shipper</application> tries to
 deduce what it should do rather than requiring you to tell it.  In
@@ -713,8 +705,7 @@ BuildArch: noarch
 </refsect1>
 
 <refsect1><title>Author</title>
-<para>Eric S. Raymond <email>esr@thyrsus.com</email>.  The buildrpms
-script was originally by Sean Reifschneider.</para>
+<para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
 
 <para>There is a project web page at
 <ulink
@@ -738,6 +729,9 @@ RPM submissions.</para>
 
 <para>The <varname>keywords</varname> variable is gone alomg with LSM
 support.</para>
+
+<para>The <command>buildrpms</command> script is gone; shipper now
+does that logic internally.</para>
 </refsect1>
 
 <refsect1><title>Bugs</title>
