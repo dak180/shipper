@@ -538,7 +538,7 @@ try:
             make_index_page(download_only_deliverables + web_only_deliverables,
                             "index.html-downloads")
             delete_at_end.append("index.html-downloads")
-            make_index_page(web_only_deliverables, "index.page-nodownloads")
+            make_index_page(web_only_deliverables, "index.html-nodownloads")
             delete_at_end.append("index.html-nodownloads")
             delete_at_end.append("index.html")
             upload_or_die("ln -f index.html-downloads index.html")
