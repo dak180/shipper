@@ -2,7 +2,7 @@
 #
 # shipper -- a tool for shipping software
 
-import sys, os, readline, re, commands, time, glob, optparse, stat
+import sys, os, readline, re, commands, time, glob, optparse, stat, email
 
 #
 # State variables
@@ -124,7 +124,8 @@ def upload(destination, files, subdir=None):
         destination = destination[6:].split("/")
         host = destination.pop(0)
         directory = "/".join(destination)
-        commands = ["lftp\n", "open -u anonymous," + whoami + " " + host + "\n"]
+        (realname, address) = email.utils.parseaddr(whoami)
+        commands = ["lftp\n", "open -u anonymous," + address + " " + host + "\n"]
         if directory:
             commands.append("cd " + directory + "\n")
         commands.append("mput " + " ".join(files) + "\n")
@@ -290,7 +291,7 @@ try:
 
     # Set various sensible defaults
     if not whoami:
-        whoami = os.getenv('USERNAME') + "@" + os.getenv('HOSTNAME')
+        croak("please set whoami in your .shipper file.")
 
     # Where to get the metadata
     specfiles = glob.glob("*.spec")

@@ -216,9 +216,8 @@ ship anything.</para>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>A plausible email address for the user.  If not specified in the
-config file, it's generated from
-<envar>$USERNAME</envar> and <envar>$HOSTNAME</envar>.</para>
+<para>A plausible email address for the user. There is no default;
+if you don't configue this. shipper will exit with san error message.</para>
 </entry>
 </row>
 <row>
@@ -736,6 +735,9 @@ url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink
 directory has been removed, as that portion of its archives is now
 mainly historical and no longer used for distribution (the last index
 compilation was in 2007).</para>
+
+<para>Trying to deduce a defaukt whoami gave bad results and has beebn
+abandoned.</para>
 </refsect1>
 
 <refsect1><title>Bugs</title>
