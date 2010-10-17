@@ -10,10 +10,9 @@ SOURCES = shipper buildrpms Makefile $(DOCS) shipper.spec
 
 all: shipper-$(VERS).tar.gz
 
-install: shipper.1 rpm2lsm.1
+install: shipper.1
 	cp shipper buildrpms rpm2lsm $(BINDIR)
 	gzip <shipper.1 >$(MANDIR)/shipper.1.gz
-	gzip <rpm2lsm.1 >$(MANDIR)/rpm2lsm.1.gz
 
 shipper.1: shipper.xml
 	xmlto man shipper.xml
@@ -29,5 +28,5 @@ shipper-$(VERS).tar.gz: $(SOURCES)
 dist: shipper-$(VERS).tar.gz
 
 release: shipper-$(VERS).tar.gz shipper.html rpm2lsm.html
-	shipper; rm -f CHANGES SHIPPER* *.html *.lsm *.1
+	shipper; rm -f CHANGES SHIPPER* *.html *.1
 
