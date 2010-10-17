@@ -668,11 +668,11 @@ version number.</para>
 <refsect1><title>Command-line Options</title>
 
 <para>The -n option of <application>shipper</application> suppresses
-uploads, just building all deliverables locally.  The -N option
-suppresses both uploads and builds, generating a configuration dump
-instead.  The -v option makes <application>shipper</application>
-chatty about what it's doing.  The -h option prints a usage message
-and exits.</para>
+uploads, just building all deliverables locally (and not deleting
+them, after delivery, as normally occurs).  The -N option suppresses
+both uploads and builds, generating a configuration dump instead.  The
+-v option makes <application>shipper</application> chatty about what
+it's doing.  The -h option prints a usage message and exits.</para>
 
 </refsect1>
 
