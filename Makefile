@@ -11,7 +11,7 @@ SOURCES = shipper buildrpms Makefile $(DOCS) shipper.spec
 all: shipper-$(VERS).tar.gz
 
 install: shipper.1
-	cp shipper buildrpms rpm2lsm $(BINDIR)
+	cp shipper buildrpms $(BINDIR)
 	gzip <shipper.1 >$(MANDIR)/shipper.1.gz
 
 shipper.1: shipper.xml
@@ -30,6 +30,6 @@ clean:
 
 dist: shipper-$(VERS).tar.gz
 
-release: shipper-$(VERS).tar.gz shipper.html rpm2lsm.html
+release: shipper-$(VERS).tar.gz shipper.html
 	shipper; rm -f CHANGES SHIPPER* *.html *.1
 

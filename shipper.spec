@@ -23,14 +23,14 @@ auxiliary tool, buildrpms, builds RPMs if required.
 %setup -q
 
 %build
-make %{?_smp_mflags} shipper.1 rpm2lsm.1
+make %{?_smp_mflags} shipper.1
 
 %install
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
 mkdir -p "$RPM_BUILD_ROOT"%{_bindir}
 mkdir -p "$RPM_BUILD_ROOT"%{_mandir}/man1/
-cp shipper rpm2lsm buildrpms "$RPM_BUILD_ROOT"%{_bindir}
-cp shipper.1 rpm2lsm.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
+cp shipper buildrpms "$RPM_BUILD_ROOT"%{_bindir}
+cp shipper.1 "$RPM_BUILD_ROOT"%{_mandir}/man1/
 
 %clean
 [ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf "$RPM_BUILD_ROOT"
