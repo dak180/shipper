@@ -1,11 +1,9 @@
 #!/bin/bash
 #
-#  Build RPMs from the source in the current directory.  This script sets
-#  up an RPM "_topdir" and builds the RPMs under there, then copies the
-#  binary and source RPMs to the current directory.
+#  Build RPMs from the source in the current directory.
 #
 #  Written by Sean Reifschneider <jafo-rpms@tummy.com>, 2003
-#  Heavily hacked by ESR, 2004-2006
+#  Heavily hacked by ESR, 2004-2010
 #
 # Just one option: -t to set the target architecture.
 
