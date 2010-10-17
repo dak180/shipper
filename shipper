@@ -564,7 +564,8 @@ try:
                             print "%d: %s" % (i, f)
                             i += 1
                     elif focus in "0123456789":
-                        print "# OK:", freshmeat_focus_types[int(focus)]
+                        focus = freshmeat_focus_types[int(focus)]
+                        print "# OK:", focus
                         break
                     elif focus.lower() in map(lambda x: x.lower(), freshmeat_focus_types):
                         break
@@ -647,7 +648,6 @@ try:
                 upload(destination, all_deliverables)
 
         # Shipping has succeeded.
-        
         if tag_template and tag_message:
             tagname = tag_template % version
             tag_message = tag_message % version
