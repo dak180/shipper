@@ -201,7 +201,7 @@ either a [user@]site:path destination that
 <refentrytitle>lftp</refentrytitle> <manvolnum>1</manvolnum>
 </citerefentry>
 can use, or one of the special public destination names. Note that when
-the destination is a web or FP site
+the destination is a web or FTP site
 actual project directory is computed by
 appending the value of <varname>package</varname> to
 the destination you're shipping to.</para>
