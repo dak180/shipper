@@ -278,7 +278,7 @@ builds.</para>
 <row>
 <entry><varname>website</varname></entry>
 <entry>URL:</entry>
-<entry>XBS-Website:</entry>
+<entry>Homepage:</entry>
 <entry>
 <para>Project website URL. Used when generating project announcements.</para>
 </entry>
