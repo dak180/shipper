@@ -404,7 +404,7 @@ try:
     tarball   = package + "-" + version + ".tar.gz"
     binrpm    = package + "-" + version + "-1." + arch + ".rpm"
     srcrpm    = package + "-" + version + "-1.src.rpm"
-    zip       = package + "-" + version + ".zip"
+    zipfile   = package + "-" + version + ".zip"
 
     # Map web deliverables to explanations for the resource table
     # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FRESHMEAT.
@@ -419,7 +419,7 @@ try:
         ]
     download_stock_deliverables = [
         (tarball,	"source tarball"),
-        (zip,   	"ZIP archive"),
+        (zipfile,   	"ZIP archive"),
         ]
 
     #
@@ -583,7 +583,7 @@ try:
                 if os.path.exists(tarball):
                     ofp.write("Gzipped-Tar-URL: %s\n" % os.path.join(download,tarball))
                 if os.path.exists(zip):
-                    ofp.write("Zipped-Tar-URL: %s\n" % os.path.join(download, zip))
+                    ofp.write("Zipped-Tar-URL: %s\n" % os.path.join(download, zipfile))
                 if os.path.exists("CHANGES"):
                     ofp.write("Changelog-URL: %s\n" % os.path.join(homepage, "CHANGES"))
                 if os.path.exists(binrpm):
