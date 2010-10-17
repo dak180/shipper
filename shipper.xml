@@ -84,6 +84,11 @@ up.  Building local deliverables is separated from uploading because
 it means that you can stop and inspect what you're going to ship
 before committing to an upload.</para>
 
+<!-- FIXME: can we force this with an rpmbuild option? -->
+<para>Note: For RPM building to work, the spec file must have a
+BuildRoot field that is somewhre writeably by the calling user. 
+A recommended value is "%{_tmppath}/%{name}-root"</para>
+
 <para>The -n (noupload) option stops before uploading, leaving all
 local deliverables in place but displaying the exact upload commands
 that would have been used to ship them.  The command <command>shipper
