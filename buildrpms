@@ -59,6 +59,6 @@ then
 fi
 
 #  clean up build directory
-[ ! -z "$TMPDIR" -a "$TMPDIR" != / ] && rm -rf "$TMPDIR"
+rm -fr ~/rpmbuild
 
 exit $status
