@@ -54,8 +54,8 @@ fi
 if [ $status = '0' ]
 then
     # copy RPMs to this directory
-    cp "$TMPDIR"/RPMS/*/*.rpm .
-    cp "$TMPDIR"/SRPMS/*.rpm .
+    cp ~/rpmbuild/RPMS/*/*.rpm .
+    cp ~/rpmbuild/SRPMS/*.rpm .
 fi
 
 #  clean up build directory
