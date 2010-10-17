@@ -32,7 +32,6 @@ indextemplate = """
     'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html>
 <head>
-<link rel='stylesheet' href='/~esr/sitestyle.css' type='text/css' />
 <meta name='description' content='Resource page for %(package)s' />
 <meta name='generator' content='shipper' />
 <meta name='MSSmartTagsPreventParsing' content='TRUE' />
