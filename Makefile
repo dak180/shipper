@@ -25,6 +25,9 @@ shipper-$(VERS).tar.gz: $(SOURCES)
 	@tar -czf shipper-$(VERS).tar.gz shipper-$(VERS)
 	@rm -fr shipper-$(VERS)
 
+clean:
+	rm -f *.1 *.tar.gz
+
 dist: shipper-$(VERS).tar.gz
 
 release: shipper-$(VERS).tar.gz shipper.html rpm2lsm.html
