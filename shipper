@@ -114,7 +114,7 @@ def upload_or_die(cmd):
         do_or_die(cmd)
 
 def upload(destination, files, subdir=None):
-    # Upload a file via ftp or sftp, handles
+    "Upload a file via scp, deleting with ssh first if it exists."
     if subdir == None:
         subdir=package
     print "# Uploading to %s" % destination
