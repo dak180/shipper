@@ -617,8 +617,6 @@ try:
         # Shipping methods for public destinations.
         def freshmeat():
             freshmeat_ship(("SHIPPER.FRESHMEAT",))
-        def redhat():
-            upload("ftp://incoming.redhat.com", download_deliverables)
         def berlios():
             upload("ftp://ftp.berlios.de/incoming", download_deliverables)
             if os.path.exists("index.html-nodownloads"):
@@ -628,7 +626,7 @@ try:
                            + (berlios_name or package) \
                            + "/htdocs"
             upload(berlios_webdir, web_deliverables, subdir="")
-        hardwired = ("freshmeat", "redhat", "berlios")
+        hardwired = ("freshmeat", "berlios")
 
         # OK, ship everything.
         for destination in destinations:

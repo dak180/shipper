@@ -542,16 +542,6 @@ destination.  Here are the destination types
 </thead>
 <tbody>
 <row>
-<entry>redhat</entry>
-<entry>RPMs</entry>
-<entry>-</entry>
-<entry>
-<para>If the Red Hat destination is on your list,
-<application>shipper</application> will attempt to ship source
-and binary RPMs to the Red Hat submission directory via FTP.</para>
-</entry>
-</row>
-<row>
 <entry>berlios</entry>
 <entry>tarball, zipfile, RPMs, README, CHANGES, NEWS, HISTORY, *.{html,css,js}, 
 BUGS, TODO.</entry>
@@ -743,6 +733,9 @@ abandoned.</para>
 
 <para>The old variable <varname>subversion_tag_template</varname> is now
 <varname>tag_template</varname>.</para>
+
+<para>The "redhat" public destination is gone, as they mno longer accept
+RPM submissions.</para>
 </refsect1>
 
 <refsect1><title>Bugs</title>

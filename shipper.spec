@@ -15,10 +15,9 @@ BuildArch: noarch
 shipper is a power distribution tool for developers with multiple
 projects who do frequent releases.  It automates the tedious process
 of shipping a software release to several standard places, including
-the Red Hat submission directory, and your own hosted website.  It
-also knows how to post a release announcement to freshmeat.net via
-freshmeat-submit.  An auxiliary tool, buildrpms, builds RPMs if
-required.
+Berlios and your own hosted website.  It also knows how to post a
+release announcement to freshmeat.net via freshmeat-submit.  An
+auxiliary tool, buildrpms, builds RPMs if required.
 
 %prep 
 %setup -q
