@@ -276,12 +276,11 @@ builds.</para>
 </entry>
 </row>
 <row>
-<entry><varname>homepage</varname></entry>
+<entry><varname>website</varname></entry>
 <entry>URL:</entry>
-<entry>XBS-Home-Page:</entry>
+<entry>XBS-Website:</entry>
 <entry>
-<para>Project home page URL. Used when generating project 
-announcements.</para>
+<para>Project website URL. Used when generating project announcements.</para>
 </entry>
 </row>
 <row>
