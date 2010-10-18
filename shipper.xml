@@ -327,28 +327,17 @@ name; you only need to set it if they differ.</para>
 </entry>
 </row>
 <row>
-<entry><varname>changelog</varname></entry>
-<entry>ChangeLog or %changelog</entry>
-<entry align='center'>-</entry>
-<entry>
-<para>If a <filename>ChangeLog</filename> file exists in the project
-directory, its entire contents.  Otherwise, if it exists,
-the entire changelog section from the specfile.</para>
-</entry>
-</row>
-<row>
 <entry><varname>lastchange</varname></entry>
-<entry>ChangeLog or %changelog</entry>
+<entry>-</entry>
 <entry align='center'>-</entry>
 <entry>
 <para>
-If the source of your changlog was your specfile, this is the
-most recent entry from your changelog without
-its date/author/release header.  If the source was Changelog, this is a 
-line of text directing the user to see the ChangeLog file. 
-This becomes the Changes field in your freshmeat.net announcement,
-as freshmeat.net doesn't like the bulleted format of GNU ChangeLog
-entries.</para>
+The last-change entry from your NEWS or Changelog file.. To extaact
+this, first any header lines (detected by leading spaces are skipped.  
+Then the first nonblank line (which is assumed to be the date/release
+information) is skipped.  Then al lines before the next blank
+one are grabbed.
+</para>
 </entry>
 </row>
 <row>

@@ -378,14 +378,14 @@ try:
                 print "shipper: I see a %s file" % filename
             state = 0
             for line in open(filename, "r"):
-                print "I see", line
                 if state == 0:       # Skipping header
                     if line.startswith(" ") or line.startswith("\t"):
                         continue
                     elif not line.strip():
                         continue
                     else:
-                        lastchange = line
+                        # Skip first line in the log entry.
+                        lastchange = ""
                         state = 1
                 elif state == 1:     # Past header
                     if not line.strip():
@@ -532,8 +532,8 @@ try:
                 if s:
                     ofp.write("%s-URL: %s\n" % (e, os.path.join(website, f)))
             # freshmeat.net doesn't like bulleted entries.
-            freshmeatlog = lastchange.replace("\n  ", "\n")
-            ofp.write("\n" + freshmeatlog)
+            freshmeatlog = map(lambda s: s.lstrip(), lastchange.split("\n"))
+            ofp.write("\n" + "\n".join(freshmeatlog))
             ofp.close()
 
     # Finally, email notification
