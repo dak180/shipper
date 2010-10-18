@@ -240,7 +240,8 @@ set it for you.</para>
 There is a default which generates a very simple page containing a
 title, a date, and a table listing downloadable resources.  This is
 used when shipping to a web directory, if no index page exists when
-shipper is run.</para>
+shipper is run. If this variable in None, index page generation is 
+suppressed.</para>
 </entry>
 </row>
 <row>

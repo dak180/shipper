@@ -8,11 +8,11 @@ import sys, os, readline, re, commands, time, glob, optparse, stat, email
 # State variables
 #
 destinations = []	# List of remote directories to update
-whoami = None		# Who am I? (Used for FTP logins)
+whoami = None		# Who am I? (Used for FTP logins and mail signatures)
 date = None		# User has not yet set a date
 package = None   	# Nor a package name
 website = None		# Nor a home page
-sproject_tags = None  	# Keywords for tagging
+project_tags = None  	# Keywords for tagging
 freshmeat_name = None	# Name of the project on Freshmeat
 berlios_name = None	# Name of the project on derlios,de
 changelog = None	# Project changelog
@@ -51,6 +51,7 @@ indextemplate = """
 </body>
 </html>
 """
+
 mailtemplate = """Subject: Announcing release %(version)s of %(package)s
 
 Release %(version)s of %(package)s is now available at:
@@ -530,24 +531,18 @@ try:
                 explanation = "HTML page."
             web_only_deliverables.append((filename, explanation, False))
 
-        # If a web page doesn't already exist, make two versions.
-        # One has a resource table listing all deliverables, for ordinary
-        # websites. The other one omits downloadables; this is for sites
-        # like berlios and sourceforge, where downloads live on a separate
-        # server.
-        if website and not os.path.exists("index.html"):
-            make_index_page(download_only_deliverables + web_only_deliverables,
-                            "index.html-downloads")
-            delete_at_end.append("index.html-downloads")
-            make_index_page(web_only_deliverables, "index.html-nodownloads")
-            delete_at_end.append("index.html-nodownloads")
+        # If a web page doesn't already exist, but the index template
+        # variable is nonempty (which is the default) make one.  
+        if website and indextemplate and not os.path.exists("index.html"):
+            make_index_page(download_only_deliverables+web_only_deliverables,
+                            "index.html")
             delete_at_end.append("index.html")
-            upload_or_die("ln -f index.html-downloads index.html")
-
-        # Now that the web page has been generated, it can add itself to the
-        # deliverables without having it show up in the resource table.
-        if os.path.exists("index.html"):
-            web_only_deliverables.append(("index.html", "index web page"))
+            # Now that the web page has been generated, it can add
+            # itself to the deliverables without having it show up in
+            # the resource table.
+            web_only_deliverables.append(("index.html",
+                                          "index web page",
+                                          False))
 
         # The freshmeat announcement
         if 'freshmeat' in destinations:
@@ -644,7 +639,6 @@ try:
                 else:
                     do_or_die(command)
             elif destination not in hardwired:
-                upload_or_die("ln -f index.html-downloads index.html")
                 upload(destination, all_deliverables)
 
         # Shipping has succeeded.
