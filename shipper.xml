@@ -338,7 +338,7 @@ name; you only need to set it if they differ.</para>
 The last-change entry from your NEWS or Changelog file.. To extract
 this, first any header lines (detected by leading spaces are skipped.  
 Then the first nonblank line (which is assumed to be the date/release
-information) is skipped.  Then al lines before the next blank
+information) is skipped.  Then all lines before the next blank
 one are grabbed.
 </para>
 </entry>
@@ -364,7 +364,7 @@ Python "%(variable)s" syntax, not shell-substitution syntax.</para>
 
 </refsect1>
 
-<refsect1><title>Finding and Building Local Deliverables</title>
+<refsect1><title>Finding Local Deliverables</title>
 
 <para>The following files are considered stock deliverables and may be
 shipped if they are present when <application>shipper</application>
