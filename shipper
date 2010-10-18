@@ -372,20 +372,28 @@ try:
     # Finally, derive the lastchange entry; we'll need it for
     # freshmeat.net (and someday for berlios.de).
     lastchange = None
-    if os.path.exists("ChangeLog"):
-        if options.verbose:
-            print "shipper: I see a ChangeLog file"
-        ifp = open("ChangeLog", "r")
-        changelog = ifp.read()
-        ifp.close()
-        lastchange = ""
-        for line in changelog.split("\n"):
-            if line.strip() or not "*" in lastchange:
-                lastchange += line + "\n"
-            else:
-                break
+    for filename in ("NEWS", "ChangeLog"):
+        if os.path.exists(filename):
+            if options.verbose:
+                print "shipper: I see a %s file" % filename
+            state = 0
+            for line in open(filename, "r"):
+                print "I see", line
+                if state == 0:       # Skipping header
+                    if line.startswith(" ") or line.startswith("\t"):
+                        continue
+                    elif not line.strip():
+                        continue
+                    else:
+                        lastchange = line
+                        state = 1
+                elif state == 1:     # Past header
+                    if not line.strip():
+                        break
+                    else:
+                        lastchange += line
     if 'freshmeat' in destinations and not lastchange:
-        croak("Freshmeat notification requires a ChangeLog file.")
+        croak("Freshmeat notification requires a NEWS or HISTORY file.")
 
     #
     # Now compute the names of deliverables
@@ -524,7 +532,7 @@ try:
                 if s:
                     ofp.write("%s-URL: %s\n" % (e, os.path.join(website, f)))
             # freshmeat.net doesn't like bulleted entries.
-            freshmeatlog = lastchange[2:].replace("\n  ", "\n")
+            freshmeatlog = lastchange.replace("\n  ", "\n")
             ofp.write("\n" + freshmeatlog)
             ofp.close()
 
