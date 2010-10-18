@@ -20,6 +20,7 @@
   <arg choice='opt'>-n</arg>
   <arg choice='opt'>-N</arg>
   <arg choice='opt'>-v</arg>
+  <arg choice='opt'>-m</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -236,8 +237,8 @@ set it for you.</para>
 <para>Template HTML from which to generate index.html for shipping.
 There is a default which generates a very simple page containing a
 title, a date, and a table listing downloadable resources.  This is
-used when shipping to a web directory, if no index page exists when
-shipper is run. If this variable in None, index page generation is 
+used when shipping to a web directory, if the <option>-m</option> option is
+set. If this variable in None, index page generation is
 suppressed.</para>
 </entry>
 </row>
@@ -468,15 +469,8 @@ deleted after a successful upload.</para>
 <row>
 <entry>index.html</entry>
 <entry>
-<para>An index web page, to be shipped to any website destination.</para>
-</entry>
-</row>
-<row>
-<entry>ChangeLog</entry>
-<entry>
-<para>If there is no ChangeLog file but there was a %changelog in your
-specfile, <application>shipper</application> will generate a ChangeLog
-from the changelog entries in the specfile and ship that.</para>
+<para>An index web page, to be shipped to any website destination.
+Only generated if the <option>-m</option> option is set.</para>
 </entry>
 </row>
 <row>
@@ -653,7 +647,9 @@ version number.</para>
 <para>The -n option of <application>shipper</application> suppresses
 uploads, just building all deliverables locally (and not deleting
 them, after delivery, as normally occurs).  The -N option suppresses
-both uploads and builds, generating a configuration dump instead.  The
+both uploads and builds, generating a configuration dump instead.  The -m
+option tells the tool to generate a web page an upload it to website 
+destinations. The
 -v option makes <application>shipper</application> chatty about what
 it's doing.  The -h option prints a usage message and exits.</para>
 
