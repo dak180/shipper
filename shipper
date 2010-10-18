@@ -162,7 +162,7 @@ def make_index_page(deliverables, version):
     print "# Building %s..." % version
     global resourcetable
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
-    for (file, explanation) in deliverables:
+    for (file, explanation, urlify) in deliverables:
         resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
     resourcetable += "</table>"
     # OK, now build the index page itself
@@ -323,7 +323,7 @@ try:
     elif os.path.exists("control"):
         metadata = Specfile("control")
     else:
-        croak("must be exactly one RPM or dpkg specfile in the directory!")
+        croak("must be exactly one RPM or dpkg control file in the directory!")
 
     # Get the package name
     if not package:
@@ -424,27 +424,64 @@ try:
     # Now compute the names of deliverables
     #
 
-    # These are all potential deliverable files that include the version number
-    tarball   = package + "-" + version + ".tar.gz"
-    binrpm    = package + "-" + version + "-1." + arch + ".rpm"
-    srcrpm    = package + "-" + version + "-1.src.rpm"
-    zipfile   = package + "-" + version + ".zip"
+    # Potential deliverable files that include the version number.
+    deliverable_paths = [
+        package + "-" + version + ".tar.gz",
+        package + "-" + version + ".tar.bz2",
+        package + "-" + version + ".tgz",
+        package + "-" + version + ".zip",
+    ]
+    deliverable_paths = filter(os.path.exists, deliverable_paths) 
+    rpmmatch   = re.compile("-" + version + r"-.*\.rpm")
+    deliverable_paths += filter(lambda filename: rpmmatch.search(filename),
+                                os.listdir("."))
+    debmatch  = re.compile("-" + version + r"-.*\.deb")
+    deliverable_paths += filter(lambda filename: debmatch.search(filename),
+                                os.listdir("."))
+
+    download_only_deliverables = []
+    tag_mapping = []
+    if options.verbose:
+        print "Downloadables:", " ".join(deliverable_paths)
+    for path in deliverable_paths:
+        if path.endswith(".tar.gz") or path.endswith(".tgz"):
+            explanation = "gzipped source tarball"
+            freshmeat_tag = "Tar/GZ"
+        elif path.endswith(".tar.bz2"):
+            explanation = "bzipped source tarball"
+            freshmeat_tag = "Tar/BZ"
+        elif path.endswith(".zip"):
+            explanation = "zip archive"
+            freshmeat_tag = "Zip"
+        elif path.endswith(".src.rpm"):
+            explanation = "source RPM"
+            freshmeat_tag = "SRPM"
+        elif path.endswith(".rpm"):
+            explanation = "binary RPM"
+            freshmeat_tag = "RPM"
+        elif path.endswith(".deb"):
+            explanation = "Debian package"
+            freshmeat_tag = "Deb"
+        else:
+            print >>sys.stderr, "shipper: type of deliverable %s unknown" % path
+            raise SystemExit,1
+        download_only_deliverables.append((path, explanation, False))
+        tag_mapping.append((path, freshmeat_tag))
 
     # Map web deliverables to explanations for the resource table
     # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FRESHMEAT.
-    web_only_stock_deliverables = [
-        ("README",	"roadmap file"),
-        ("ChangeLog",	"change log"),
-        ("CHANGES",	"change log"),		# Generated
-        ("NEWS",	"Project news"),
-        ("HISTORY",	"Project history"),
-        ("BUGS",	"Known bugs"),
-        ("TODO",	"To-do file"),
+    # The boolean says whether the URL for this web deliverable
+    # should be announced on Freshmeat.
+    web_only_deliverables = [
+        ("README",	"roadmap file",    False),
+        ("ChangeLog",	"change log",       True),
+        ("NEWS",	"Project news",    False),
+        ("HISTORY",	"Project history", False),
+        ("BUGS",	"Known bugs",      False),
+        ("TODO",	"To-do file",      True),
         ]
-    download_stock_deliverables = [
-        (tarball,	"source tarball"),
-        (zipfile,   	"ZIP archive"),
-        ]
+    web_only_deliverables = filter(lambda (f, e, s): os.path.exists(f),
+                                   web_only_deliverables)
 
     #
     # Might be time to dump
@@ -460,16 +497,14 @@ try:
                 print "No %s" % variable
             else:
                 print "%s = <<EOF\n%sEOF" % (variable, eval(variable))
-        sys.exit(0)
+        raise SystemExit, 0
     #
     # Build deliverables
     #
 
     # Sanity checks
-    if not os.path.exists(tarball):
-        croak("no tarball %s!" % tarball)
-    if metadata.type == "RPM" and not metadata.extract("BuildRoot"):
-        croak("specfile %s doesn't have a BuildRoot!" % metadata.filename)
+    if not download_only_deliverables:
+        croak("no deliverables!")
     if not destinations:
         croak("the Destinations list is empty; nothing to do.")
 
@@ -478,78 +513,33 @@ try:
 
     try:
         delete_at_end = []
-        rpmlist = []
 
-        def newer(f1, f2):
-            return os.path.exists(f1) and (os.stat(f1).st_mtime > os.stat(f2).st_mtime)
-
-        # Re-enable this when we can build debs.  There's also an
-        # issue with noarch not getting set even when BuildArch is, e.g.
-        # in shipping submit-freshmeat.
-        if False:
-            # Generate RPMs first, the list of these is variable and
-            # needs to go into deliverables.
-            print "# Building RPMs..."
-            output = trap_or_die("rpmbuild -ta %s; cp ~/rpmbuild/RPMS/*/*.rpm ~/rpmbuild/SRPMS/*.rpm .; rm -fr ~/rpmbuild" % tarball)
-            if options.verbose:
-                sys.stdout.write(output)
-            # Extract names of RPMs actually generated.
-            # Later in the code we presume that binrpm matches one
-            # of these, the base-subpackage binary RPM.  Others
-            # might be, for example, a -devel RPM.
-            for line in output.split("\n"):
-                if line.startswith("Wrote: "):
-                    rpm = os.path.basename(line[6:])
-                    delete_at_end.append(rpm)
-                    rpmlist.append(rpm)
-            if options.verbose:
-                print "RPMS:", ", ".join(rpmlist)
-
-        # Next the CHANGES file.  Build this only if (a) there is no
+        # Next the ChangeLog file.  Build this only if (a) there is no
         # ChangeLog, and (b) there is a specfile %changelog.        
         if not os.path.exists("ChangeLog") and changelog:
-            print "# Building CHANGES..."
-            ofp = open("CHANGES", "w")
+            print "# Building ChangeLog..."
+            ofp = open("ChangeLog", "w")
             ofp.write("                     Changelog for " + package + "\n\n")
             ofp.write(changelog)
             ofp.close()
-            delete_at_end.append("CHANGES")
+            web_only_stock_deliverables.append(("ChangeLog",
+                                                "Change log (generated)"))
+            delete_at_end.append("ChangeLog")
 
-        #
-        # Compute the deliverables, we need this even if not rebuilding
-        # the index.
-        #
-        # Anything in the list of standard download deliverables is eligible.
-        download_only_deliverables = []
-        for (file, explanation) in download_stock_deliverables:
-            if os.path.exists(file):
-                download_only_deliverables.append((file, explanation))
-        # So are any RPMS we generated
-        for rpm in rpmlist:
-            if rpm == binrpm:
-                download_only_deliverables.append((rpm, "installable binary RPM"))
-            elif rpm == srcrpm:
-                download_only_deliverables.append((rpm, "source RPM"))
-            else:
-                download_only_deliverables.append((rpm, "auxiliary RPM"))
-
-        # Anything in the list of standard web deliverables is eligible.
-        web_only_deliverables = []
-        for (file, explanation) in web_only_stock_deliverables:
-            if os.path.exists(file):
-                web_only_deliverables.append((file, explanation))
-        # So is anything with an HTML, Javascript, or CSS extension
-        for file in glob.glob('*.html')+glob.glob('*.js')+glob.glob('*.css'):
-            if file == 'index.html':
+        # Compute other deliverables, we need this even if not rebuilding
+        # the index. Includes anything with an HTML, Javascript, or CSS
+        # extension.
+        for filename in glob.glob('*.html')+glob.glob('*.js')+glob.glob('*.css'):
+            if filename == 'index.html':
                 continue
-            stem = file[:-4]
+            stem = filename[:-4]
             for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
                 if os.path.exists(stem + ext):
                     explanation = "HTML rendering of " + stem + ext
                     break
             else:
                 explanation = "HTML page."
-            web_only_deliverables.append((file, explanation))
+            web_only_deliverables.append((filename, explanation, False))
         # Configuration variable can specify more
         if webfiles:
             web_only_deliverables += webfiles
@@ -609,14 +599,11 @@ try:
                     ofp.write("Project-Tags: %s\n" % project_tags)
                 ofp.write("Release-Focus: %s\n" % focus)
                 ofp.write("Website-URL: %s\n" % website)
-                if os.path.exists(tarball):
-                    ofp.write("Tar/GZ-URL: %s\n" % os.path.join(download,tarball))
-                if os.path.exists(zipfile):
-                    ofp.write("Zip-URL: %s\n" % os.path.join(download, zipfile))
-                if os.path.exists("CHANGES"):
-                    ofp.write("Changelog-URL: %s\n" % os.path.join(website, "CHANGES"))
-                if os.path.exists(binrpm):
-                    ofp.write("RPM-URL: %s\n" % os.path.join(download, binrpm))
+                for (f, e, s) in web_only_deliverables:
+                    if s:
+                        ofp.write("%s-URL: %s\n" % (e, os.path.join(website, f)))
+                for (deliverable, tag) in tag_mapping:
+                    ofp.write("%s-URL: %s\n" % (tag, os.path.join(deliverable)))
                 # freshmeat.net doesn't like bulleted entries.
                 freshmeatlog = lastchange[2:].replace("\n  ", "\n")
                 ofp.write("\n" + freshmeatlog)

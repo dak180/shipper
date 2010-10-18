@@ -5,6 +5,9 @@
 <refmeta>
 <refentrytitle>shipper</refentrytitle>
 <manvolnum>1</manvolnum>
+<refmiscinfo class='source'>freshmeat-submit</refmiscinfo>
+<refmiscinfo class='manual'>Development Tools</refmiscinfo>
+<refmiscinfo class='date'>Oct 17 2010</refmiscinfo>
 </refmeta>
 <refnamediv id='name'>
 <refname> shipper</refname>
@@ -37,16 +40,18 @@ of shipping releases to as near zero as possible.</para>
 deduce what it should do rather than requiring you to tell it.  In
 order to do this, it relies on your project obeying standard GNU-like
 naming conventions.  It also relies on being able to mine project
-metadata out of a package specfile.  (Presently the only variety of
-package specfile supported is an RPM spec; this may change in the future,
-when we fully support shipping Debian packages.)</para>
+metadata out of a package specfile. A package specfile may be either 
+an RPM spec or a Debian control file; for both, <command>shipper</command>
+expects to see a small handful of extension fields that tell ut
+what to do.</para>
 
-<para>In normal use, you need set only one configuration variable,
-which is the list of destinations to ship to.  You may also
-want to add some magic <quote>Project-Tags</quote> comments to your
-project specfiles.  Once you have <application>shipper</application>
-up and running, you can experiment with more advanced features
-such as having the program generate project web pages for you.</para>
+<para>In normal use, you need set only one header,
+<quote>Destinations:</quote> which is the list of destinations to ship
+to.  You may also want to add some magic <quote>Project-Tags</quote>
+headers to your project specfiles.  Once you have
+<application>shipper</application> up and running, you can experiment
+with more advanced features such as having the program generate
+project web pages for you.</para>
 </refsect1>
 
 <refsect1><title>Theory of Operation</title>
@@ -76,18 +81,13 @@ stop there.</para>
 
 <para>The first real work that gets done is finding or building local
 deliverables.  These are either <emphasis>generated
-deliverables</emphasis> (like RPMs) that can be rebuilt automatically,
+deliverables</emphasis> that can be rebuilt automatically,
 or or <emphasis>stock deliverables</emphasis> (like a README file)
 that have to be changed by hand.  <application>shipper</application>
 rebuilds any generated deliverable that doesn't exist when it starts
 up.  Building local deliverables is separated from uploading because
 it means that you can stop and inspect what you're going to ship
 before committing to an upload.</para>
-
-<!-- FIXME: can we force this with an rpmbuild option? -->
-<para>Note: For RPM building to work, the spec file must have a
-BuildRoot field that is somewhre writeably by the calling user. 
-A recommended value is "%{_tmppath}/%{name}-root"</para>
 
 <para>The -n (noupload) option stops before uploading, leaving all
 local deliverables in place but displaying the exact upload commands
@@ -278,18 +278,9 @@ builds.</para>
 <row>
 <entry><varname>website</varname></entry>
 <entry>URL:</entry>
-<entry>Homepage:</entry>
+<entry>Website:</entry>
 <entry>
 <para>Project website URL. Used when generating project announcements.</para>
-</entry>
-</row>
-<row>
-<entry><varname>arch</varname></entry>
-<entry>BuildArch:</entry>
-<entry>Architecture:</entry>
-<entry>
-<para>Build architecture.  If this field is <quote>noarch</quote>, 
-noarch rather than binary RPMs will be built.</para>
 </entry>
 </row>
 <row>
@@ -407,13 +398,29 @@ starts up:</para>
 <row>
 <entry>tarball</entry>
 <entry>
-<para>The current source tarball, that is the file named ${package}-${version}.tar.gz.</para>
+<para>Current source tarballs, that is any files named
+${package}.*-${version}.tar.gz or ${package}.*-${version}.tgz or
+${package}.*-${version}.tar.bz2.</para>
+</entry>
+</row>
+<row>
+<entry>RPMs</entry>
+<entry>
+<para>Current RPMs, that is any files named
+${package}.*-${version}.*.rpm.</para>
+</entry>
+</row>
+<row>
+<entry>debs</entry>
+<entry>
+<para>Current deb files, that is any files named
+${package}.*-${version}.*.deb.</para>
 </entry>
 </row>
 <row>
 <entry>zipfile</entry>
 <entry>
-<para>The current source zip archive, that is the file named ${package}-${version}.zip.</para>
+<para>Current source zip archives, that is any file named ${package}.*-${version}.zip.</para>
 </entry>
 </row>
 <row>
@@ -539,7 +546,7 @@ destination.  Here are the destination types
 <tbody>
 <row>
 <entry>berlios</entry>
-<entry>tarball, zipfile, RPMs, README, CHANGES, NEWS, HISTORY, *.{html,css,js}, 
+<entry>tarball, zipfile, RPMs, debs, README, CHANGES, NEWS, HISTORY, *.{html,css,js}, 
 BUGS, TODO.</entry>
 <entry>-</entry>
 <entry>
@@ -570,7 +577,7 @@ local deliverable SHIPPER.FRESHMEAT.</para>
 </row>
 <row>
 <entry>Generic Web site</entry>
-<entry>README, tarball, zipfile, RPMs, CHANGES, NEWS, HISTORY,
+<entry>README, tarball, zipfile, RPMs, debs, CHANGES, NEWS, HISTORY,
 *.{html,css,js}, BUGS, TODO.</entry>
 <entry>scp destination ([user@]host:dir)</entry>
 <entry>
