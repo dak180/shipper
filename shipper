@@ -533,7 +533,7 @@ try:
             ofp.write("Website-URL: %s\n" % website)
             for (f, e, s) in deliverables:
                 if s:
-                    ofp.write("%s-URL: %s\n" % (e, os.path.join(website, f)))
+                    ofp.write("%s-URL: %s\n" % (s, os.path.join(website, f)))
             # freshmeat.net doesn't like bulleted entries.
             freshmeatlog = map(lambda s: s.lstrip(), lastchange.split("\n"))
             ofp.write("\n" + "\n".join(freshmeatlog))
