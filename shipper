@@ -66,8 +66,8 @@ Here are the most recent changes:
 """
 
 # It's unpleasant that we have to include these here, but
-# the freshmeat release focus has to be validated even if the
-# user is offline and the XML-RPC service not accessible.
+# the new API doesn't have any facility that allow us to
+# validate these.
 freshmeat_focus_types = (
 "N/A",
 "Initial freshmeat announcement",
