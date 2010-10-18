@@ -156,16 +156,16 @@ def freshmeat_ship(manifest):
         print "Announcing to freshmeat..."
     upload_or_die("freshmeat-submit <" + manifest[0])
 
-def make_index_page(deliverables, version):
-    "Make index page, listing specified set deliverables, if it doesn't exist."
-    print "# Building %s..." % version
+def make_index_page(deliverables):
+    "Make index page, listing specified deliverables."
+    print "# Building index.html..."
     global resourcetable
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
     for (file, explanation, urlify) in deliverables:
         resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
     resourcetable += "</table>"
     # OK, now build the index page itself
-    ofp = open(version, "w")
+    ofp = open("index.html", "w")
     ofp.write(indextemplate % globals())
     ofp.close()
 
@@ -417,46 +417,32 @@ try:
     # Now compute the names of deliverables
     #
 
-    # Potential deliverable files that include the version number.
-    deliverable_paths = []
-    tarballmatch = re.compile(package + ".*-" + version + r".(tar.gz|tar.bz2|tgz|zip)")
-    deliverable_paths += filter(lambda filename: tarballmatch.search(filename),
-                                os.listdir("."))
-    rpmmatch   = re.compile(package + ".*-" + version + r"-.*\.rpm")
-    deliverable_paths += filter(lambda filename: rpmmatch.search(filename),
-                                os.listdir("."))
-    debmatch  = re.compile(package + ".*-" + version + r"-.*\.deb")
-    deliverable_paths += filter(lambda filename: debmatch.search(filename),
-                                os.listdir("."))
-
+    deliverable_types = (
+        (re.compile(package + ".*-" + version + r".(tar.gz|tgz)$"),
+         "gzipped source tarball", "Tar/GZ"),
+        (re.compile(package + ".*-" + version + r".tar.bz2$"),
+         "bzipped source tarball", "Tar/BZ"),
+        (re.compile(package + ".*-" + version + r".zip$"),
+         "zip archive", "Zip"),
+        (re.compile(package + ".*-" + version + r"-.*\.src.rpm$"),
+         "source RPM", "SRPM"),
+        (re.compile(package + ".*-" + version + r"-.*\.rpm$"),
+         "binary RPM", "RPM"),
+        (re.compile(package + ".*-" + version + r"-.*\.deb$"),
+         "Debian package", "Deb"),
+        )
     download_only_deliverables = []
     tag_mapping = []
+    for filename in os.listdir("."):
+        for (pattern, explanation, tag) in deliverable_types: 
+            if pattern.search(filename):
+                download_only_deliverables.append((filename,
+                                                   explanation,
+                                                   False))
+                tag_mapping.append((filename, tag))
     if options.verbose:
-        print "Downloadables:", " ".join(deliverable_paths)
-    for path in deliverable_paths:
-        if path.endswith(".tar.gz") or path.endswith(".tgz"):
-            explanation = "gzipped source tarball"
-            freshmeat_tag = "Tar/GZ"
-        elif path.endswith(".tar.bz2"):
-            explanation = "bzipped source tarball"
-            freshmeat_tag = "Tar/BZ"
-        elif path.endswith(".zip"):
-            explanation = "zip archive"
-            freshmeat_tag = "Zip"
-        elif path.endswith(".src.rpm"):
-            explanation = "source RPM"
-            freshmeat_tag = "SRPM"
-        elif path.endswith(".rpm"):
-            explanation = "binary RPM"
-            freshmeat_tag = "RPM"
-        elif path.endswith(".deb"):
-            explanation = "Debian package"
-            freshmeat_tag = "Deb"
-        else:
-            print >>sys.stderr, "shipper: type of deliverable %s unknown" % path
-            raise SystemExit,1
-        download_only_deliverables.append((path, explanation, False))
-        tag_mapping.append((path, freshmeat_tag))
+        print "Downloadables:", " ".join(map(lambda x: x[0],
+                                         download_only_deliverables))
 
     # Map web deliverables to explanations for the resource table
     # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FRESHMEAT.
@@ -464,11 +450,11 @@ try:
     # should be announced on Freshmeat.
     web_only_deliverables = [
         ("README",	"roadmap file",    False),
-        ("ChangeLog",	"change log",       True),
+        ("ChangeLog",	"change log",      True),
         ("NEWS",	"Project news",    False),
         ("HISTORY",	"Project history", False),
         ("BUGS",	"Known bugs",      False),
-        ("TODO",	"To-do file",      True),
+        ("TODO",	"To-do file",      False),
         ]
     web_only_deliverables = filter(lambda (f, e, s): os.path.exists(f),
                                    web_only_deliverables)
@@ -513,7 +499,8 @@ try:
             ofp.write(changelog)
             ofp.close()
             web_only_deliverables.append(("ChangeLog",
-                                          "Change log (generated)"))
+                                          "Change log (generated)",
+                                          True))
             delete_at_end.append("ChangeLog")
 
         # Compute other deliverables, we need this even if not rebuilding
@@ -534,8 +521,7 @@ try:
         # If a web page doesn't already exist, but the index template
         # variable is nonempty (which is the default) make one.  
         if website and indextemplate and not os.path.exists("index.html"):
-            make_index_page(download_only_deliverables+web_only_deliverables,
-                            "index.html")
+            make_index_page(download_only_deliverables+web_only_deliverables)
             delete_at_end.append("index.html")
             # Now that the web page has been generated, it can add
             # itself to the deliverables without having it show up in
