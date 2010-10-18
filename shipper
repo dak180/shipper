@@ -483,25 +483,27 @@ try:
         def newer(f1, f2):
             return os.path.exists(f1) and (os.stat(f1).st_mtime > os.stat(f2).st_mtime)
 
-        #
-        # Generate RPMs first, the list of these is variable and needs to go
-        # into deliverables.
-        #
-        print "# Building RPMs..."
-        output = trap_or_die("rpmbuild -ta %s; cp ~/rpmbuild/RPMS/*/*.rpm ~/rpmbuild/SRPMS/*.rpm .; rm -fr ~/rpmbuild" % tarball)
-        if options.verbose:
-            sys.stdout.write(output)
-        # Extract names of RPMs actually generated.
-        # Later in the code we presume that binrpm matches one
-        # of these, the base-subpackage binary RPM.  Others
-        # might be, for example, a -devel RPM.
-        for line in output.split("\n"):
-            if line.startswith("Wrote: "):
-                rpm = os.path.basename(line[6:])
-                delete_at_end.append(rpm)
-                rpmlist.append(rpm)
-        if options.verbose:
-            print "RPMS:", ", ".join(rpmlist)
+        # Re-enable this when we can build debs.  There's also an
+        # issue with noarch not getting set even when BuildArch is, e.g.
+        # in shipping submit-freshmeat.
+        if False:
+            # Generate RPMs first, the list of these is variable and
+            # needs to go into deliverables.
+            print "# Building RPMs..."
+            output = trap_or_die("rpmbuild -ta %s; cp ~/rpmbuild/RPMS/*/*.rpm ~/rpmbuild/SRPMS/*.rpm .; rm -fr ~/rpmbuild" % tarball)
+            if options.verbose:
+                sys.stdout.write(output)
+            # Extract names of RPMs actually generated.
+            # Later in the code we presume that binrpm matches one
+            # of these, the base-subpackage binary RPM.  Others
+            # might be, for example, a -devel RPM.
+            for line in output.split("\n"):
+                if line.startswith("Wrote: "):
+                    rpm = os.path.basename(line[6:])
+                    delete_at_end.append(rpm)
+                    rpmlist.append(rpm)
+            if options.verbose:
+                print "RPMS:", ", ".join(rpmlist)
 
         # Next the CHANGES file.  Build this only if (a) there is no
         # ChangeLog, and (b) there is a specfile %changelog.        
