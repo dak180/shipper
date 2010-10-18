@@ -451,10 +451,10 @@ try:
     web_only_deliverables = [
         ("README",	"roadmap file",    False),
         ("ChangeLog",	"change log",      True),
-        ("NEWS",	"Project news",    False),
-        ("HISTORY",	"Project history", False),
-        ("BUGS",	"Known bugs",      False),
-        ("TODO",	"To-do file",      False),
+        ("NEWS",	"project news",    False),
+        ("HISTORY",	"project history", False),
+        ("BUGS",	"known bugs",      False),
+        ("TODO",	"to-do file",      False),
         ]
     web_only_deliverables = filter(lambda (f, e, s): os.path.exists(f),
                                    web_only_deliverables)
