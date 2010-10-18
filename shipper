@@ -425,17 +425,14 @@ try:
     #
 
     # Potential deliverable files that include the version number.
-    deliverable_paths = [
-        package + "-" + version + ".tar.gz",
-        package + "-" + version + ".tar.bz2",
-        package + "-" + version + ".tgz",
-        package + "-" + version + ".zip",
-    ]
-    deliverable_paths = filter(os.path.exists, deliverable_paths) 
-    rpmmatch   = re.compile("-" + version + r"-.*\.rpm")
+    deliverable_paths = []
+    tarballmatch = re.compile(package + ".*-" + version + r".(tar.gz|tar.bz2|tgz|zip)")
+    deliverable_paths += filter(lambda filename: tarballmatch.search(filename),
+                                os.listdir("."))
+    rpmmatch   = re.compile(package + ".*-" + version + r"-.*\.rpm")
     deliverable_paths += filter(lambda filename: rpmmatch.search(filename),
                                 os.listdir("."))
-    debmatch  = re.compile("-" + version + r"-.*\.deb")
+    debmatch  = re.compile(package + ".*-" + version + r"-.*\.deb")
     deliverable_paths += filter(lambda filename: debmatch.search(filename),
                                 os.listdir("."))
 
