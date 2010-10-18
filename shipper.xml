@@ -21,6 +21,7 @@
   <arg choice='opt'>-N</arg>
   <arg choice='opt'>-v</arg>
   <arg choice='opt'>-m</arg>
+  <arg choice='opt'>-t</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -103,12 +104,13 @@ the command <command>shipper -n</command> will show you exactly what
 <para>Otherwise, <application>shipper</application> then uploads deliverables
 and posts all announcements.</para>
 
-<para>After deliverables have shipped successfully and notifications posted, 
-<application>shipper</application> determines if the directory it
-is in is a working copy in a version-control system that supports 
-release tagging.  If so, it tries to tag the release just shipped.
-See <xref linkend='postinstall'/> for discussion of what version-control
-systems are supported and what actions will be taken.</para>
+<para>After deliverables have shipped successfully and notifications
+posted, <application>shipper</application> determines if the directory
+it is in is a working copy in a version-control system that supports
+release tagging.  If so, and the <option>-t</option> has been
+selected, it tries to tag the release just shipped.  See <xref
+linkend='postinstall'/> for discussion of what version-control systems
+are supported and what actions will be taken.</para>
 
 <para>Finally, note that <application>shipper</application> makes one
 important assumption about the structure of your website(s).  Beneath
@@ -646,12 +648,20 @@ version number.</para>
 
 <para>The -n option of <application>shipper</application> suppresses
 uploads, just building all deliverables locally (and not deleting
-them, after delivery, as normally occurs).  The -N option suppresses
-both uploads and builds, generating a configuration dump instead.  The -m
-option tells the tool to generate a web page an upload it to website 
-destinations. The
--v option makes <application>shipper</application> chatty about what
-it's doing.  The -h option prints a usage message and exits.</para>
+them, after delivery, as normally occurs).</para>
+
+<para>The -N option suppresses both uploads and builds, generating a
+configuration dump instead.</para>
+
+<para>The -m option tells <application>shipper</application> to
+generate a web page an upload it to website destinations.</para>
+
+<para>The -t option tells <application>shipper</application> to
+attempt to tag the local repo after shipping.</para>
+
+<para>The -v option makes <application>shipper</application> chatty
+about what it's doing.  The -h option prints a usage message and
+exits.</para>
 
 </refsect1>
 
@@ -705,7 +715,8 @@ support.</para>
 <para>The tool no longer tries to build RPMs itself, but still 
 ships them if present. </para>
 
-<para>It is no longer default behavior to build and ship a web page.</para> 
+<para>It is no longer default behavior to build and ship a web page,
+or to tag after shipping.</para>
 </refsect1>
 
 <refsect1><title>Bugs</title>
