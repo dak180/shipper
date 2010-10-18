@@ -199,10 +199,6 @@ class Specfile:
             self.website = self.extract("URL")
             self.summary = self.extract("Summary")
             self.description = self.rpm_get_multiline("description")
-            changelines = self.rpm_get_multiline("changelog").split("\n")
-            while not changelines[-1] or changelines[-1].startswith("# "):
-                changelines.pop()
-            self.changelog = "\n".join(changelines)
         elif filename == "control":
             self.type = "deb"
             self.name = self.extract("Package")
@@ -216,7 +212,6 @@ class Specfile:
                 line = fp.readline()
                 if not line:
                     break
-                # Pick up fieldnames *without* translation options.
                 if line.startswith("Description:"):
                     gather = True
                     continue
@@ -233,8 +228,6 @@ class Specfile:
                 self.description = desc.strip() + "\n"
             else:
                 self.description = None
-            # FIXME: parse Debian changelog files
-            self.changelog = None
     def extract(self, fld):
         "Extract a one-line field, possibly embedded as a magic comment."
         if self.type == "RPM":
@@ -354,7 +347,7 @@ try:
         local_destinations = map(lambda x: x.strip(), local_destinations.split(","))
         destinations += local_destinations
 
-    print"# Uploading version %s of %s" % (version, package)
+    print "# Uploading version %s of %s" % (version, package)
 
     # Extract remaining variables for templating
     if not website:
@@ -376,11 +369,9 @@ try:
     if options.verbose:
         print "shipper: variable extraction finished"
 
-    # Finally, derive the change log and lastchange entry;
-    # we'll need the latter for freshmeat.net
-    freshmeat_lastchange = lastchange = changelog = None
-    # ChangeLog, if present, takes precedence;
-    # we assume if both are present that the specfile log is about packaging.
+    # Finally, derive the lastchange entry; we'll need it for
+    # freshmeat.net (and someday for berlios.de).
+    lastchange = None
     if os.path.exists("ChangeLog"):
         if options.verbose:
             print "shipper: I see a ChangeLog file"
@@ -393,25 +384,8 @@ try:
                 lastchange += line + "\n"
             else:
                 break
-        # freshmeat.net doesn't like bulleted items in a changes field.
-        freshmeat_lastchange = "See the ChangeLog file for recent changes."
-    elif metadata.changelog:
-        if options.verbose:
-            print "shipper: I see changelog metadata"
-        changelog = metadata.changelog
-        lastchange = ""
-        for line in changelog.split("\n"):
-            if not lastchange and (not line.strip() or line[0] == '*'):
-                continue
-            elif line.strip():
-                lastchange += line + "\n"
-            else:
-                break
-        # This usually produces a lastchange entry that freshmeat will take.
-        freshmeat_lastchange = lastchange
-
-    if options.verbose:
-        print "shipper: starting deliverables computation"
+    if 'freshmeat' in destinations and not lastchange:
+        croak("Freshmeat notification requires a ChangeLog file.")
 
     #
     # Now compute the names of deliverables
@@ -419,6 +393,9 @@ try:
     def versioned(filename):
         "Does the specfied filename contain a version number?"
         return re.search("[0-9]", filename)
+
+    if options.verbose:
+        print "shipper: starting deliverables computation"
 
     # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FRESHMEAT.
     deliverable_types = (
@@ -483,174 +460,148 @@ try:
     if options.verbose:
         print "shipper: sanity checks passed"
 
-    try:
-        delete_at_end = []
+    # Compute other deliverables, we need this even if not rebuilding
+    # the index. Includes anything with an HTML, Javascript, or CSS
+    # extension.
+    for filename in glob.glob('*.html')+glob.glob('*.js')+glob.glob('*.css'):
+        if filename == 'index.html':
+            continue
+        stem = filename[:-4]
+        for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
+            if os.path.exists(stem + ext):
+                explanation = "HTML rendering of " + stem + ext
+                break
+        else:
+            explanation = "HTML page."
+        deliverables.append((filename, explanation, None))
 
-        # Next the ChangeLog file.  Build this only if (a) there is no
-        # ChangeLog, and (b) there is a specfile %changelog.        
-        if not os.path.exists("ChangeLog") and changelog:
-            print "# Building ChangeLog..."
-            ofp = open("ChangeLog", "w")
-            ofp.write("                     Changelog for " + package + "\n\n")
-            ofp.write(changelog)
-            ofp.close()
-            deliverables.append(("ChangeLog",
-                                 "Change log (generated)",
-                                 "ChangeLog"))
-            delete_at_end.append("ChangeLog")
+    # If a web page doesn't already exist, but the index template
+    # variable is nonempty (which is the default) make one.  
+    if website and indextemplate and not os.path.exists("index.html"):
+        make_index_page(deliverables)
+        # Now that the web page has been generated, it can add
+        # itself to the deliverables without having it show up in
+        # the resource table.
+        deliverables.append(("index.html", "index web page", None))
 
-        # Compute other deliverables, we need this even if not rebuilding
-        # the index. Includes anything with an HTML, Javascript, or CSS
-        # extension.
-        for filename in glob.glob('*.html')+glob.glob('*.js')+glob.glob('*.css'):
-            if filename == 'index.html':
-                continue
-            stem = filename[:-4]
-            for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
-                if os.path.exists(stem + ext):
-                    explanation = "HTML rendering of " + stem + ext
+    # The freshmeat announcement
+    if 'freshmeat' in destinations:
+        print "# Building SHIPPER.FRESHMEAT..."
+        if not website:
+            print "# Can't announce to freshmeat without a primary website!"
+        elif not lastchange:
+            print "# Can't announce to freshmeat without a changes field!"
+        else:
+            while True:
+                focus = raw_input("# freshmeat.net release focus (? for list): ")
+                if focus == '?':
+                    i = 0
+                    for f in freshmeat_focus_types:
+                        print "%d: %s" % (i, f)
+                        i += 1
+                elif focus in "0123456789":
+                    focus = freshmeat_focus_types[int(focus)]
+                    print "# OK:", focus
                     break
-            else:
-                explanation = "HTML page."
-            deliverables.append((filename, explanation, None))
-
-        # If a web page doesn't already exist, but the index template
-        # variable is nonempty (which is the default) make one.  
-        if website and indextemplate and not os.path.exists("index.html"):
-            make_index_page(deliverables)
-            delete_at_end.append("index.html")
-            # Now that the web page has been generated, it can add
-            # itself to the deliverables without having it show up in
-            # the resource table.
-            deliverables.append(("index.html", "index web page", None))
-
-        # The freshmeat announcement
-        if 'freshmeat' in destinations:
-            print "# Building SHIPPER.FRESHMEAT..."
-            if not website:
-                print "# Can't announce to freshmeat without a primary website!"
-            elif not lastchange:
-                print "# Can't announce to freshmeat without a changes field!"
-            else:
-                while True:
-                    focus = raw_input("# freshmeat.net release focus (? for list): ")
-                    if focus == '?':
-                        i = 0
-                        for f in freshmeat_focus_types:
-                            print "%d: %s" % (i, f)
-                            i += 1
-                    elif focus in "0123456789":
-                        focus = freshmeat_focus_types[int(focus)]
-                        print "# OK:", focus
-                        break
-                    elif focus.lower() in map(lambda x: x.lower(), freshmeat_focus_types):
-                        break
-                    else:
-                        croak("not a valid freshmeat.net release focus!")
-                # Download directory has to be computed differently at
-                # special destinations
-                if website.find("berlios"):
-                    download = "http://download.berlios.de/"+(berlios_name or package)
+                elif focus.lower() in map(lambda x: x.lower(), freshmeat_focus_types):
+                    break
                 else:
-                    download = website
-                ofp = open("SHIPPER.FRESHMEAT", "w")
-                ofp.write("Project: %s\n" % (freshmeat_name or package))
-                ofp.write("Version: %s\n" % version)
-                if project_tags:
-                    ofp.write("Project-Tags: %s\n" % project_tags)
-                ofp.write("Release-Focus: %s\n" % focus)
-                ofp.write("Website-URL: %s\n" % website)
-                for (f, e, s) in deliverables:
-                    if s:
-                        ofp.write("%s-URL: %s\n" % (e, os.path.join(website, f)))
-                # freshmeat.net doesn't like bulleted entries.
-                freshmeatlog = lastchange[2:].replace("\n  ", "\n")
-                ofp.write("\n" + freshmeatlog)
-                ofp.close()
-                delete_at_end.append("SHIPPER.FRESHMEAT")
-
-        # Finally, email notification
-	maildests = filter(lambda x: x.startswith("mailto:"), destinations)
-        if maildests:
-            print "# Building SHIPPER.EMAIL..."
-            ofp = open("SHIPPER.EMAIL", "w")
-	    ofp.write("To: " + ", ".join(map(lambda x: x[7:], maildests)) + "\n")
-            ofp.write(mailtemplate % globals())
+                    croak("not a valid freshmeat.net release focus!")
+            # Download directory has to be computed differently at
+            # special destinations
+            if website.find("berlios"):
+                download = "http://download.berlios.de/"+(berlios_name or package)
+            else:
+                download = website
+            ofp = open("SHIPPER.FRESHMEAT", "w")
+            ofp.write("Project: %s\n" % (freshmeat_name or package))
+            ofp.write("Version: %s\n" % version)
+            if project_tags:
+                ofp.write("Project-Tags: %s\n" % project_tags)
+            ofp.write("Release-Focus: %s\n" % focus)
+            ofp.write("Website-URL: %s\n" % website)
+            for (f, e, s) in deliverables:
+                if s:
+                    ofp.write("%s-URL: %s\n" % (e, os.path.join(website, f)))
+            # freshmeat.net doesn't like bulleted entries.
+            freshmeatlog = lastchange[2:].replace("\n  ", "\n")
+            ofp.write("\n" + freshmeatlog)
             ofp.close()
-            delete_at_end.append("SHIPPER.FRESHMEAT")
 
-        #
-        # Now actually ship
-        #
+    # Finally, email notification
+    maildests = filter(lambda x: x.startswith("mailto:"), destinations)
+    if maildests:
+        print "# Building SHIPPER.EMAIL..."
+        ofp = open("SHIPPER.EMAIL", "w")
+        ofp.write("To: " + ", ".join(map(lambda x: x[7:], maildests)) + "\n")
+        ofp.write(mailtemplate % globals())
+        ofp.close()
 
-        # Compute final deliverables
-        all_deliverables = map(lambda x: x[0], deliverables)
-        download_deliverables = filter(versioned,
-                                       map(lambda x: x[0], deliverables))
-        web_deliverables = filter(lambda f: not versioned(f),
-                                  map(lambda x: x[0], deliverables))
+    #
+    # Now actually ship
+    #
 
-        # Shipping methods for public destinations.
-        def freshmeat():
-            freshmeat_ship(("SHIPPER.FRESHMEAT",))
-        def berlios():
-            upload("ftp://ftp.berlios.de/incoming", download_deliverables)
-            berlios_webdir = \
-                           "shell.berlios.de:/home/groups/" \
-                           + (berlios_name or package) \
-                           + "/htdocs"
-            upload(berlios_webdir, web_deliverables, subdir="")
-        hardwired = ("freshmeat", "berlios")
+    # Compute final deliverables
+    all_deliverables = map(lambda x: x[0], deliverables)
+    download_deliverables = filter(versioned,
+                                   map(lambda x: x[0], deliverables))
+    web_deliverables = filter(lambda f: not versioned(f),
+                              map(lambda x: x[0], deliverables))
 
-        # OK, ship everything.
-        for destination in destinations:
-            if destination in hardwired:
-                print "# Shipping to public destination", destination
-                eval(destination + "()")
-            elif destination.startswith("ftp:"):
-                upload(destination, download_deliverables)
-            elif destination.startswith("mailto:"):
-                print "# Mailing to %s" % destination[7:]
-                command = "sendmail -i -oem -f %s %s <SHIPPER.EMAIL" % (whoami, destination[7:])
-                if options.noupload:
-                    print command
-                else:
-                    do_or_die(command)
-            elif destination not in hardwired:
-                upload(destination, all_deliverables)
+    # Shipping methods for public destinations.
+    def freshmeat():
+        freshmeat_ship(("SHIPPER.FRESHMEAT",))
+    def berlios():
+        upload("ftp://ftp.berlios.de/incoming", download_deliverables)
+        berlios_webdir = \
+                       "shell.berlios.de:/home/groups/" \
+                       + (berlios_name or package) \
+                       + "/htdocs"
+        upload(berlios_webdir, web_deliverables, subdir="")
+    hardwired = ("freshmeat", "berlios")
 
-        # Shipping has succeeded.
-        if tag_template and tag_message:
-            tagname = tag_template % version
-            tag_message = tag_message % version
+    # OK, ship everything.
+    for destination in destinations:
+        if destination in hardwired:
+            print "# Shipping to public destination", destination
+            eval(destination + "()")
+        elif destination.startswith("ftp:"):
+            upload(destination, download_deliverables)
+        elif destination.startswith("mailto:"):
+            print "# Mailing to %s" % destination[7:]
+            command = "sendmail -i -oem -f %s %s <SHIPPER.EMAIL" % (whoami, destination[7:])
+            if options.noupload:
+                print command
+            else:
+                do_or_die(command)
+        elif destination not in hardwired:
+            upload(destination, all_deliverables)
 
-            # If we're in the trunk of an SVN repository, we want to tag
-            # what just got shipped as an external release (unless the tag
-            # already exists, or the user suppressed this behavior by
-            # setting subversion_tag_template to None or "").
-            if os.path.basename(os.getcwd())=='trunk' and os.path.exists(".svn"):
-                print "# This is a Subversion trunk directory..."
-                if os.path.exists("../tags"):
-                    print "# I see a peer tags directory..."
-                    if os.path.exists("../tags/" + tagname):
-                        print "# This release has aleady been tagged."
-                    else:
-                        print "# I will copy and tag this release."
-                        upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
-            if os.path.exists(".git"):
-                print "# This is a git repository..."
-                if os.path.exists(".git/refs/tags/" + tagname):
+    # Shipping has succeeded.
+    if tag_template and tag_message:
+        tagname = tag_template % version
+        tag_message = tag_message % version
+
+        # If we're in the trunk of an SVN repository, we want to tag
+        # what just got shipped as an external release (unless the tag
+        # already exists, or the user suppressed this behavior by
+        # setting subversion_tag_template to None or "").
+        if os.path.basename(os.getcwd())=='trunk' and os.path.exists(".svn"):
+            print "# This is a Subversion trunk directory..."
+            if os.path.exists("../tags"):
+                print "# I see a peer tags directory..."
+                if os.path.exists("../tags/" + tagname):
                     print "# This release has aleady been tagged."
                 else:
-                    print "# I will tag this release."
-                    upload_or_die("git tag -a %s -m '%s'" % (tagname, tag_message))
-    finally:
-        cleanup = "rm -f " + " ".join(delete_at_end)
-        if options.noupload:
-            print cleanup
-        else:
-            for file in delete_at_end:
-                os.system(cleanup)
+                    print "# I will copy and tag this release."
+                    upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
+        if os.path.exists(".git"):
+            print "# This is a git repository..."
+            if os.path.exists(".git/refs/tags/" + tagname):
+                print "# This release has aleady been tagged."
+            else:
+                print "# I will tag this release."
+                upload_or_die("git tag -a %s -m '%s'" % (tagname, tag_message))
     print "# Done"
 except KeyboardInterrupt:
     print "# Bye!"
