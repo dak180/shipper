@@ -335,7 +335,7 @@ name; you only need to set it if they differ.</para>
 <entry align='center'>-</entry>
 <entry>
 <para>
-The last-change entry from your NEWS or Changelog file.. To extaact
+The last-change entry from your NEWS or Changelog file.. To extract
 this, first any header lines (detected by leading spaces are skipped.  
 Then the first nonblank line (which is assumed to be the date/release
 information) is skipped.  Then al lines before the next blank
