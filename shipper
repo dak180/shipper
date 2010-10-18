@@ -416,48 +416,44 @@ try:
     #
     # Now compute the names of deliverables
     #
+    def versioned(filename):
+        "Does the specfied filename contain a version number?"
+        return re.search("[0-9]", filename)
 
+    # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FRESHMEAT.
     deliverable_types = (
+        (re.compile("^README$"),
+         "roadmap file",           None),
+        (re.compile("^ChangeLog$"),
+         "change log",             "ChangeLog"),
+        (re.compile("^NEWS$"),
+         "project news",           None),
+        (re.compile("^HISTORY$"),
+         "project history",        None),
+        (re.compile("^BUGS$"),
+         "known bugs",             None),
+        (re.compile("^TODO$"),
+         "to-do file",             None),
         (re.compile(package + ".*-" + version + r".(tar.gz|tgz)$"),
          "gzipped source tarball", "Tar/GZ"),
         (re.compile(package + ".*-" + version + r".tar.bz2$"),
          "bzipped source tarball", "Tar/BZ"),
         (re.compile(package + ".*-" + version + r".zip$"),
-         "zip archive", "Zip"),
+         "zip archive",            "Zip"),
         (re.compile(package + ".*-" + version + r"-.*\.src.rpm$"),
-         "source RPM", "SRPM"),
+         "source RPM",              "SRPM"),
         (re.compile(package + ".*-" + version + r"-.*\.rpm$"),
-         "binary RPM", "RPM"),
+         "binary RPM",              "RPM"),
         (re.compile(package + ".*-" + version + r"-.*\.deb$"),
-         "Debian package", "Deb"),
+         "Debian package",          "Deb"),
         )
-    download_only_deliverables = []
-    tag_mapping = []
+    deliverables = []
     for filename in os.listdir("."):
         for (pattern, explanation, tag) in deliverable_types: 
             if pattern.search(filename):
-                download_only_deliverables.append((filename,
-                                                   explanation,
-                                                   False))
-                tag_mapping.append((filename, tag))
+                deliverables.append((filename, explanation, tag))
     if options.verbose:
-        print "Downloadables:", " ".join(map(lambda x: x[0],
-                                         download_only_deliverables))
-
-    # Map web deliverables to explanations for the resource table
-    # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FRESHMEAT.
-    # The boolean says whether the URL for this web deliverable
-    # should be announced on Freshmeat.
-    web_only_deliverables = [
-        ("README",	"roadmap file",    False),
-        ("ChangeLog",	"change log",      True),
-        ("NEWS",	"project news",    False),
-        ("HISTORY",	"project history", False),
-        ("BUGS",	"known bugs",      False),
-        ("TODO",	"to-do file",      False),
-        ]
-    web_only_deliverables = filter(lambda (f, e, s): os.path.exists(f),
-                                   web_only_deliverables)
+        print "Deliverables:", " ".join(map(lambda x: x[0], deliverables))
 
     #
     # Might be time to dump
@@ -479,8 +475,8 @@ try:
     #
 
     # Sanity checks
-    if not download_only_deliverables:
-        croak("no deliverables!")
+    if not filter(versioned, map(lambda (f, e, t): f, deliverables)):
+        croak("no deliverables with versions!")
     if not destinations:
         croak("the Destinations list is empty; nothing to do.")
 
@@ -498,9 +494,9 @@ try:
             ofp.write("                     Changelog for " + package + "\n\n")
             ofp.write(changelog)
             ofp.close()
-            web_only_deliverables.append(("ChangeLog",
-                                          "Change log (generated)",
-                                          True))
+            deliverables.append(("ChangeLog",
+                                 "Change log (generated)",
+                                 "ChangeLog"))
             delete_at_end.append("ChangeLog")
 
         # Compute other deliverables, we need this even if not rebuilding
@@ -516,19 +512,17 @@ try:
                     break
             else:
                 explanation = "HTML page."
-            web_only_deliverables.append((filename, explanation, False))
+            deliverables.append((filename, explanation, None))
 
         # If a web page doesn't already exist, but the index template
         # variable is nonempty (which is the default) make one.  
         if website and indextemplate and not os.path.exists("index.html"):
-            make_index_page(download_only_deliverables+web_only_deliverables)
+            make_index_page(deliverables)
             delete_at_end.append("index.html")
             # Now that the web page has been generated, it can add
             # itself to the deliverables without having it show up in
             # the resource table.
-            web_only_deliverables.append(("index.html",
-                                          "index web page",
-                                          False))
+            deliverables.append(("index.html", "index web page", None))
 
         # The freshmeat announcement
         if 'freshmeat' in destinations:
@@ -556,7 +550,7 @@ try:
                 # Download directory has to be computed differently at
                 # special destinations
                 if website.find("berlios"):
-                    download = "http://download.berlios.de/"+(freshmeat_name or package)
+                    download = "http://download.berlios.de/"+(berlios_name or package)
                 else:
                     download = website
                 ofp = open("SHIPPER.FRESHMEAT", "w")
@@ -566,11 +560,9 @@ try:
                     ofp.write("Project-Tags: %s\n" % project_tags)
                 ofp.write("Release-Focus: %s\n" % focus)
                 ofp.write("Website-URL: %s\n" % website)
-                for (f, e, s) in web_only_deliverables:
+                for (f, e, s) in deliverables:
                     if s:
                         ofp.write("%s-URL: %s\n" % (e, os.path.join(website, f)))
-                for (deliverable, tag) in tag_mapping:
-                    ofp.write("%s-URL: %s\n" % (tag, os.path.join(deliverable)))
                 # freshmeat.net doesn't like bulleted entries.
                 freshmeatlog = lastchange[2:].replace("\n  ", "\n")
                 ofp.write("\n" + freshmeatlog)
@@ -592,17 +584,17 @@ try:
         #
 
         # Compute final deliverables
-        all_deliverables = map(lambda x: x[0], download_only_deliverables + web_only_deliverables)
-        download_deliverables = map(lambda x: x[0], download_only_deliverables)
-        web_deliverables = map(lambda x: x[0], web_only_deliverables)
+        all_deliverables = map(lambda x: x[0], deliverables)
+        download_deliverables = filter(versioned,
+                                       map(lambda x: x[0], deliverables))
+        web_deliverables = filter(lambda f: not versioned(f),
+                                  map(lambda x: x[0], deliverables))
 
         # Shipping methods for public destinations.
         def freshmeat():
             freshmeat_ship(("SHIPPER.FRESHMEAT",))
         def berlios():
             upload("ftp://ftp.berlios.de/incoming", download_deliverables)
-            if os.path.exists("index.html-nodownloads"):
-                upload_or_die("ln -f index.html-nodownloads index.html")
             berlios_webdir = \
                            "shell.berlios.de:/home/groups/" \
                            + (berlios_name or package) \
