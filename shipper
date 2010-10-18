@@ -512,8 +512,8 @@ try:
             ofp.write("                     Changelog for " + package + "\n\n")
             ofp.write(changelog)
             ofp.close()
-            web_only_stock_deliverables.append(("ChangeLog",
-                                                "Change log (generated)"))
+            web_only_deliverables.append(("ChangeLog",
+                                          "Change log (generated)"))
             delete_at_end.append("ChangeLog")
 
         # Compute other deliverables, we need this even if not rebuilding
