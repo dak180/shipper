@@ -59,23 +59,23 @@ project web pages for you.</para>
 <para><application>shipper</application> pushes
 <emphasis>deliverables</emphasis> out to
 <emphasis>destinations</emphasis>.  Deliverables include: source
-tarballs, source zip archives, source RPMs, binary RPMs, ChangeLog
-files, README files,and various other project metadata files.
-Destinations include both <emphasis>private destinations</emphasis>
-like websites, FTP archive sites and mailing lists, and
-<emphasis>public destinations</emphasis> like freshmeat.net
-and berlios.de. The shipper framework is extensible
-and it is relatively easy to add new destination types and new
-deliverables; in the future, we hope to support (for example) Debian
-packages as deliverables and SourceForge as a destination.</para>
+tarballs, source zip archives, source RPMs, binary RPMs, Debian
+package files, ChangeLog files, README files,and various other project
+metadata files.  Destinations include both <emphasis>private
+destinations</emphasis> like websites, FTP archive sites and mailing
+lists, and <emphasis>public destinations</emphasis> like freshmeat.net
+and berlios.de. The <application>shipper</application> framework is
+extensible and it is relatively easy to add new destination types and
+new deliverables; in the future, we hope to support SourceForge as a
+destination.</para>
 
 <para><application>shipper</application>'s first step is to find the
-project name and version, then to check that the minimum set of files that
-<application>shipper</application> requires to continue is in place.
-To start with, <application>shipper</application> needs a source
-tarball and a specfile. Once it knows those are in place, it
-can extract various pieces of information it will need to do its
-real work. It also reads in a handful of configuration variables.
+project name and version, then to check that the minimum set of files
+that <application>shipper</application> requires to continue is in
+place.  To start with, <application>shipper</application> needs at
+least one deliverable and a specfile. Once it knows those are in
+place, it can extract various pieces of information it will need to do
+its real work. It also reads in a handful of configuration variables.
 The -N (nobuild) option causes it to dump all configuration values and
 stop there.</para>
 
@@ -396,7 +396,7 @@ starts up:</para>
 </entry>
 </row>
 <row>
-<entry>tarball</entry>
+<entry>tarballs</entry>
 <entry>
 <para>Current source tarballs, that is any files named
 ${package}.*-${version}.tar.gz or ${package}.*-${version}.tgz or
@@ -418,7 +418,7 @@ ${package}.*-${version}.*.deb.</para>
 </entry>
 </row>
 <row>
-<entry>zipfile</entry>
+<entry>zipfiles</entry>
 <entry>
 <para>Current source zip archives, that is any file named ${package}.*-${version}.zip.</para>
 </entry>
@@ -485,27 +485,20 @@ deleted after a successful upload.</para>
 </entry>
 </row>
 <row>
-<entry>RPMs</entry>
-<entry>
-<para>Source and either binary or noarch RPMs.</para>
-</entry>
-</row>
-<row>
-<entry>CHANGES</entry>
+<entry>ChangeLog</entry>
 <entry>
 <para>If there is no ChangeLog file but there was a %changelog in your
-specfile, <application>shipper</application> will generate a CHANGES
+specfile, <application>shipper</application> will generate a ChangeLog
 from the changelog entries in the specfile and ship that.</para>
 </entry>
 </row>
 <row>
 <entry>SHIPPER.FRESHMEAT</entry>
 <entry>
-<para>
-If freshmeat is in the user's destination list,
+<para>If freshmeat is in the user's destination list,
 <application>shipper</application> will generate a file called
 SHIPPER.FRESHMEAT. It will be a job card that can be fed to
-freshmeat.net's XML-RPC interface via
+freshmeat.net's API via
 <citerefentry><refentrytitle>freshmeat-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </entry>
@@ -546,7 +539,7 @@ destination.  Here are the destination types
 <tbody>
 <row>
 <entry>berlios</entry>
-<entry>tarball, zipfile, RPMs, debs, README, CHANGES, NEWS, HISTORY, *.{html,css,js}, 
+<entry>tarball, zipfile, RPMs, debs, README, ChangeLog, NEWS, HISTORY, *.{html,css,js}, 
 BUGS, TODO.</entry>
 <entry>-</entry>
 <entry>
@@ -577,7 +570,7 @@ local deliverable SHIPPER.FRESHMEAT.</para>
 </row>
 <row>
 <entry>Generic Web site</entry>
-<entry>README, tarball, zipfile, RPMs, debs, CHANGES, NEWS, HISTORY,
+<entry>README, tarball, zipfile, RPMs, debs, ChangeLog, NEWS, HISTORY,
 *.{html,css,js}, BUGS, TODO.</entry>
 <entry>scp destination ([user@]host:dir)</entry>
 <entry>
@@ -595,7 +588,7 @@ variable.</para>
 </row>
 <row>
 <entry>Generic FTP site</entry>
-<entry>tarball, RPMs</entry>
+<entry>tarball, RPMs, debs</entry>
 <entry>FTP URL</entry>
 <entry>
 <para>Old-fashioned FTP site with no metadata.  The FTP URL is parsed
