@@ -12,8 +12,7 @@ whoami = None		# Who am I? (Used for FTP logins)
 date = None		# User has not yet set a date
 package = None   	# Nor a package name
 website = None		# Nor a home page
-arch = None       	# The machine architecture
-project_tags = None  	# Keywords for tagging
+sproject_tags = None  	# Keywords for tagging
 freshmeat_name = None	# Name of the project on Freshmeat
 berlios_name = None	# Name of the project on derlios,de
 changelog = None	# Project changelog
@@ -198,7 +197,6 @@ class Specfile:
             self.version = self.extract("Version")
             self.website = self.extract("URL")
             self.summary = self.extract("Summary")
-            self.arch = self.extract("BuildArch") or commands.getoutput("rpm --showrc | sed -n '/^build arch/s/.* //p'")
             self.description = self.rpm_get_multiline("description")
             changelines = self.rpm_get_multiline("changelog").split("\n")
             while not changelines[-1] or changelines[-1].startswith("# "):
@@ -210,9 +208,6 @@ class Specfile:
             self.version = self.extract("Version").split("-")[0]
             self.website = self.extract("Homepage")
             self.summary = self.extract("Description")
-            self.arch = self.extract("Architecture")
-            if not self.arch:
-                croak("this control file lacks an Architecture field")
             fp = open(self.filename)
             desc = ""
             gather = False
@@ -369,8 +364,6 @@ try:
         summary = metadata.summary
     if not description:
         description = metadata.description
-    if not arch:
-        arch = metadata.arch
     if not project_tags:
         project_tags = metadata.extract("Project-Tags")
     if not freshmeat_name:
@@ -484,7 +477,7 @@ try:
     #
     if options.nobuild:
         for variable in ('destinations', 'whoami', 'date', 
-                         'package', 'website', 'arch', 'project_tags', 
+                         'package', 'website', 'project_tags', 
                          'freshmeat_name', 'berlios_name', 'summary',
                          'tag_template', 'tag_message'):
             print "%s = %s" % (variable, `eval(variable)`)

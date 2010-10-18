@@ -73,8 +73,8 @@ destination.</para>
 project name and version, then to check that the minimum set of files
 that <application>shipper</application> requires to continue is in
 place.  To start with, <application>shipper</application> needs at
-least one deliverable and a specfile. Once it knows those are in
-place, it can extract various pieces of information it will need to do
+least one deliverable and a specfile. Once it knows where the specfile is,
+it can extract various pieces of information it will need to do
 its real work. It also reads in a handful of configuration variables.
 The -N (nobuild) option causes it to dump all configuration values and
 stop there.</para>
@@ -563,7 +563,7 @@ announcement on freshmeat.net using
 <citerefentry><refentrytitle>freshmeat-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 The announcement will include URLs for whichever of the following
 deliverables are shipped, using the URL field from your specfile:
-tarball, zipfile, RPMs, CHANGES.  The user will be prompted for a
+tarballs, zipfiles, RPMs, debs, ChangeLog.  The user will be prompted for a
 Freshmeat release-focus.  This announcement is generated into the
 local deliverable SHIPPER.FRESHMEAT.</para>
 </entry>
@@ -678,7 +678,7 @@ that the makefile version is derived from (and thus always consistent
 with) the specfile version.</para>
 
 <programlisting>
-VERS=$(shell sed &lt;*.spec -n -e '/Version: \(.*\)/s//\1/p')
+VERS=$(shell sed &lt;*.spec control -n -e '/Version: \(.*\)/s//\1/p')
 </programlisting>
 
 <para>A makefile production like the following will allow
@@ -692,20 +692,7 @@ release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis
 </programlisting>
 
 <para>You will want to change <emphasis>package</emphasis> to your 
-project name.  Note that you should not use this recipe if your
-project  has its own (non-generated) index page, as the -f option will
-overwrite <filename>index.html</filename>.</para>
-
-<para>To make
-<citerefentry>
-<refentrytitle>rpm</refentrytitle><manvolnum>1</manvolnum>
-</citerefentry>
-build noarch rather than binary RPMs, insert the following header in
-your specfile:</para>
-
-<programlisting>
-BuildArch: noarch
-</programlisting>
+project name.</para>
 </refsect1>
 
 <refsect1><title>Author</title>
@@ -734,13 +721,12 @@ RPM submissions.</para>
 <para>The <varname>keywords</varname> variable is gone alomg with LSM
 support.</para>
 
-<para>The <command>buildrpms</command> script is gone; shipper now
-does that logic internally.</para>
+<para>The tool no longer tries to byuild RPMs itself, but still 
+ships them if present. </para>
 </refsect1>
 
 <refsect1><title>Bugs</title>
-<para>The rsync destination type is untested.  Shipping Debian packages 
-should be supported.</para>
+<para>The rsync destination type is untested.</para>
 </refsect1>
 
 <refsect1><title>See Also</title>
