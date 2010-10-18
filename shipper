@@ -20,7 +20,6 @@ changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
 summary = None   	# One-line summary of the package
 description = None	# Nor a description
-webfiles = []		# Extra webfiles
 
 # Policy choices
 tag_template = "%s"
@@ -487,7 +486,7 @@ try:
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'arch', 'project_tags', 
                          'freshmeat_name', 'berlios_name', 'summary',
-                         'webfiles', 'tag_template', 'tag_message'):
+                         'tag_template', 'tag_message'):
             print "%s = %s" % (variable, `eval(variable)`)
         for variable in ('description', 'changelog', 'lastchange', 'mailtemplate', 'indextemplate'):
             if not eval(variable):
@@ -537,9 +536,6 @@ try:
             else:
                 explanation = "HTML page."
             web_only_deliverables.append((filename, explanation, False))
-        # Configuration variable can specify more
-        if webfiles:
-            web_only_deliverables += webfiles
 
         # If a web page doesn't already exist, make two versions.
         # One has a resource table listing all deliverables, for ordinary
