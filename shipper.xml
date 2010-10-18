@@ -442,7 +442,7 @@ ${package}.*-${version}.*.deb.</para>
 </entry>
 </row>
 <row>
-<entry>*.{html,css,js}</entry>
+<entry>*.{html,xhtml,css,js}</entry>
 <entry>
 <para>Any files with an .html, .js, or .css extension will be shipped to all 
 website destinations.</para>
@@ -690,7 +690,8 @@ url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink
 <para>Support for LSM files and shipping to the ibiblio submissions
 directory has been removed, as that portion of its archives is now
 mainly historical and no longer used for distribution (the last index
-compilation was in 2007).</para>
+compilation was in 2007). The The "redhat" public destination is gone, 
+as they no longer accept RPM submissions.</para>
 
 <para>Trying to deduce a default whoami gave bad results and has been
 abandoned.</para>
@@ -698,14 +699,13 @@ abandoned.</para>
 <para>The old variable <varname>subversion_tag_template</varname> is now
 <varname>tag_template</varname>.</para>
 
-<para>The "redhat" public destination is gone, as they mno longer accept
-RPM submissions.</para>
-
-<para>The <varname>keywords</varname> variable is gone alomg with LSM
+<para>The <varname>keywords</varname> variable is gone along with LSM
 support.</para>
 
-<para>The tool no longer tries to byuild RPMs itself, but still 
+<para>The tool no longer tries to build RPMs itself, but still 
 ships them if present. </para>
+
+<para>It is no longer default behavior to build and ship a web page.</para> 
 </refsect1>
 
 <refsect1><title>Bugs</title>
