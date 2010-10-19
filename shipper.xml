@@ -17,7 +17,7 @@
 
 <cmdsynopsis>
   <command>shipper</command>  
-  <arg choice='opt'>-n</arg>
+  <arg choice='opt'>-u</arg>
   <arg choice='opt'>-N</arg>
   <arg choice='opt'>-v</arg>
   <arg choice='opt'>-m</arg>
@@ -96,10 +96,12 @@ upload.</para>
 <filename>index.html</filename> file for uploading, if
 no such file alreay exists.</para>
 
-<para>The -n (noupload) option stops just before uploading, displaying the
-exact upload commands that would have been used to ship them.  Thus,
-the command <command>shipper -n</command> will show you exactly what
-<application>shipper</application> would do for a real upload.</para>
+<para>Without the -u (upload) option,
+<application>shipper</application> stops just before uploading,
+displaying the exact upload commands that would have been used to ship
+deliverables.  Thus, the command <command>shipper</command> with no
+options will show you exactly what <application>shipper</application>
+would do for a real upload.</para>
 
 <para>Otherwise, <application>shipper</application> then uploads deliverables
 and posts all announcements.</para>
@@ -424,6 +426,12 @@ ${package}.*-${version}.*.deb.</para>
 </entry>
 </row>
 <row>
+<entry>COPYING</entry>
+<entry>
+<para>Project license file.</para>
+</entry>
+</row>
+<row>
 <entry>NEWS</entry>
 <entry>
 <para>Project news file.</para>
@@ -537,7 +545,7 @@ destination.  Here are the destination types
 <tbody>
 <row>
 <entry>berlios</entry>
-<entry>tarball, zipfile, RPMs, debs, README, ChangeLog, NEWS, HISTORY, *.{html,css,js}, 
+<entry>tarball, zipfile, RPMs, debs, README, COPYING, ChangeLog, NEWS, HISTORY, *.{html,css,js}, 
 BUGS, TODO.</entry>
 <entry>-</entry>
 <entry>
@@ -568,7 +576,7 @@ local deliverable SHIPPER.FRESHMEAT.</para>
 </row>
 <row>
 <entry>Generic Web site</entry>
-<entry>README, tarball, zipfile, RPMs, debs, ChangeLog, NEWS, HISTORY,
+<entry>README, COPYING, tarball, zipfile, RPMs, debs, ChangeLog, NEWS, HISTORY,
 *.{html,css,js}, BUGS, TODO.</entry>
 <entry>scp destination ([user@]host:dir)</entry>
 <entry>

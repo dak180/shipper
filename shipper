@@ -111,10 +111,10 @@ def trap_or_die(cmd):
         return output
 
 def upload_or_die(cmd):
-    if options.noupload:
-        print cmd
-    else:
+    if options.upload:
         do_or_die(cmd)
+    else:
+        print cmd
 
 def upload(destination, files, subdir=None):
     "Upload a file via scp, deleting with ssh first if it exists."
@@ -132,12 +132,12 @@ def upload(destination, files, subdir=None):
             commands.append("cd " + directory + "\n")
         commands.append("mput " + " ".join(files) + "\n")
         commands.append("close\n")
-        if options.noupload:
-            print "".join(commands)
-        else:
+        if options.upload:
             pfp = os.popen(commands.pop(0), "w")
             pfp.writelines(commands)
             pfp.close()
+        else:
+            print "".join(commands)
     elif destination.find("::") > -1:
         upload_or_die("rsync " + " ".join(files) + " " + destination)
     elif destination.find(":") > -1:
@@ -296,13 +296,13 @@ try:
     # Process options
     #
 
-    parser = optparse.OptionParser(usage="%prog: [-n] [-f] [-v]")
+    parser = optparse.OptionParser(usage="%prog: [-u] [-f] [-v]")
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose", default=False,
                       help="print progress messages to stdout")
-    parser.add_option("-n", "--noupload",
-                      action="store_true", dest="noupload", default=False,
-                      help="don't do uploads, just build deliverables")
+    parser.add_option("-u", "--upload",
+                      action="store_true", dest="upload", default=False,
+                      help="do uploads, don't just just build deliverables")
     parser.add_option("-N", "--nobuild",
                       action="store_true", dest="nobuild", default=False,
                       help="dump configuration only, no builds or uploads")
@@ -620,7 +620,7 @@ try:
         elif destination.startswith("mailto:"):
             dest = destination[7:]
             print "# Mailing to %s" % dest
-            if not options.noupload:
+            if options.upload:
                 server = smtplib.SMTP('localhost')
                 server.sendmail(whoami, dest, open("SHIPPER.EMAIL").read())
                 server.quit()
