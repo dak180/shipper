@@ -353,6 +353,15 @@ variable is only computed if the index page is built.  Any setting
 of it in the startup files is ignored.</para>
 </entry>
 </row>
+<row>
+<entry><varname>extralines</varname></entry> <entry
+align='center'>-</entry> <entry align='center'>-</entry>
+<entry>
+<para>Lines to be inserted after the table of resources.  You
+can set this; <application>shipper</application> may add to it to,
+for example, create a link to the project's Freshmeat page.</para>
+</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>

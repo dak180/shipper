@@ -19,6 +19,7 @@ changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
 summary = None   	# One-line summary of the package
 description = None	# Nor a description
+extralines = ""         # Extra lines for HTML template
 
 # Policy choices
 tag_template = "%s"
@@ -44,6 +45,8 @@ indextemplate = """
 <br />
 %(resourcetable)s
 <br />
+
+%(extralines)s
 
 <p>Last modified %(date)s.</p>
 
@@ -159,11 +162,14 @@ def freshmeat_ship(manifest):
 def make_index_page(deliverables):
     "Make index page, listing specified deliverables."
     print "# Building index.html..."
-    global resourcetable
+    global resourcetable, extralines
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
     for (file, explanation, urlify) in deliverables:
         resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
     resourcetable += "</table>"
+    if 'freshmeat' in destinations:
+        extralines += "<p>There is a <a href='http://freshmeat.net/projects/%s'>Freshmeat %s</a> page.</p>\n" % \
+                      (freshmeat_name, freshmeat_name)
     # OK, now build the index page itself
     ofp = open("index.html", "w")
     ofp.write(indextemplate % globals())
@@ -389,10 +395,12 @@ try:
         description = metadata.description
     if not project_tags:
         project_tags = metadata.extract("Project-Tags")
+    freshmeat_name = metadata.extract("Freshmeat-Name")
     if not freshmeat_name:
-        freshmeat_name = metadata.extract("Freshmeat-Name")
+        freshmeat_name = package
+    berlios_name = metadata.extract("Berlios-Name")
     if not berlios_name:
-        berlios_name = metadata.extract("Berlios-Name")
+        berlios_name = package
     resourcetable = ""
 
     if options.verbose:
