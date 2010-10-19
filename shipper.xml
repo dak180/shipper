@@ -335,11 +335,12 @@ name; you only need to set it if they differ.</para>
 <entry align='center'>-</entry>
 <entry>
 <para>
-The last-change entry from your NEWS or Changelog file.. To extract
-this, first any header lines (detected by leading spaces are skipped.  
-Then the first nonblank line (which is assumed to be the date/release
-information) is skipped.  Then all lines before the next blank
-one are grabbed.
+The last-change entry from your NEWS, Changelog, or RPM spec file. To
+extract this information from a NEWS or HISTORY file, first any header
+lines (detected by leading spaces) are skipped; in a secfile, all
+lines up to and including %changelog are skipped.  Then the first
+nonblank line (which is assumed to be the date/release information) is
+skipped.  Then all lines before the next blank one are grabbed.
 </para>
 </entry>
 </row>

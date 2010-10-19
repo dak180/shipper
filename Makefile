@@ -31,5 +31,5 @@ clean:
 dist: shipper-$(VERS).tar.gz
 
 release: shipper-$(VERS).tar.gz shipper.html
-	shipper; rm -f CHANGES SHIPPER* *.html *.1
+	shipper -m -t; rm -f CHANGES SHIPPER* *.html *.1
 

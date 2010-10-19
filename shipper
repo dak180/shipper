@@ -199,6 +199,29 @@ class Specfile:
             self.website = self.extract("URL")
             self.summary = self.extract("Summary")
             self.description = self.rpm_get_multiline("description")
+            last = ""
+            state = 0
+            for line in open(self.filename):
+                if state == 0:
+                    if line.startswith("%changelog"):
+                        state = 1
+                        continue
+                elif state == 1:
+                    # Skip first line of entry
+                    state = 2
+                    continue
+                elif state == 2:
+                    if not line.strip():
+                        break
+                    else:
+                        print "Bazx!", `line`
+                        if line.strip().startswith("-"):
+                            line = line.lstrip()[1:]
+                        last += line
+            if last:
+                self.lastchange = last
+            else:
+                self.lastchange = None
         elif filename == "control":
             self.type = "deb"
             self.name = self.extract("Package")
@@ -228,6 +251,7 @@ class Specfile:
                 self.description = desc.strip() + "\n"
             else:
                 self.description = None
+            self.lastchange = None
     def extract(self, fld):
         "Extract a one-line field, possibly embedded as a magic comment."
         if self.type == "RPM":
@@ -398,6 +422,8 @@ try:
                         break
                     else:
                         lastchange += line
+    if not lastchange and metadata.lastchange:
+        lastchange = metadata.lastchange
     if 'freshmeat' in destinations and not lastchange:
         croak("Freshmeat notification requires a NEWS or HISTORY file.")
 
