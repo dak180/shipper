@@ -397,7 +397,7 @@ try:
     if not description:
         description = metadata.description
     if not project_tags:
-        project_tags = metadata.extract("Project-Tags")
+        project_tags = metadata.extract("Project-Tag-List")
     freshmeat_name = metadata.extract("Freshmeat-Name")
     if not freshmeat_name:
         freshmeat_name = package
@@ -569,7 +569,7 @@ try:
             ofp.write("Project: %s\n" % (freshmeat_name or package))
             ofp.write("Version: %s\n" % version)
             if project_tags:
-                ofp.write("Project-Tags: %s\n" % project_tags)
+                ofp.write("Project-Tag-List: %s\n" % project_tags)
             ofp.write("Release-Focus: %s\n" % focus)
             ofp.write("Website-URL: %s\n" % website)
             for (f, e, s) in deliverables:

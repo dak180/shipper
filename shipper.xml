@@ -49,7 +49,7 @@ what to do.</para>
 
 <para>In normal use, you need set only one header,
 <quote>Destinations:</quote> which is the list of destinations to ship
-to.  You may also want to add some magic <quote>Project-Tags</quote>
+to.  You may also want to add some magic <quote>Project-Tag-List</quote>
 headers to your project specfiles.  Once you have
 <application>shipper</application> up and running, you can experiment
 with more advanced features such as having the program generate
@@ -288,8 +288,8 @@ builds.</para>
 </row>
 <row>
 <entry><varname>project_tags</varname></entry>
-<entry>#Project-Tags:</entry>
-<entry>XBS-Project-Tags:</entry>
+<entry>#Project-Tag-List:</entry>
+<entry>XBS-Project-Tag-List:</entry>
 <entry>
 <para>Topic tags, used on Freshmeat.</para>
 </entry>
