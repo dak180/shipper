@@ -414,8 +414,8 @@ try:
     # Finally, derive the lastchange entry; we'll need it for
     # freshmeat.net (and someday for berlios.de).
     lastchange = None
-    for filename in ("NEWS", "ChangeLog"):
-        if os.path.exists(filename):
+    for filename in ("NEWS", "HISTORY", "ChangeLog"):
+        if not lastchange and os.path.exists(filename):
             if options.verbose:
                 print "shipper: I see a %s file" % filename
             state = 0
@@ -437,7 +437,7 @@ try:
     if not lastchange and metadata.lastchange:
         lastchange = metadata.lastchange
     if 'freshmeat' in destinations and not lastchange:
-        croak("Freshmeat notification requires a NEWS or HISTORY file.")
+        croak("Freshmeat notification requires a NEWS, HISTORY or ChangeLog file.")
 
     #
     # Now compute the names of deliverables
