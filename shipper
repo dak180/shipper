@@ -2,7 +2,8 @@
 #
 # shipper -- a tool for shipping software
 
-import sys, os, readline, re, commands, time, glob, optparse, stat, email
+import sys, os, readline, re, commands, time
+import glob, optparse, stat, email, smtplib
 
 #
 # State variables
@@ -617,12 +618,12 @@ try:
         elif destination.startswith("ftp:"):
             upload(destination, download_deliverables)
         elif destination.startswith("mailto:"):
-            print "# Mailing to %s" % destination[7:]
-            command = "sendmail -i -oem -f '%s' %s <SHIPPER.EMAIL" % (whoami, destination[7:])
-            if options.noupload:
-                print command
-            else:
-                do_or_die(command)
+            dest = destination[7:]
+            print "# Mailing to %s" % dest
+            if not options.noupload:
+                server = smtplib.SMTP('localhost')
+                server.sendmail(whoami, dest, open("SHIPPER.EMAIL").read())
+                server.quit()
         elif destination not in hardwired:
             upload(destination, all_deliverables)
 
