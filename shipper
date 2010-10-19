@@ -515,7 +515,7 @@ try:
     # Compute other deliverables, we need this even if not rebuilding
     # the index. Includes anything with an HTML, Javascript, or CSS
     # extension.
-    for filename in glob.glob('*.x?html')+glob.glob('*.js')+glob.glob('*.css'):
+    for filename in glob.glob('*.html')+glob.glob('*.xhtml')+glob.glob('*.js')+glob.glob('*.css'):
         if filename == 'index.html':
             continue
         stem = filename[:-4]
