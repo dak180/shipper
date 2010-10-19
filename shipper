@@ -184,6 +184,7 @@ def make_index_page(deliverables):
 
 def grep(pattern, file):
     "Mine for a specified pattern in a file."
+    # Note: this blank-strips its output!
     fp = open(file)
     try:
         while True:
@@ -192,7 +193,7 @@ def grep(pattern, file):
                 return None
             m = re.search(pattern, line)
             if m:
-                return m.group(1)
+                return m.group(1).strip()
     finally:
         fp.close()
     return None
