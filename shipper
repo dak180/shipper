@@ -233,8 +233,10 @@ class Specfile:
                 self.lastchange = None
         elif filename == "control":
             self.type = "deb"
-            self.name = self.extract("Package")
-            self.version = self.extract("Version").split("-")[0]
+            self.package = self.extract("Package")
+            self.version = self.extract("Version")
+            if self.version and "-" in self.version:
+                self.version = self.version.split("-")[0]
             self.website = self.extract("Homepage")
             self.summary = self.extract("Description")
             fp = open(self.filename)
@@ -359,7 +361,6 @@ try:
         croak("can't get package name!")
 
     # Extract the package version from the specfile or Makefile
-    specvers = metadata.version
     makevers = None
     makefile = None
     if os.path.exists("Makefile"):
@@ -371,14 +372,14 @@ try:
         # Maybe it's a shell command intended to extract version from specfile
         if makevers and makevers[0] == '$':
             makevers = commands.getoutput(makevers[7:-1])
-    if makevers and specvers != makevers:
-        croak("specfile version %s != Makefile version %s"%(specvers,makevers))
-    elif specvers == None:
-        croak("can't get package version")
-    elif specvers[0] not in "0123456789":
-        croak("package version %s appears garbled" % specvers)
+    if makevers and metadata.version and metadata.version != makevers:
+        croak("specfile version %s != Makefile version %s"%(metadata.version,makevers))
     else:
-        version = specvers
+        version = makevers or metadata.version
+    if version == None:
+        croak("can't get package version")
+    elif version[0] not in "0123456789":
+        croak("package version %s appears garbled" % version)
 
     # Specfiles may set their own destinations
     local_destinations = metadata.extract("Destinations")
