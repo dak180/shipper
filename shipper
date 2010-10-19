@@ -214,7 +214,6 @@ class Specfile:
                     if not line.strip():
                         break
                     else:
-                        print "Bazx!", `line`
                         if line.strip().startswith("-"):
                             line = line.lstrip()[1:]
                         last += line
@@ -525,7 +524,7 @@ try:
         deliverables.append(("index.html", "index web page", None))
 
     # The freshmeat announcement
-    if 'freshmeat' in destinations:
+    if 'freshmeat' in destinations and not os.path.exists("SHIPPER.FRESHMEAT"):
         print "# Building SHIPPER.FRESHMEAT..."
         if not website:
             print "# Can't announce to freshmeat without a primary website!"
@@ -570,7 +569,7 @@ try:
 
     # Finally, email notification
     maildests = filter(lambda x: x.startswith("mailto:"), destinations)
-    if maildests:
+    if maildests and not os.path.exists("SHIPPER.EMAIL"):
         print "# Building SHIPPER.EMAIL..."
         ofp = open("SHIPPER.EMAIL", "w")
         ofp.write("To: " + ", ".join(map(lambda x: x[7:], maildests)) + "\n")
