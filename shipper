@@ -458,6 +458,8 @@ try:
          "known bugs",             None),
         (re.compile("^TODO$"),
          "to-do file",             None),
+        (re.compile("^COPYING$"),
+         "project license",        None),
         (re.compile(package + ".*-" + version + r".(tar.gz|tgz)$"),
          "gzipped source tarball", "Tar/GZ"),
         (re.compile(package + ".*-" + version + r".tar.bz2$"),
@@ -616,7 +618,7 @@ try:
             upload(destination, download_deliverables)
         elif destination.startswith("mailto:"):
             print "# Mailing to %s" % destination[7:]
-            command = "sendmail -i -oem -f %s %s <SHIPPER.EMAIL" % (whoami, destination[7:])
+            command = "sendmail -i -oem -f '%s' %s <SHIPPER.EMAIL" % (whoami, destination[7:])
             if options.noupload:
                 print command
             else:
