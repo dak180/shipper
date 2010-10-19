@@ -630,7 +630,7 @@ try:
             else:
                 print "mail %s <<EOF" % dest
                 print content
-                print EOF
+                print "EOF"
         elif destination not in hardwired:
             upload(destination, all_deliverables)
 
