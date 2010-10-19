@@ -154,11 +154,13 @@ def upload(destination, files, subdir=None):
     else:
         sys.stderr.write("Don't know what to do with destination %s!\n" % destination)
 
-def freshmeat_ship(manifest):
+def freshmeat_ship(job_card):
     "Ship a specified update to freshmeat."
-    if options.verbose:
-        print "Announcing to freshmeat..."
-    upload_or_die("freshmeat-submit <" + manifest[0])
+    if options.upload:
+        upload_or_die("freshmeat-submit <" + job_card)
+    print "Announcing to freshmeat <<EOF"
+    sys.stdout.write(open(job_card).read())
+    print "EOF"
 
 def make_index_page(deliverables):
     "Make index page, listing specified deliverables."
@@ -600,7 +602,7 @@ try:
 
     # Shipping methods for public destinations.
     def freshmeat():
-        freshmeat_ship(("SHIPPER.FRESHMEAT",))
+        freshmeat_ship("SHIPPER.FRESHMEAT")
     def berlios():
         upload("ftp://ftp.berlios.de/incoming", download_deliverables)
         berlios_webdir = \
@@ -620,10 +622,15 @@ try:
         elif destination.startswith("mailto:"):
             dest = destination[7:]
             print "# Mailing to %s" % dest
+            content = open("SHIPPER.EMAIL").read()
             if options.upload:
                 server = smtplib.SMTP('localhost')
-                server.sendmail(whoami, dest, open("SHIPPER.EMAIL").read())
+                server.sendmail(whoami, dest, content)
                 server.quit()
+            else:
+                print "mail %s <<EOF" % dest
+                print content
+                print EOF
         elif destination not in hardwired:
             upload(destination, all_deliverables)
 
