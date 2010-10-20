@@ -472,11 +472,11 @@ try:
         (re.compile(package + ".*-" + version + r".zip$"),
          "zip archive",            "Zip"),
         (re.compile(package + ".*-" + version + r"-.*\.src.rpm$"),
-         "source RPM",              "SRPM"),
+         "source RPM",              "SRPM-Package"),
         (re.compile(package + ".*-" + version + r"-.*\.rpm$"),
-         "binary RPM",              "RPM"),
+         "binary RPM",              "RPM-Package"),
         (re.compile(package + ".*-" + version + r"-.*\.deb$"),
-         "Debian package",          "Deb"),
+         "Debian package",          "Debian-Package"),
         )
     deliverables = []
     for filename in os.listdir("."):
