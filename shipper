@@ -344,6 +344,16 @@ try:
         securecheck(here_profile)
         execfile(here_profile)
 
+    # Hack the destinations variable if need be, might mean we can avoid some
+    # builds.
+    if options.excluded:
+        for excludee in options.excluded.split(","):
+            if excludee in destinations:
+                destinations.remove(excludee)
+            else:
+                print >>sys.stderr, "shipper: %s isn't in the destinations!" % excludee
+                raise SystemExit,1
+
     # Set various sensible defaults
     if not whoami:
         croak("please set whoami in your .shipper file.")
@@ -455,6 +465,8 @@ try:
     # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FRESHMEAT.
     deliverable_types = (
         (re.compile("^README$"),
+         "roadmap file",           None),
+        (re.compile("^READ.ME$"),
          "roadmap file",           None),
         (re.compile("^ChangeLog$"),
          "change log",             "ChangeLog"),
@@ -616,14 +628,6 @@ try:
                        + "/htdocs"
         upload(berlios_webdir, web_deliverables, subdir="")
     hardwired = ("freshmeat", "berlios")
-
-    if options.excluded:
-        for excludee in options.excluded.split(","):
-            if excludee in destinations:
-                destinations.remove(excludee)
-            else:
-                print >>sys.stderr, "shipper: %s isn't in the destinations!" % excludee
-                raise SystemExit,1
 
     if options.verbose:
         print "Destinations: ", ", ".join(destinations)
