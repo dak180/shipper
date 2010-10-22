@@ -22,7 +22,7 @@
   <arg choice='opt'>-v</arg>
   <arg choice='opt'>-m</arg>
   <arg choice='opt'>-t</arg>
-  <arg choice='opt'>-x</arg>
+  <arg choice='opt'>-x <replaceable>destinations</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
