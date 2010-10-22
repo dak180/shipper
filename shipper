@@ -318,7 +318,7 @@ try:
                       action="store_true", dest="vcstag", default=False,
                       help="tag repo for external release after shipping")
     parser.add_option("-x", "--exclude",
-                      dest="excluded", default=[],
+                      dest="excluded", default="",
                       help="exclude some shipping targets")
     (options, args) = parser.parse_args()
 
@@ -617,12 +617,13 @@ try:
         upload(berlios_webdir, web_deliverables, subdir="")
     hardwired = ("freshmeat", "berlios")
 
-    for excludee in options.excluded.split(","):
-        if excludee in destinations:
-            destinations.remove(excludee)
-        else:
-            print >>sys.stderr, "shipper: %s isn't in the destinations!" % excludee
-            raise SystemExit,1
+    if options.excluded:
+        for excludee in options.excluded.split(","):
+            if excludee in destinations:
+                destinations.remove(excludee)
+            else:
+                print >>sys.stderr, "shipper: %s isn't in the destinations!" % excludee
+                raise SystemExit,1
 
     if options.verbose:
         print "Destinations: ", ", ".join(destinations)
