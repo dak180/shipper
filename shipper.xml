@@ -18,10 +18,11 @@
 <cmdsynopsis>
   <command>shipper</command>  
   <arg choice='opt'>-u</arg>
-  <arg choice='opt'>-N</arg>
+  <arg choice='opt'>-n</arg>
   <arg choice='opt'>-v</arg>
   <arg choice='opt'>-m</arg>
   <arg choice='opt'>-t</arg>
+  <arg choice='opt'>-x</arg>
 </cmdsynopsis>
 </refsynopsisdiv>
 
@@ -81,7 +82,7 @@ from a specfile, either an RPM spec or a Debian control file. The project
 name, version, and various other pieces of project-related metadata 
 are extracted from the specfile.</para>
 
-<para>The -N (nobuild) option causes
+<para>The <option>-n</option> (nobuild) option causes
 <application>shipper</application> to dump all configuration values
 and exit immediately after collecting them.</para>
 
@@ -103,8 +104,12 @@ deliverables.  Thus, the command <command>shipper</command> with no
 options will show you exactly what <application>shipper</application>
 would do for a real upload.</para>
 
-<para>Otherwise, <application>shipper</application> then uploads deliverables
-and posts all announcements.</para>
+<para>Otherwise, <application>shipper</application> then uploads
+deliverables and posts all announcements.  The <option>-x</option> may
+be use to suppress delivery to specified destinations that would
+normally be performed (e.g., due to a destination variable set in one
+of your <filename>.shipper</filename> files>); it may be a
+comma-separated list.</para>
 
 <para>After deliverables have shipped successfully and notifications
 posted, <application>shipper</application> determines if the directory

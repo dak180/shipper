@@ -307,8 +307,8 @@ try:
                       help="print progress messages to stdout")
     parser.add_option("-u", "--upload",
                       action="store_true", dest="upload", default=False,
-                      help="do uploads, don't just just build deliverables")
-    parser.add_option("-N", "--nobuild",
+                      help="do uploads")
+    parser.add_option("-n", "--nobuild",
                       action="store_true", dest="nobuild", default=False,
                       help="dump configuration only, no builds or uploads")
     parser.add_option("-m", "--makeindex",
@@ -316,7 +316,10 @@ try:
                       help="generate an index.html for websites")
     parser.add_option("-t", "--tag",
                       action="store_true", dest="vcstag", default=False,
-                      help="tag source repo for external release after shipping")
+                      help="tag repo for external release after shipping")
+    parser.add_option("-x", "--exclude",
+                      dest="excluded", default=[],
+                      help="exclude some shipping targets")
     (options, args) = parser.parse_args()
 
     #
@@ -614,6 +617,16 @@ try:
         upload(berlios_webdir, web_deliverables, subdir="")
     hardwired = ("freshmeat", "berlios")
 
+    for excludee in options.excluded.split(","):
+        if excludee in destinations:
+            destinations.remove(excludee)
+        else:
+            print >>sys.stderr, "shipper: %s isn't in the destinations!" % excludee
+            raise SystemExit,1
+
+    if options.verbose:
+        print "Destinations: ", ", ".join(destinations)
+
     # OK, ship everything.
     for destination in destinations:
         if destination in hardwired:
@@ -644,7 +657,7 @@ try:
         # If we're in the trunk of an SVN repository, we want to tag
         # what just got shipped as an external release (unless the tag
         # already exists, or the user suppressed this behavior by
-        # setting subversion_tag_template to None or "").
+        # setting tag_template to None or "").
         if os.path.basename(os.getcwd())=='trunk' and os.path.exists(".svn"):
             print "# This is a Subversion trunk directory..."
             if os.path.exists("../tags"):
@@ -654,6 +667,7 @@ try:
                 else:
                     print "# I will copy and tag this release as %s." % tagname
                     upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
+        # Ditto for git.
         if os.path.exists(".git"):
             print "# This is a git repository..."
             if os.path.exists(".git/refs/tags/" + tagname):
