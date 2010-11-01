@@ -144,16 +144,12 @@ def upload(destination, files, subdir=None):
     elif destination.find(":") > -1:
         (host, directory) = destination.split(":")
         for file in files:
-            # This is a really ugly way to deal with the problem
-            # of write-protected files in the remote directory.
-            # Unfortunately, sftp(1) is rather brain-dead -- no
-            # way to ignore failure on a remove, and refuses to
-            # do renames with an obscure error message. The chmod
-            # command ensures that the uploaded file will be world-
-            # visible, necessary for brosers to see it.
+            # Requires your files to be writeable by you - maybe not so if they
+            # were RCSed but not locked! If they are, the -p option to scp
+            # will set that permission on the remote host and allow you to
+            # update the files with scp later.
             remote = os.path.join(directory, subdir, os.path.basename(file))
-            upload_or_die("scp " + file + " " + host + ":" + remote+".new;")
-            upload_or_die("ssh %s 'mv -f %s.new %s'; chmod a+r %s" % (host, remote, remote, remote))
+            upload_or_die("scp -p " + file + " " + host + ":" + remote)
     else:
         sys.stderr.write("Don't know what to do with destination %s!\n" % destination)
 
