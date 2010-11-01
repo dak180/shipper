@@ -35,6 +35,7 @@ indextemplate = """
 <meta name='description' content='Resource page for %(package)s' />
 <meta name='generator' content='shipper' />
 <meta name='MSSmartTagsPreventParsing' content='TRUE' />
+<meta name='description' content="%(summary)s"/>
 <title>Resource page for %(package)s %(version)s</title>
 </head>
 <body>
@@ -147,10 +148,12 @@ def upload(destination, files, subdir=None):
             # of write-protected files in the remote directory.
             # Unfortunately, sftp(1) is rather brain-dead -- no
             # way to ignore failure on a remove, and refuses to
-            # do renames with an obscure error message.
+            # do renames with an obscure error message. The chmod
+            # command ensures that the uploaded file will be world-
+            # visible, necessary for brosers to see it.
             remote = os.path.join(directory, subdir, os.path.basename(file))
             upload_or_die("scp " + file + " " + host + ":" + remote+".new;")
-            upload_or_die("ssh %s 'mv -f %s.new %s'" % (host, remote, remote))
+            upload_or_die("ssh %s 'mv -f %s.new %s'; chmod a+r %s" % (host, remote, remote, remote))
     else:
         sys.stderr.write("Don't know what to do with destination %s!\n" % destination)
 
@@ -385,6 +388,8 @@ try:
         # Maybe it's a shell command intended to extract version from specfile
         if makevers and makevers[0] == '$':
             makevers = commands.getoutput(makevers[7:-1])
+        if makevers[0] == '"' and makevers[-1] == '"':
+            makevers = makevers[1:-1]
     if makevers and metadata.version and metadata.version != makevers:
         croak("specfile version %s != Makefile version %s"%(metadata.version,makevers))
     else:
