@@ -170,7 +170,7 @@ def make_index_page(deliverables):
         resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
     resourcetable += "</table>"
     if 'freshmeat' in destinations:
-        extralines += "<p>There is a <a href='http://freshmeat.net/projects/%s'>Freshmeat %s</a> page.</p>\n" % \
+        extralines += "<p>There is a Freshmeat <a href='http://freshmeat.net/projects/%s'>%s page</a>.</p>\n" % \
                       (freshmeat_name, freshmeat_name)
     # OK, now build the index page itself
     ofp = open("index.html", "w")
