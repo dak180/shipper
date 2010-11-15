@@ -298,23 +298,24 @@ def whoami_really():
     "Ask various programs that keep track of who you are who you are."
     # Bazaar version-control system
     (bzrerr, bzrout) = commands.getstatusoutput("bzr config email")
-    #if bzrerr == 0 and bzrout:
-    #    return bzrout
+    if bzrerr == 0 and bzrout:
+        return bzrout
     # Git version-control system
     (nameerr, nameout) = commands.getstatusoutput("git config user.name")
     (emailerr, emailout) = commands.getstatusoutput("git config user.email")
-    #if nameerr == 0 and nameout and emailerr == 0 and emailout:
-    #    return "%s <%s>" % (nameout, emailout)
-    # Mercurial version-control system
-    hgrc = os.path.expanduser('~/.hgrc')
-    if os.path.exists(hgrc):
-        with file(hgrc) as fp:
-            config = ConfigParser.ConfigParser()
-            config.readfp(fp)
-            try:
-                return config.get("ui", "username")
-            except (ConfigParser.Error):
-                pass
+    if nameerr == 0 and nameout and emailerr == 0 and emailout:
+        return "%s <%s>" % (nameout, emailout)
+    # Various random configs
+    for (fn, mine) in (
+        ("~/.hgrc", r"username\s*=\s*(.*)"),                # Mercurial
+        ("~/.lynxrc", r"personal_mail_address\s*=\s*(.*)")  # Lynx
+        ):
+        fn = os.expanduser(fn)
+        if os.path.exists(fn):
+            for line in file(fn):
+                m = re.search(mine, line)
+                if m:
+                    return m.group(1)
     # Out of alternatives
     return None
 
