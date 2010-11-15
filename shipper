@@ -5,6 +5,8 @@
 import sys, os, readline, re, commands, time
 import glob, optparse, stat, email, smtplib, ConfigParser
 
+version="0.10"
+
 #
 # State variables
 #

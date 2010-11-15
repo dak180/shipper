@@ -1,12 +1,12 @@
 # Makefile for the shipper project
 
-VERS=$(shell sed <shipper.spec -n -e '/Version: \(.*\)/s//\1/p')
+VERS=$(shell sed <shipper -n -e '/^version=\(.*\)/s//\1/p')
 
 MANDIR=$(DESTDIR)/usr/share/man/man1
 BINDIR=$(DESTDIR)/usr/bin
 
 DOCS    = README COPYING shipper.xml shipper.1
-SOURCES = shipper Makefile $(DOCS) shipper.spec
+SOURCES = shipper Makefile $(DOCS) control
 
 all: shipper-$(VERS).tar.gz
 
@@ -27,6 +27,9 @@ shipper-$(VERS).tar.gz: $(SOURCES)
 
 clean:
 	rm -f *.1 *.tar.gz *.rpm *.tar.gz SHIPPER.*
+
+version:
+	echo $(VERS)
 
 dist: shipper-$(VERS).tar.gz
 
