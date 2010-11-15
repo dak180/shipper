@@ -220,8 +220,9 @@ ship anything.</para>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>A plausible email address for the user. There is no default;
-if you don't configue this. shipper will exit with an error message.</para>
+<para>A plausible email address for the user. If you
+don't configure this, shipper will snoop the configuration 
+files of other programs attempting to deduce it.</para>
 </entry>
 </row>
 <row>

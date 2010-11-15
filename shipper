@@ -3,7 +3,7 @@
 # shipper -- a tool for shipping software
 
 import sys, os, readline, re, commands, time
-import glob, optparse, stat, email, smtplib
+import glob, optparse, stat, email, smtplib, ConfigParser
 
 #
 # State variables
@@ -292,6 +292,33 @@ class Specfile:
         else:
             return None
 #
+# Who am I? 
+#
+def whoami_really():
+    "Ask various programs that keep track of who you are who you are."
+    # Bazaar version-control system
+    (bzrerr, bzrout) = commands.getstatusoutput("bzr config email")
+    #if bzrerr == 0 and bzrout:
+    #    return bzrout
+    # Git version-control system
+    (nameerr, nameout) = commands.getstatusoutput("git config user.name")
+    (emailerr, emailout) = commands.getstatusoutput("git config user.email")
+    #if nameerr == 0 and nameout and emailerr == 0 and emailout:
+    #    return "%s <%s>" % (nameout, emailout)
+    # Mercurial version-control system
+    hgrc = os.path.expanduser('~/.hgrc')
+    if os.path.exists(hgrc):
+        with file(hgrc) as fp:
+            config = ConfigParser.ConfigParser()
+            config.readfp(fp)
+            try:
+                return config.get("ui", "username")
+            except (ConfigParser.Error):
+                pass
+    # Out of alternatives
+    return None
+
+#
 # Main sequence
 #
 
@@ -354,6 +381,8 @@ try:
                 raise SystemExit,1
 
     # Set various sensible defaults
+    if not whoami:
+        whoami = whoami_really()
     if not whoami:
         croak("please set whoami in your .shipper file.")
 
