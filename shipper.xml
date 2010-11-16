@@ -62,15 +62,15 @@ project web pages for you.</para>
 <para><application>shipper</application> pushes
 <emphasis>deliverables</emphasis> out to
 <emphasis>destinations</emphasis>.  Deliverables include: source
-tarballs, source zip archives, source RPMs, binary RPMs, Debian
-package files, ChangeLog files, README files,and various other project
-metadata files.  Destinations include both <emphasis>private
-destinations</emphasis> like websites, FTP archive sites and mailing
-lists, and <emphasis>public destinations</emphasis> like freshmeat.net
-and berlios.de. The <application>shipper</application> framework is
-extensible and it is relatively easy to add new destination types and
-new deliverables; in the future, we hope to support SourceForge and
-other forge sites as destinations.</para>
+tarballs, source zip archives, ChangeLog files, README files,and
+various other project metadata files.  Destinations include both
+<emphasis>private destinations</emphasis> like websites, FTP archive
+sites and mailing lists, and <emphasis>public destinations</emphasis>
+like freshmeat.net and berlios.de. The
+<application>shipper</application> framework is extensible and it is
+relatively easy to add new destination types and new deliverables; in
+the future, we hope to support SourceForge and other forge sites as
+destinations.</para>
 
 <para>The <application>shipper</application> program's first step is
 to read the <filename>.shipper</filename> files in your home directory
@@ -78,9 +78,9 @@ and the current directory.  These set various control variables and
 templates <application>shipper</application> will use later.</para>
 
 <para>Second, <application>shipper</application> reads per-project
-from a specfile, either an RPM spec or a Debian control file. The project 
-name, version, and various other pieces of project-related metadata 
-are extracted from the specfile.</para>
+information from a specfile, either an RPM spec or a Debian control
+file. The project name, version, and various other pieces of
+project-related metadata are extracted from the specfile.</para>
 
 <para>The <option>-n</option> (nobuild) option causes
 <application>shipper</application> to dump all configuration values
@@ -268,10 +268,10 @@ project web page, and the last entry in the project changelog.</para>
 <entry>Name:</entry>
 <entry>Package:</entry>
 <entry>
-<para>Project name, used to generate the stem part of the names of RPMs and
-other deliverables that <application>shipper</application>
-builds. If the specfile is a Debian control file, the Debian-specific
-part of the version number (after the dash) is removed.</para>
+<para>Project name, used to generate the stem part of the names
+deliverables that <application>shipper</application> builds. If the
+specfile is a Debian control file, the Debian-specific part of the
+version number (after the dash) is removed.</para>
 </entry>
 </row>
 <row>
@@ -279,9 +279,8 @@ part of the version number (after the dash) is removed.</para>
 <entry>Version:</entry>
 <entry>Version:</entry>
 <entry>
-<para>Project version, used in generating the names of RPMs and
-other deliverables that <application>shipper</application>
-builds.</para>
+<para>Project version, used in generating the names of deliverables
+that <application>shipper</application> builds.</para>
 </entry>
 </row>
 <row>
@@ -624,19 +623,6 @@ each email address specified as a destination.</para>
 
 <para>No email destinations are set up by default.  You must
 declare them by putting mailto: urls in the
-<varname>destinations</varname> variable.</para>
-</entry>
-</row>
-<row>
-<entry>rsync unit</entry>
-<entry>SRPM</entry>
-<entry>rsync address ([user@]host::unit)</entry>
-<entry>
-<para>An SRPM is shipped to each destination that is recognized as 
-an rsync address (by the double colon).</para>
-
-<para>No rsync destinations are set up by default.  You must
-declare them by putting rsync addresses in the
 <varname>destinations</varname> variable.</para>
 </entry>
 </row>
