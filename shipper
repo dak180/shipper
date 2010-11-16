@@ -709,7 +709,7 @@ try:
         if os.path.exists(".git"):
             print "# This is a git repository..."
             if os.path.exists(".git/refs/tags/" + tagname):
-                print "# This release has aleady been tagged."
+                print "# This release has already been tagged."
             else:
                 print "# I will tag this release as %s." % tagname
                 upload_or_die("git tag -a %s -m '%s'" % (tagname, tag_message))
