@@ -69,7 +69,7 @@ sites and mailing lists, and <emphasis>public destinations</emphasis>
 like freshmeat.net and berlios.de. The
 <application>shipper</application> framework is extensible and it is
 relatively easy to add new destination types and new deliverables; in
-the future, we hope to support SourceForge and other forge sites as
+the future, we hope to support all major forge sites as
 destinations.</para>
 
 <para>The <application>shipper</application> program's first step is
@@ -318,6 +318,21 @@ name; you only need to set it if they differ.</para>
 announcements and computing the location of your project web
 directory. If this isn't present, it defaults to the project
 name; you only need to set it if they differ.</para>
+</entry>
+</row>
+<row>
+<entry><varname>sourceforge_name</varname></entry>
+<entry>#SourceForge-Name:</entry>
+<entry>XBS-SourceForge-Name:</entry>
+<entry>
+<para>SourceForge shortname, used in generating announcements and
+computing the location of your project directories on SourceForge. If
+this isn't present, it defaults to the project name; you only need to
+set it if they differ.</para>
+
+<para>If your SourceForge-Name has a '@' in it, the prefix before that
+is removed an interpreted as your SourceForge user ID. If no such prefix
+is present, the user ID from whoami will be assumed.</para>  
 </entry>
 </row>
 <row>

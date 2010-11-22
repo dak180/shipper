@@ -17,7 +17,8 @@ package = None   	# Nor a package name
 website = None		# Nor a home page
 project_tags = None  	# Keywords for tagging
 freshmeat_name = None	# Name of the project on Freshmeat
-berlios_name = None	# Name of the project on derlios,de
+berlios_name = None	# Name of the project on berlios,de
+sourceforge_name = None # Name of the project on sourceforge.net
 changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
 summary = None   	# One-line summary of the package
@@ -120,7 +121,7 @@ def upload_or_die(cmd):
         print cmd
 
 def upload(destination, files, subdir=None):
-    "Upload a file via scp, deleting with ssh first if it exists."
+    "Upload a file via ftp or scp."
     if subdir == None:
         subdir=package
     print "# Uploading to %s" % destination
@@ -129,8 +130,7 @@ def upload(destination, files, subdir=None):
         destination = destination[6:].split("/")
         host = destination.pop(0)
         directory = "/".join(destination)
-        (realname, address) = email.utils.parseaddr(whoami)
-        commands = ["lftp\n", "open -u anonymous," + address + " " + host + "\n"]
+        commands = ["lftp\n", "open -u anonymous," + myaddress + " " + host + "\n"]
         if directory:
             commands.append("cd " + directory + "\n")
         commands.append("mput " + " ".join(files) + "\n")
@@ -386,6 +386,8 @@ try:
         whoami = whoami_really()
     if not whoami:
         croak("please set whoami in your .shipper file.")
+    (myrealname, myaddress) = email.utils.parseaddr(whoami)
+    (myuserid, myhost) = myaddress.split("@")
 
     # Where to get the metadata
     specfiles = glob.glob("*.spec")
@@ -450,6 +452,13 @@ try:
     berlios_name = metadata.extract("Berlios-Name")
     if not berlios_name:
         berlios_name = package
+    sourceforge_name = metadata.extract("SourceForge-Name")
+    if sourceforge_name:
+        if "@" in sourceforge_name:
+            (sourceforge_userid, sourceforge_name) = sourceforge_name.split("@")
+    else:
+        sourceforge_name = package
+        sourceforge_userid = myuserid
     resourcetable = ""
 
     if options.verbose:
@@ -538,8 +547,8 @@ try:
     if options.nobuild:
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'project_tags', 
-                         'freshmeat_name', 'berlios_name', 'summary',
-                         'tag_template', 'tag_message'):
+                         'freshmeat_name', 'berlios_name', 'sourceforge_name',
+                         'summary', 'tag_template', 'tag_message'):
             print "%s = %s" % (variable, `eval(variable)`)
         for variable in ('description', 'changelog', 'lastchange', 'mailtemplate', 'indextemplate'):
             if not eval(variable):
@@ -589,8 +598,10 @@ try:
         print "# Building SHIPPER.FRESHMEAT..."
         if not website:
             print "# Can't announce to freshmeat without a primary website!"
+            destinations.remove("freshmeat")
         elif not lastchange:
             print "# Can't announce to freshmeat without a changes field!"
+            destinations.remove("freshmeat")
         else:
             while True:
                 focus = raw_input("# freshmeat.net release focus (? for list): ")
@@ -611,6 +622,11 @@ try:
             # special destinations
             if website.find("berlios"):
                 download = "http://download.berlios.de/"+(berlios_name or package)
+            if website.find("sourceforge"):
+                download = "http://sourceforge.net/projects/%s/files/%s/%s" % (
+                    sourceforge_name,
+                    sourceforge_name,
+                    version)
             else:
                 download = website
             ofp = open("SHIPPER.FRESHMEAT", "w")
@@ -622,7 +638,7 @@ try:
             ofp.write("Website-URL: %s\n" % website)
             for (f, e, s) in deliverables:
                 if s:
-                    ofp.write("%s-URL: %s\n" % (s, os.path.join(website, f)))
+                    ofp.write("%s-URL: %s\n" % (s, os.path.join(download, f)))
             # freshmeat.net doesn't like bulleted entries.
             freshmeatlog = map(lambda s: s.lstrip(), lastchange.split("\n"))
             ofp.write("\n" + "\n".join(freshmeatlog))
@@ -658,7 +674,16 @@ try:
                        + (berlios_name or package) \
                        + "/htdocs"
         upload(berlios_webdir, web_deliverables, subdir="")
-    hardwired = ("freshmeat", "berlios")
+    def sourceforge():
+        upload_or_die("rsync -avP -e ssh %s %s,%s@frs.sourceforge.net:/home/frs/project/%s/%s/%s/%s/" % (
+            " ".join(download_deliverables),
+            sourceforge_userid, 
+            sourceforge_name,
+            sourceforge_name[:1],
+            sourceforge_name[:2],
+            sourceforge_name,
+            version))
+    hardwired = ("freshmeat", "berlios", "sourceforge")
 
     if options.verbose:
         print "Destinations: ", ", ".join(destinations)
