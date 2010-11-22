@@ -700,7 +700,7 @@ try:
             sourceforge_name[:2],
             sourceforge_name,
             version))
-        upload_or_die("rsync -aiv %s $%s,%s@web.sourceforge.net:htdocs/" % (
+        upload_or_die("rsync -aiv %s %s,%s@web.sourceforge.net:htdocs/" % (
             " ".join(web_deliverables),
             sourceforge_userid,
             sourceforge_name))
