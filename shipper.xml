@@ -295,7 +295,9 @@ that <application>shipper</application> builds.</para>
 <entry>URL:</entry>
 <entry>Website:</entry>
 <entry>
-<para>Project website URL. Used when generating project announcements.</para>
+<para>Project website URL. Used when generating project announcements. When your
+upload destination is Berlios or SourceForge, this will be generated for you
+if you don't specify it.</para>
 </entry>
 </row>
 <row>
