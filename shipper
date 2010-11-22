@@ -165,8 +165,17 @@ def make_index_page(deliverables, substitutions):
     "Make index page, listing specified deliverables."
     print "# Building index.html..."
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
-    for (file, explanation, urlify) in deliverables:
-        resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (file,file,explanation)
+    # This is a bit of a nasty hack.  It relies on the assumption that
+    # a file belongs in the download area (as opposed to on the
+    # website) if and only if it is a deliverable for which we've
+    # defined a Freshmeat tag.
+    for (ifile, explanation, tag) in deliverables:
+        if tag:
+            url = download
+        else:
+            url = website
+        url = os.path.join(url, ifile)
+        resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (url,ifile,explanation)
     resourcetable += "</table>"
     if 'freshmeat' in destinations:
         extralines += "<p>There is a Freshmeat <a href='http://freshmeat.net/projects/%s'>%s page</a>.</p>\n" % \
@@ -443,13 +452,6 @@ try:
                 if removable in destinations:
                     destinations.remove(removable)
 
-    # Some desinations imply website locations
-    if not website:
-        if "sourceforge" in destinations:
-            website = "http://%s.sourceforge.net/" % sourceforge_name
-        if "berlios" in destinations:
-            website = "http://%s.berlios.de/" % berlios_name
-
     print "# Uploading version %s of %s" % (version, package)
 
     # Extract remaining variables for templating
@@ -508,6 +510,25 @@ try:
         lastchange = metadata.lastchange
     if 'freshmeat' in destinations and not lastchange:
         croak("Freshmeat notification requires a NEWS, HISTORY or ChangeLog file.")
+
+    # Some destinations imply website locations
+    if not website:
+        if "sourceforge" in destinations:
+            website = "http://%s.sourceforge.net/" % sourceforge_name
+        if "berlios" in destinations:
+            website = "http://%s.berlios.de/" % berlios_name
+
+    # Download directory has to be computed differently at
+    # special destinations.
+    if website.find("berlios"):
+        download = "http://download.berlios.de/"+(berlios_name or package)
+    if website.find("sourceforge"):
+        download = "http://sourceforge.net/projects/%s/files/%s/%s" % (
+            sourceforge_name,
+            sourceforge_name,
+            version)
+    else:
+        download = website 
 
     #
     # Now compute the names of deliverables
@@ -635,17 +656,6 @@ try:
                     break
                 else:
                     croak("not a valid freshmeat.net release focus!")
-            # Download directory has to be computed differently at
-            # special destinations
-            if website.find("berlios"):
-                download = "http://download.berlios.de/"+(berlios_name or package)
-            if website.find("sourceforge"):
-                download = "http://sourceforge.net/projects/%s/files/%s/%s" % (
-                    sourceforge_name,
-                    sourceforge_name,
-                    version)
-            else:
-                download = website
             ofp = open("SHIPPER.FRESHMEAT", "w")
             ofp.write("Project: %s\n" % (freshmeat_name or package))
             ofp.write("Version: %s\n" % version)
