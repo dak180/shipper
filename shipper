@@ -684,12 +684,16 @@ try:
     # Now actually ship
     #
 
-    # Compute final deliverables
+    # Compute final deliverables.  This computation needs to coincide
+    # with the way web deliverables are dustinguished from download
+    # deliverables in make_index_page(), otherwise havoc will ensue.
     all_deliverables = map(lambda x: x[0], deliverables)
-    download_deliverables = filter(versioned,
-                                   map(lambda x: x[0], deliverables))
-    web_deliverables = filter(lambda f: not versioned(f),
-                              map(lambda x: x[0], deliverables))
+    download_deliverables = map(lambda x: x[0],
+                                filter(lambda (f, e, s): s is not None,
+                                deliverables))
+    web_deliverables = map(lambda x: x[0],
+                                filter(lambda (f, e, s): s is None,
+                                deliverables))
 
     # Shipping methods for public destinations.
     def freshmeat():
