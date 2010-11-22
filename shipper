@@ -513,7 +513,7 @@ try:
     # Now compute the names of deliverables
     #
     def versioned(filename):
-        "Does the specfied filename contain a version number?"
+        "Does the specified filename contain a version number?"
         return re.search("[0-9]", filename)
 
     if options.verbose:
