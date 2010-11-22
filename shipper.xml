@@ -734,10 +734,6 @@ ships them if present. </para>
 or to tag after shipping.</para>
 </refsect1>
 
-<refsect1><title>Bugs</title>
-<para>The rsync destination type is untested.</para>
-</refsect1>
-
 <refsect1><title>See Also</title>
 
 <para>

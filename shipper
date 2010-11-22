@@ -141,8 +141,6 @@ def upload(destination, files, subdir=None):
             pfp.close()
         else:
             print "".join(commands)
-    elif destination.find("::") > -1:
-        upload_or_die("rsync " + " ".join(files) + " " + destination)
     elif destination.find(":") > -1:
         (host, directory) = destination.split(":")
         for file in files:
