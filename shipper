@@ -164,6 +164,7 @@ def freshmeat_ship(job_card):
 def make_index_page(deliverables, substitutions):
     "Make index page, listing specified deliverables."
     print "# Building index.html..."
+    global extralines
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
     for (ifile, explanation, tag, bulky) in deliverables:
         if bulky:
