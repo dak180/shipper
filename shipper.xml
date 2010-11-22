@@ -210,6 +210,13 @@ actual project directory is computed by
 appending the value of <varname>package</varname> to
 the destination you're shipping to.</para>
 
+<para>A destination entry of <quote>~</quote> can be used to clear the
+previously-set value, so an individial project control file can ignore
+desrinations set in your home-directory
+<filename>~/.shipper</filename> file.  Additionally, <quote>~</quote>
+followed by a destination causes that individual destination to be
+removed.</para>
+
 <para><emphasis role='bold'>There is no default.</emphasis>.  If you
 do not set this variable, <application>shipper</application> won't
 ship anything.</para>

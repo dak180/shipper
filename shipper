@@ -431,7 +431,16 @@ try:
     local_destinations = metadata.extract("Destinations")
     if local_destinations:
         local_destinations = map(lambda x: x.strip(), local_destinations.split(","))
-        destinations += local_destinations
+        negations = filter(lambda s: s.startswith("~"), local_destinations)
+        local_destinations = filter(lambda s: not s.startswith("~"),
+                               local_destinations)
+        if "~" in negations:
+            destinations = local_destinations
+        else:
+            destinations += local_destinations
+            for removable in map(lambda s: s[1:], negations):
+                if removable in destinations:
+                    destinations.remove(removable)
 
     print "# Uploading version %s of %s" % (version, package)
 
