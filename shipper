@@ -670,6 +670,10 @@ try:
         # the resource table.
         deliverables.append(("index.html", "index web page", None, False))
 
+    # We'll want the logo if it exists, too
+    if logo:
+        deliverables.append((logo, "project logo", None, False))
+
     # The freshmeat announcement
     if 'freshmeat' in destinations and not os.path.exists("SHIPPER.FRESHMEAT"):
         print "# Building SHIPPER.FRESHMEAT..."
