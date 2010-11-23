@@ -227,9 +227,10 @@ ship anything.</para>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>A plausible email address for the user. If you
-don't configure this, shipper will snoop the configuration 
-files of other programs attempting to deduce it.</para>
+<para>A name and email address for the user; should be RFC-822 form,
+e.g. "J. Random User &lt;user@fubar.com&gt;. If you don't configure
+this, shipper will snoop the configuration files of other programs
+attempting to deduce it.</para>
 </entry>
 </row>
 <row>
@@ -391,6 +392,15 @@ align='center'>-</entry> <entry align='center'>-</entry>
 <para>Lines to be inserted after the table of resources.  You
 can set this; <application>shipper</application> may add to it to,
 for example, create a link to the project's Freshmeat page.</para>
+</entry>
+</row>
+<row>
+<entry><varname>logo</varname></entry>
+<entry align='center'>#Logo</entry>
+<entry align='center'>XBS-Logo</entry>
+<entry>
+<para>A logo or icon for the project.  The default web page template will
+embed this in the page header.</para>
 </entry>
 </row>
 </tbody>

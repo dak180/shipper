@@ -24,6 +24,7 @@ lastchange = None  	# Last entry in changelog
 summary = None   	# One-line summary of the package
 description = None	# Nor a description
 extralines = ""         # Extra lines for HTML template
+logo = ""               # Project logo
 
 # Policy choices
 tag_template = "%s"
@@ -42,6 +43,15 @@ indextemplate = """
 <title>Resource page for %(package)s %(version)s</title>
 </head>
 <body>
+
+<table width='100%%' cellpadding='0' summary='Canned page header' bgcolor='#ddd'>
+<tr>
+<td><h2>Resource page for %(package)s %(version)s</h2></td>
+<td align="center">%(centertext)s</td>
+<td align='right'><h2>%(date)s</h2></td>
+</tr>
+</table>
+
 
 <h1>Resource page for %(package)s %(version)s</td></h1>
 
@@ -177,6 +187,9 @@ def make_index_page(deliverables, substitutions):
     if 'freshmeat' in destinations:
         extralines += "<p>There is a Freshmeat <a href='http://freshmeat.net/projects/%s'>%s page</a>.</p>\n" % \
                       (freshmeat_name, freshmeat_name)
+    centertext = ""
+    if "logo" in substitutions and substitutions["logo"]:
+        centertext = '<img src="%s"/>' % substitutions["logo"]
     substitutions["description"] = "<p>" + substitutions["description"].replace("\n\n", "</p>\n\n<p>") + "</p>"
     substitutions.update(locals())
     # OK, now build the index page itself
@@ -475,6 +488,7 @@ try:
     else:
         sourceforge_name = package
         sourceforge_userid = myuserid
+    logo = metadata.extract("Logo")
     resourcetable = ""
 
     if options.verbose:
