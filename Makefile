@@ -6,7 +6,7 @@ MANDIR=$(DESTDIR)/usr/share/man/man1
 BINDIR=$(DESTDIR)/usr/bin
 
 DOCS    = README COPYING shipper.xml shipper.1
-SOURCES = shipper Makefile $(DOCS) control
+SOURCES = shipper .shipper Makefile $(DOCS) control shipper-logo.png
 
 all: shipper-$(VERS).tar.gz
 
@@ -26,7 +26,7 @@ shipper-$(VERS).tar.gz: $(SOURCES)
 	@rm -fr shipper-$(VERS)
 
 clean:
-	rm -f *.1 *.tar.gz *.rpm *.tar.gz SHIPPER.*
+	rm -f *.1 *.tar.gz *.rpm *.tar.gz SHIPPER.* *.html
 
 version:
 	echo $(VERS)

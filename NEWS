@@ -1,7 +1,7 @@
 			shipper project news
 
 * Mon Nov 22 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.11
-  Support for SourceForge as a desination.
+  Support for SourceForge as a destination.
 
 * Thu Nov 15 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.10
   Generate correct download directories in a Freshmeat announcement for a 
