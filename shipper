@@ -531,9 +531,9 @@ try:
 
     # Download directory has to be computed differently at
     # special destinations.
-    if website.find("berlios"):
+    if "berlios"in website:
         download = "http://download.berlios.de/"+(berlios_name or package)
-    if website.find("sourceforge"):
+    if "sourceforge"in website:
         download = "http://sourceforge.net/projects/%s/files/%s/%s" % (
             sourceforge_name,
             sourceforge_name,
