@@ -1,5 +1,8 @@
 			shipper project news
 
+* Fri Nov 26 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.13
+  Can now tag releaaes under hg and bzr,
+
 * Tue Nov 23 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.12
   Added the logo variable and logo embedding in the web-age template.
 

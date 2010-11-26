@@ -793,32 +793,32 @@ try:
         elif destination not in hardwired:
             upload(destination, all_deliverables)
 
+    print "Foo!", options.vcstag, tag_template, tag_message
+
     # Shipping has succeeded.
     if options.vcstag and tag_template and tag_message:
         tagname = tag_template % version
         tag_message = tag_message % version
 
         # If we're in the trunk of an SVN repository, we want to tag
-        # what just got shipped as an external release (unless the tag
-        # already exists, or the user suppressed this behavior by
-        # setting tag_template to None or "").
+        # what just got shipped as an external release.
         if os.path.basename(os.getcwd())=='trunk' and os.path.exists(".svn"):
             print "# This is a Subversion trunk directory..."
             if os.path.exists("../tags"):
-                print "# I see a peer tags directory..."
+                print "# I see an svn peer tags directory..."
                 if os.path.exists("../tags/" + tagname):
                     print "# This release has aleady been tagged."
                 else:
                     print "# I will copy and tag this release as %s." % tagname
                     upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
-        # Ditto for git.
-        if os.path.exists(".git"):
-            print "# This is a git repository..."
-            if os.path.exists(".git/refs/tags/" + tagname):
-                print "# This release has already been tagged."
-            else:
-                print "# I will tag this release as %s." % tagname
-                upload_or_die("git tag -a %s -m '%s'" % (tagname, tag_message))
+        for (idir, what, cmnd) in (
+            (".git", "git", "git tag -a %(tagname)s -m '%(tag_message)s'"),
+            (".hg",  "hg",  "hg tag %(tagname)s -m '%(tag_message)s'"),
+            (".bzr", "bzr", "bzr tag %(tagname)s"),
+            ):
+            if os.path.exists(idir):
+                print "# I will %s-tag this release as %s." % (what, tagname)
+                upload_or_die(cmnd % globals())
     print "# Done"
 except KeyboardInterrupt:
     print "# Bye!"
