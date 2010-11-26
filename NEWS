@@ -2,7 +2,7 @@
 
 * Fri Nov 26 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.12
   Can now tag releases under hg and bzr,
-  Added the logo variable and logo embedding in the web-age template.
+  Added the logo variable and logo embedding in the web-page template.
 
 * Mon Nov 22 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.11
   Support for SourceForge as a destination.
