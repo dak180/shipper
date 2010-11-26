@@ -793,8 +793,6 @@ try:
         elif destination not in hardwired:
             upload(destination, all_deliverables)
 
-    print "Foo!", options.vcstag, tag_template, tag_message
-
     # Shipping has succeeded.
     if options.vcstag and tag_template and tag_message:
         tagname = tag_template % version
