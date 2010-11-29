@@ -10,6 +10,8 @@ Description: automated shipping of open-source project releases
  SourceForge or Berlios, and knows how to post a release announcement to 
  freshmeat.net via freshmeat-submit.
 
+XBS-Destinations: freshmeat
+
 Homepage: http://www.catb.org/~esr/shipper
 
 XBS-Project-Tag-List: packaging, distribution
