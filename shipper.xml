@@ -346,6 +346,15 @@ is present, the user ID from whoami will be assumed.</para>
 </entry>
 </row>
 <row>
+<entry><varname>gitorious_url</varname></entry>
+<entry>#Gitorious-URL:</entry>
+<entry>XBS-Gitorious-URL:</entry>
+<entry>
+<para>URL pointing at Gitorious hosting space for the project. If it
+exists, it should point at a git repository for the source code.</para>
+</entry>
+</row>
+<row>
 <entry><varname>summary</varname></entry>
 <entry>Summary</entry>
 <entry>Description:</entry>

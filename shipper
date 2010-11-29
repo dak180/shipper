@@ -18,6 +18,7 @@ website = None		# Nor a home page
 project_tags = None  	# Keywords for tagging
 freshmeat_name = None	# Name of the project on Freshmeat
 berlios_name = None	# Name of the project on berlios,de
+gitorious_url = None    # Name of the project on gitorious
 sourceforge_name = None # Name of the project on sourceforge.net
 changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
@@ -184,6 +185,9 @@ def make_index_page(deliverables, substitutions):
         url = os.path.join(url, ifile)
         resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (url,ifile,explanation)
     resourcetable += "</table>"
+    if gitorious_url:
+        extralines += "<p>The project is hosted on <a href='%s'>gitorious</a>.</p>\n" % \
+                      gitorious_url
     if 'freshmeat' in destinations:
         extralines += "<p>There is a Freshmeat <a href='http://freshmeat.net/projects/%s'>%s page</a>.</p>\n" % \
                       (freshmeat_name, freshmeat_name)
@@ -488,6 +492,7 @@ try:
     else:
         sourceforge_name = package
         sourceforge_userid = myuserid
+    gitorious_url = metadata.extract("Gitorious-URL")
     logo = metadata.extract("Logo")
     resourcetable = ""
 
@@ -585,7 +590,7 @@ try:
          "project license",
          None,
          False),
-        (re.compile(package + ".*-" + version + r".(tar.gz|tgz)$"),
+        (re.compile(".*-" + version + r".(tar.gz|tgz)$"),
          "gzipped source tarball",
          "Tar/GZ",
          True),
