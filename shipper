@@ -776,27 +776,28 @@ try:
     if options.verbose:
         print "Destinations: ", ", ".join(destinations)
 
-    # OK, ship everything.
-    for destination in destinations:
+    # OK, ship everything.  First, the non-mail destinations
+    for destination in filter(lambda d: not d.startswith("mailto:"),destinations):
         if destination in hardwired:
             print "# Shipping to public destination", destination
             eval(destination + "()")
         elif destination.startswith("ftp:"):
             upload(destination, download_deliverables)
-        elif destination.startswith("mailto:"):
-            dest = destination[7:]
-            print "# Mailing to %s" % dest
-            content = open("SHIPPER.EMAIL").read()
-            if options.upload:
-                server = smtplib.SMTP('localhost')
-                server.sendmail(whoami, dest, content)
-                server.quit()
-            else:
-                print "mail %s <<EOF" % dest
-                print content
-                print "EOF"
         elif destination not in hardwired:
             upload(destination, all_deliverables)
+    mailaddrs = filter(lambda d: d.startswith("mailto:"),destinations)
+    if mailaddrs:
+        mailaddrs = map(lambda a: a[8:], mailaddrs)
+        print "# Mailing to %s" % ", ".join(mailaddrs)
+        content = open("SHIPPER.EMAIL").read()
+        if options.upload:
+            server = smtplib.SMTP('localhost')
+            server.sendmail(whoami, mailaddrs, content)
+            server.quit()
+        else:
+            print "mail %s <<EOF" % ", ".join(mailaddrs)
+            print content
+            print "EOF"
 
     # Shipping has succeeded.
     if options.vcstag and tag_template and tag_message:
