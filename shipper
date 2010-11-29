@@ -823,6 +823,8 @@ try:
             if os.path.exists(idir):
                 print "# I will %s-tag this release as %s." % (what, tagname)
                 upload_or_die(cmnd % globals())
+        if gitorious_url:
+            print "# Don't forget to push to the gitorious repo."
     print "# Done"
 except KeyboardInterrupt:
     print "# Bye!"
