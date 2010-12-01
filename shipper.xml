@@ -775,6 +775,15 @@ release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis
 project name.</para>
 </refsect1>
 
+<refsect1><title>Bugs</title>
+<para>The program can deliver downloadables to Berlios incoming, but not 
+script a Berlios release. That has to be done through the web interface.</para>
+
+<para>The program can put downloadables in place on SourceForge, but not set
+the "Preferred Download". Usually this will point to the most recent download
+subdirectory by default, which is the right thing.</para>
+</refsect1>
+
 <refsect1><title>Author</title>
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
 

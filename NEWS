@@ -1,5 +1,8 @@
 			shipper project news
 
+* Wed Dec 1 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.13
+  Set the Berlios download location correctly for SourceForge announcements.
+
 * Fri Nov 26 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.12
   Can now tag releases under hg and bzr,
   Added the logo variable and logo embedding in the web-page template.
