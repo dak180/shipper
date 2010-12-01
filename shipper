@@ -538,7 +538,7 @@ try:
     # special destinations.
     if "berlios"in website:
         download = "http://download.berlios.de/"+(berlios_name or package)
-    if "sourceforge"in website:
+    elif "sourceforge"in website:
         download = "http://sourceforge.net/projects/%s/files/%s/%s" % (
             sourceforge_name,
             sourceforge_name,
