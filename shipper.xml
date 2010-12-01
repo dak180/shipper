@@ -45,7 +45,7 @@ order to do this, it relies on your project obeying standard GNU-like
 naming conventions.  It also relies on being able to mine project
 metadata out of a package specfile. A package specfile may be either 
 an RPM spec or a Debian control file; for both, <command>shipper</command>
-expects to see a small handful of extension fields that tell ut
+expects to see a small handful of extension fields that tell it
 what to do.</para>
 
 <para>In normal use, you need set only one header,
@@ -93,11 +93,12 @@ deliverables is separated from uploading because it means that you can
 stop and inspect what you're going to ship before committing to an
 upload.</para>
 
-<para>The last step before uploading may be to generate an 
-<filename>index.html</filename> file for uploading, if
-no such file alreay exists.</para>
+<para>The last step before uploading may be to generate an
+<filename>index.html</filename> file for uploading, if no such file
+alreay exists and you have specified the <option>-m</option>
+option.</para>
 
-<para>Without the -u (upload) option,
+<para>Without the <option>-u</option> (upload) option,
 <application>shipper</application> stops just before uploading,
 displaying the exact upload commands that would have been used to ship
 deliverables.  Thus, the command <command>shipper</command> with no
@@ -600,7 +601,7 @@ BUGS, TODO.</entry>
 <para>If the sourceforge destination is on your list,
 <application>shipper</application> will attempt to ship a tarball and
 source and binary RPMs to the prject's frs directory via rsync; the
-deliverables will be places in a subdirectory named after the version.
+deliverables will be placed in a subdirectory named after the version.
 It will also attempt to upload all web deliverables (README, CHANGES,
 NEWS, HISTORY, *.{html,css,js}, BUGS, TODO) to the project's
 SourceForge web directory.</para>
@@ -733,18 +734,22 @@ variable will be ignored in this case.</para>
 
 <refsect1><title>Command-line Options</title>
 
-<para>The -n option of <application>shipper</application> suppresses
-uploads, just building all deliverables locally (and not deleting
-them, after delivery, as normally occurs).</para>
+<para>The <option>-n</option> generates a
+configuration dump to standard output.</para>
 
-<para>The -N option suppresses both uploads and builds, generating a
-configuration dump instead.</para>
+<para>The <option>-u</option> option enables uploading.</para>
 
-<para>The -m option tells <application>shipper</application> to
-generate a web page an upload it to website destinations.</para>
+<para>The <option>-m</option> option tells
+<application>shipper</application> to generate a web page an upload it
+to website destinations.</para>
 
-<para>The -t option tells <application>shipper</application> to
+<para>The <option>-t</option> option tells <application>shipper</application> to
 attempt to tag the local repo after shipping.</para>
+
+<para>The <option>-x</option> option specifies a destination, or a 
+comma-separated list of destinations, not to ship to. This overrides 
+the setting of the destinations variable by shippper config files and
+control or spec files.</para>
 
 <para>The -v option makes <application>shipper</application> chatty
 about what it's doing.  The -h option prints a usage message and
@@ -768,7 +773,7 @@ will be rebuilt before being shipped.</para>
 
 <programlisting>
 release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>.html 
-	shipper
+	shipper -u -m -t
 </programlisting>
 
 <para>You will want to change <emphasis>package</emphasis> to your 
