@@ -758,6 +758,12 @@ try:
         upload("dl.sv.nongnu.org:/releases/%s/" % project_name,
                download_deliverables)
         # See http://savannah.gnu.org/maintenance/HomepageUpload
+        tmpdir = tempfile.mkdtemp()
+        do_or_die("cd %s; CVS_RSH=ssh cvs -z3 -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
+                  % (tmpdir, savannah_id, project_name, project_name))
+        do_or_die("cp %s %s/%s" % (" ".join(web_deliverables), tmpdir, projectname))
+        do_or_die("cd %s/%s && cvs add %s && CVS_RSH=ssh cvs commit && rm -fr %s" \
+                  % (tmpdir, project_name, " ".join(web_deliverables), tmpdir))
     def sourceforge():
         upload_or_die("rsync -avP -e ssh %s %s,%s@frs.sourceforge.net:/home/frs/project/%s/%s/%s/%s/" % (
             " ".join(download_deliverables),
