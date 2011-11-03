@@ -379,7 +379,7 @@ exists, it should point at a git repository for the source code.</para>
 <para>
 The last-change entry from your NEWS, Changelog, or RPM spec file. To
 extract this information from a NEWS or HISTORY file, first any header
-lines (detected by leading spaces) are skipped; in a secfile, all
+lines (detected by leading spaces) are skipped; in a specfile, all
 lines up to and including %changelog are skipped.  Then the first
 nonblank line (which is assumed to be the date/release information) is
 skipped.  Then all lines before the next blank one are grabbed.
@@ -558,11 +558,11 @@ that can be fed to freecode.net's API via
 <row>
 <entry>SHIPPER.EMAIL</entry>
 <entry>
-<para>This what <application>shipper</application>
-generates to be emailed to destinations that are mailto URLs.
-This file mill not be generated if it already exists (this is soo you
-can geberate the file with <command>shipper -n</command> and edit it
-before running without <option>-n</option>).</para>
+<para>This what <application>shipper</application> generates to be
+emailed to destinations that are mailto URLs.  This file mill not be
+generated if it already exists (this is so you can generate the file
+with <command>shipper</command> (no options) and edit it before
+running with <option>-u</option>).</para>
 </entry>
 </row>
 </tbody>
