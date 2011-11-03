@@ -190,7 +190,7 @@ def make_index_page(deliverables, substitutions):
                       gitorious_url
     # Handle the old name of freecode.net for backwards compatibility.
     if 'freecode' in destinations or 'freshmeat' in destinations:
-        extralines += "<p>There is a Freecode <a href='http://freecode.net/projects/%s'>%s page</a>.</p>\n" % \
+        extralines += "<p>There is a Freecode <a href='http://freecode.com/projects/%s'>%s page</a>.</p>\n" % \
                       (freecode_name, freecode_name)
     centertext = ""
     if "logo" in substitutions and substitutions["logo"]:
@@ -503,7 +503,7 @@ try:
         print "shipper: variable extraction finished"
 
     # Finally, derive the lastchange entry; we'll need it for
-    # freecode.net
+    # freecode.com
     lastchange = None
     for filename in ("NEWS", "HISTORY", "ChangeLog"):
         if not lastchange and os.path.exists(filename):
@@ -694,7 +694,7 @@ try:
             destinations.remove("freecode")
         else:
             while True:
-                focus = raw_input("# freecode.net release focus (? for list): ")
+                focus = raw_input("# freecode.com release focus (? for list): ")
                 if focus == '?':
                     i = 0
                     for f in freecode_focus_types:
@@ -707,7 +707,7 @@ try:
                 elif focus.lower() in map(lambda x: x.lower(), freecode_focus_types):
                     break
                 else:
-                    croak("not a valid freecode.net release focus!")
+                    croak("not a valid freecode.com release focus!")
             ofp = open("SHIPPER.FREECODE", "w")
             ofp.write("Project: %s\n" % (freecode_name or package))
             ofp.write("Version: %s\n" % version)
@@ -723,7 +723,7 @@ try:
                         url = website
                     url = os.path.join(url, f)
                     ofp.write("%s-URL: %s\n" % (s, url))
-            # freecode.net doesn't like bulleted entries.
+            # freecode.com doesn't like bulleted entries.
             freecodelog = map(lambda s: s.lstrip(), lastchange.split("\n"))
             ofp.write("\n" + "\n".join(freecodelog))
             ofp.close()
