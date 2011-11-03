@@ -1,7 +1,8 @@
 			shipper project news
 
-* Thu 04 Nov 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 0.15
+* Fri 04 Nov 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 0.15
   Remove Berlios support (it's shutting down) and clean up docs.
+  Add untested support for savannah-nongnu.
 
 * Thu 03 Nov 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 0.14
   Cope with the Freshmeat to Freecode name change.
