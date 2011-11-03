@@ -17,7 +17,7 @@ package = None   	# Nor a package name
 website = None		# Nor a home page
 project_tags = None  	# Keywords for tagging
 freecode_name = None	# Name of the project on Freecode
-#berlios_name = None	# Name of the project on berlios,de
+savannah_name = None	# Name of the project on savannah.org (non-gnu)
 gitorious_url = None    # Name of the project on gitorious
 sourceforge_name = None # Name of the project on sourceforge.net
 changelog = None	# Project changelog
@@ -485,9 +485,9 @@ try:
         freecode_name = metadata.extract("Freshmeat-Name")
     if not freecode_name:
         freecode_name = package
-    #berlios_name = metadata.extract("Berlios-Name")
-    #if not berlios_name:
-    #    berlios_name = package
+    savannah_name = metadata.extract("Savannah-Name")
+    if not savannah_name:
+        savannah_name = package
     sourceforge_name = metadata.extract("SourceForge-Name")
     if sourceforge_name:
         if "@" in sourceforge_name:
@@ -534,13 +534,13 @@ try:
     if not website:
         if "sourceforge" in destinations:
             website = "http://%s.sourceforge.net/" % sourceforge_name
-        #if "berlios" in destinations:
-        #    website = "http://%s.berlios.de/" % berlios_name
+        if "savannah" in destinations:
+            website = "http://www.nongnu.org/%s/" % savannah_name
 
     # Download directory has to be computed differently at
     # special destinations.
-    #if "berlios"in website:
-    #    download = "http://download.berlios.de/"+(berlios_name or package)
+    if "savannah"in website:
+        download = "http://download.savannah.nongnu.org/releases/%s/"+(savannah_name or package)
     elif "sourceforge"in website:
         download = "http://sourceforge.net/projects/%s/files/%s/%s" % (
             sourceforge_name,
@@ -630,10 +630,9 @@ try:
     # Might be time to dump
     #
     if options.nobuild:
-        # Used to contain 'berlios_name'
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'project_tags', 
-                         'freecode_name', 'sourceforge_name',
+                         'freecode_name', 'savannah_name', 'sourceforge_name',
                          'summary', 'tag_template', 'tag_message'):
             print "%s = %s" % (variable, `eval(variable)`)
         for variable in ('description', 'changelog', 'lastchange', 'mailtemplate', 'indextemplate'):
@@ -755,13 +754,13 @@ try:
     # Shipping methods for public destinations.
     def freecode():
         freecode_ship("SHIPPER.FREECODE")
-    #def berlios():
-    #    upload("ftp://ftp.berlios.de/incoming", download_deliverables)
-    #    berlios_webdir = \
-    #                   "shell.berlios.de:/home/groups/" \
-    #                   + (berlios_name or package) \
+    def savannah():
+        upload("dl.sv.nongnu.org:/releases/%s/" % project_name, download_deliverables)
+    #    savannah_webdir = \
+    #                   "shell.savannah.de:/home/groups/" \
+    #                   + (savannah_name or package) \
     #                   + "/htdocs"
-    #    upload(berlios_webdir, web_deliverables, subdir="")
+    #    upload(savannah_webdir, web_deliverables, subdir="")
     def sourceforge():
         upload_or_die("rsync -avP -e ssh %s %s,%s@frs.sourceforge.net:/home/frs/project/%s/%s/%s/%s/" % (
             " ".join(download_deliverables),
@@ -775,8 +774,7 @@ try:
             " ".join(web_deliverables),
             sourceforge_userid,
             sourceforge_name))
-    # Used to contain "berlios"
-    hardwired = ("freecode", "sourceforge")
+    hardwired = ("freecode", "savannah", "sourceforge")
 
     if options.verbose:
         print "Destinations: ", ", ".join(destinations)
