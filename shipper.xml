@@ -66,7 +66,7 @@ tarballs, source zip archives, ChangeLog files, README files,and
 various other project metadata files.  Destinations include both
 <emphasis>private destinations</emphasis> like websites, FTP archive
 sites and mailing lists, and <emphasis>public destinations</emphasis>
-like freecode.net and berlios.de. The
+like freecode.com and berlios.de. The
 <application>shipper</application> framework is extensible and it is
 relatively easy to add new destination types and new deliverables; in
 the future, we hope to support all major forge sites as
@@ -315,7 +315,7 @@ if you don't specify it.</para>
 <entry>#Freecode-Name:</entry>
 <entry>XBS-Freecode-Name:</entry>
 <entry>
-<para>Freecode shortname, used in generating freecode.net
+<para>Freecode shortname, used in generating freecode.com
 announcements. If this isn't present, it defaults to the project
 name; you only need to set it if they differ.</para>
 </entry>
@@ -539,7 +539,7 @@ Only generated if the <option>-m</option> option is set.</para>
 SHIPPER.FREECODE, unless that file already exists (this is soo you
 can geberate the file with <command>shipper -n</command> and edit it
 before running without <option>-n</option>). This file will be a job card
-that can be fed to freecode.net's API via
+that can be fed to freecode.com's API via
 <citerefentry><refentrytitle>freecode-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </entry>
@@ -603,7 +603,7 @@ SourceForge web directory.</para>
 <entry>
 <para>If the freecode destination is on your list,
 <application>shipper</application> will attempt to post a release
-announcement on freecode.net using
+announcement on freecode.com using
 <citerefentry><refentrytitle>freecode-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 The announcement will include URLs for whichever of the following
 deliverables are shipped, using the URL field from your specfile:
@@ -770,7 +770,7 @@ url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink
 
 <refsect1><title>Changes from previous versions</title>
 
-<para>In late 2011 freshmeat.net changed its name to freecode.net.
+<para>In late 2011 freshmeat.net changed its name to freecode.com.
 For backward compatibility, Freshmeat-Name is accepted as a synonym
 for Freecode-Name.</para>
 

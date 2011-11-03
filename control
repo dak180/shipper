@@ -8,7 +8,7 @@ Description: automated shipping of open-source project releases
  projects who do frequent releases.  It automates the tedious process
  of shipping a software release, can deliver releases in correct form
  to SourceForge, and knows how to post a release announcement to
- freecode.net via freecode-submit.
+ freecode.com via freecode-submit.
 
 XBS-Destinations: freecode
 

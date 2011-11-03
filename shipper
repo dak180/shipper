@@ -188,7 +188,7 @@ def make_index_page(deliverables, substitutions):
     if gitorious_url:
         extralines += "<p>The project is hosted on <a href='%s'>gitorious</a>.</p>\n" % \
                       gitorious_url
-    # Handle the old name of freecode.net for backwards compatibility.
+    # Handle the old name of freecode.com for backwards compatibility.
     if 'freecode' in destinations or 'freshmeat' in destinations:
         extralines += "<p>There is a Freecode <a href='http://freecode.com/projects/%s'>%s page</a>.</p>\n" % \
                       (freecode_name, freecode_name)
