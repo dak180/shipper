@@ -8,9 +8,9 @@ Description: automated shipping of open-source project releases
  projects who do frequent releases.  It automates the tedious process
  of shipping a software release, can deliver releases in correct form to
  SourceForge or Berlios, and knows how to post a release announcement to 
- freshmeat.net via freshmeat-submit.
+ freecode.net via freecode-submit.
 
-XBS-Destinations: freshmeat
+XBS-Destinations: freecode
 
 Homepage: http://www.catb.org/~esr/shipper
 

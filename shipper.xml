@@ -5,7 +5,7 @@
 <refmeta>
 <refentrytitle>shipper</refentrytitle>
 <manvolnum>1</manvolnum>
-<refmiscinfo class='source'>freshmeat-submit</refmiscinfo>
+<refmiscinfo class='source'>shipper</refmiscinfo>
 <refmiscinfo class='manual'>Development Tools</refmiscinfo>
 <refmiscinfo class='date'>Oct 17 2010</refmiscinfo>
 </refmeta>
@@ -66,7 +66,7 @@ tarballs, source zip archives, ChangeLog files, README files,and
 various other project metadata files.  Destinations include both
 <emphasis>private destinations</emphasis> like websites, FTP archive
 sites and mailing lists, and <emphasis>public destinations</emphasis>
-like freshmeat.net and berlios.de. The
+like freecode.net and berlios.de. The
 <application>shipper</application> framework is extensible and it is
 relatively easy to add new destination types and new deliverables; in
 the future, we hope to support all major forge sites as
@@ -307,15 +307,15 @@ if you don't specify it.</para>
 <entry>#Project-Tag-List:</entry>
 <entry>XBS-Project-Tag-List:</entry>
 <entry>
-<para>Topic tags, used on Freshmeat.</para>
+<para>Topic tags, used on Freecode.</para>
 </entry>
 </row>
 <row>
-<entry><varname>freshmeat_name</varname></entry>
-<entry>#Freshmeat-Name:</entry>
-<entry>XBS-Freshmeat-Name:</entry>
+<entry><varname>freecode_name</varname></entry>
+<entry>#Freecode-Name:</entry>
+<entry>XBS-Freecode-Name:</entry>
 <entry>
-<para>Freshmeat shortname, used in generating freshmeat.net
+<para>Freecode shortname, used in generating freecode.net
 announcements. If this isn't present, it defaults to the project
 name; you only need to set it if they differ.</para>
 </entry>
@@ -401,7 +401,7 @@ align='center'>-</entry> <entry align='center'>-</entry>
 <entry>
 <para>Lines to be inserted after the table of resources.  You
 can set this; <application>shipper</application> may add to it to,
-for example, create a link to the project's Freshmeat page.</para>
+for example, create a link to the project's Freecode page.</para>
 </entry>
 </row>
 <row>
@@ -543,15 +543,15 @@ Only generated if the <option>-m</option> option is set.</para>
 </entry>
 </row>
 <row>
-<entry>SHIPPER.FRESHMEAT</entry>
+<entry>SHIPPER.FREECODE</entry>
 <entry>
-<para>If freshmeat is in the user's destination list,
+<para>If freecode is in the user's destination list,
 <application>shipper</application> will generate a file called
-SHIPPER.FRESHMEAT, unless that file already exists (this is soo you
+SHIPPER.FREECODE, unless that file already exists (this is soo you
 can geberate the file with <command>shipper -n</command> and edit it
 before running without <option>-n</option>). This file will be a job card
-that can be fed to freshmeat.net's API via
-<citerefentry><refentrytitle>freshmeat-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+that can be fed to freecode.net's API via
+<citerefentry><refentrytitle>freecode-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 </para>
 </entry>
 </row>
@@ -623,19 +623,19 @@ directory.
 </entry>
 </row>
 <row>
-<entry>freshmeat</entry>
-<entry>SHIPPER.FRESHMEAT</entry>
+<entry>freecode</entry>
+<entry>SHIPPER.FREECODE</entry>
 <entry>-</entry>
 <entry>
-<para>If the freshmeat destination is on your list,
+<para>If the freecode destination is on your list,
 <application>shipper</application> will attempt to post a release
-announcement on freshmeat.net using
-<citerefentry><refentrytitle>freshmeat-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+announcement on freecode.net using
+<citerefentry><refentrytitle>freecode-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 The announcement will include URLs for whichever of the following
 deliverables are shipped, using the URL field from your specfile:
 tarballs, zipfiles, RPMs, debs, ChangeLog.  The user will be prompted for a
-Freshmeat release-focus.  This announcement is generated into the
-local deliverable SHIPPER.FRESHMEAT.</para>
+Freecode release-focus.  This announcement is generated into the
+local deliverable SHIPPER.FREECODE.</para>
 </entry>
 </row>
 <row>
@@ -824,7 +824,7 @@ or to tag after shipping.</para>
 
 <para>
 <citerefentry>
-<refentrytitle>freshmeat-submit</refentrytitle>
+<refentrytitle>freecode-submit</refentrytitle>
 <manvolnum>1</manvolnum>
 </citerefentry>,
 <citerefentry>
