@@ -798,6 +798,11 @@ url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink
 </refsect1>
 
 <refsect1><title>Changes from previous versions</title>
+
+<para>In late 2011 freshmeat.net changed its name to freecode.net.
+For backward compatibility, Freshmeat-Name is accepted as a synonym
+for Freecode-Name.</para>
+
 <para>Support for LSM files and shipping to the ibiblio submissions
 directory has been removed, as that portion of its archives is now
 mainly historical and no longer used for distribution (the last index

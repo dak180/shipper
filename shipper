@@ -482,6 +482,8 @@ try:
         project_tags = metadata.extract("Project-Tag-List")
     freecode_name = metadata.extract("Freecode-Name")
     if not freecode_name:
+        freecode_name = metadata.extract("Freshmeat-Name")
+    if not freecode_name:
         freecode_name = package
     berlios_name = metadata.extract("Berlios-Name")
     if not berlios_name:
