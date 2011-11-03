@@ -775,7 +775,7 @@ For backward compatibility, Freshmeat-Name is accepted as a synonym
 for Freecode-Name.</para>
 
 <para>Support for the hardwired "berlios" destination has been removed, 
-as Berlios is shuiting down on 31 Dec 2011.</para>
+as Berlios is shutting down on 31 Dec 2011.</para>
 
 <para>Support for LSM files and shipping to the ibiblio submissions
 directory has been removed, as that portion of its archives is now

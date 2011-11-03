@@ -6,8 +6,8 @@ Package: shipper
 Description: automated shipping of open-source project releases
  shipper is a power distribution tool for developers with multiple
  projects who do frequent releases.  It automates the tedious process
- of shipping a software release, can deliver releases in correct form to
- SourceForge or Berlios, and knows how to post a release announcement to 
+ of shipping a software release, can deliver releases in correct form
+ to SourceForge, and knows how to post a release announcement to
  freecode.net via freecode-submit.
 
 XBS-Destinations: freecode
