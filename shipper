@@ -755,12 +755,9 @@ try:
     def freecode():
         freecode_ship("SHIPPER.FREECODE")
     def savannah():
-        upload("dl.sv.nongnu.org:/releases/%s/" % project_name, download_deliverables)
-    #    savannah_webdir = \
-    #                   "shell.savannah.de:/home/groups/" \
-    #                   + (savannah_name or package) \
-    #                   + "/htdocs"
-    #    upload(savannah_webdir, web_deliverables, subdir="")
+        upload("dl.sv.nongnu.org:/releases/%s/" % project_name,
+               download_deliverables)
+        # See http://savannah.gnu.org/maintenance/HomepageUpload
     def sourceforge():
         upload_or_die("rsync -avP -e ssh %s %s,%s@frs.sourceforge.net:/home/frs/project/%s/%s/%s/%s/" % (
             " ".join(download_deliverables),
