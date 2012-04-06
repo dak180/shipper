@@ -167,11 +167,12 @@ destination list.</para>
 directory; there must be exactly one.  It extracts the project name
 from the Name field.  Next step is to find the project version (the
 variable <varname>package</varname>).  This is extracted from the
-Version field of the specfile, or by looking for a makefile macro with
-a name beginning with VERS; if the value of that macro is a shell
-command wrapped in $(shell ...), it is executed and the output is
-captured to yield the version.  If both versions are present, they are
-consistency-checked.</para>
+Version field of the specfile, or by looking in an SConstruct file for
+an assignment of the variable 'version', or by looking for a makefile
+macro with a name beginning with VERS; if the value of that macro is a
+shell command wrapped in $(shell ...), it is executed and the output
+is captured to yield the version.  If both versions are present, they
+are consistency-checked.</para>
 
 <para><application>shipper</application> gets most of the rest of the
 data it uses to decide what to do from headers in the specfile.
@@ -780,6 +781,22 @@ release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis
 
 <para>You will want to change <emphasis>package</emphasis> to your 
 project name.</para>
+
+<para>In an SConstruct file, you want:
+
+<programlisting>
+version = <emphasis>version</emphasis>
+</programlisting>
+
+and something like
+
+<programlisting>
+env.Alias("release", [tarball], 'shipper -u -m -t')
+</programlisting>
+
+with 'tarball' being a production that makes a release tarball.
+</para>
+
 </refsect1>
 
 <refsect1><title>Bugs</title>
