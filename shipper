@@ -2,7 +2,7 @@
 #
 # shipper -- a tool for shipping software
 
-import sys, os, readline, re, commands, time
+import sys, os, readline, re, commands, time, tempfile
 import glob, optparse, stat, email, smtplib, ConfigParser
 
 version="0.14"
@@ -443,6 +443,8 @@ try:
             makevers = commands.getoutput(makevers[7:-1])
         if makevers[0] == '"' and makevers[-1] == '"':
             makevers = makevers[1:-1]
+    if os.path.exists("SConstruct"):
+        makevers = grep('version *= "*(.*)"', "SConstruct")
     if makevers and metadata.version and metadata.version != makevers:
         croak("specfile version %s != Makefile version %s"%(metadata.version,makevers))
     else:
@@ -756,15 +758,15 @@ try:
     def freecode():
         freecode_ship("SHIPPER.FREECODE")
     def savannah():
-        upload("dl.sv.nongnu.org:/releases/%s/" % project_name,
+        upload("dl.sv.nongnu.org:/releases/%s/" % savannah_name,
                download_deliverables)
         # See http://savannah.gnu.org/maintenance/HomepageUpload
         tmpdir = tempfile.mkdtemp()
-        do_or_die("cd %s; CVS_RSH=ssh cvs -z3 -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
-                  % (tmpdir, savannah_id, project_name, project_name))
-        do_or_die("cp %s %s/%s" % (" ".join(web_deliverables), tmpdir, projectname))
-        do_or_die("cd %s/%s && cvs add %s && CVS_RSH=ssh cvs commit && rm -fr %s" \
-                  % (tmpdir, project_name, " ".join(web_deliverables), tmpdir))
+        upload_or_die("cd %s; CVS_RSH=ssh cvs -z3 -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
+                  % (tmpdir, savannah_id, savannah_name, savannah_name))
+        upload_or_die("cp %s %s/%s" % (" ".join(web_deliverables), tmpdir, savannah_name))
+        upload_or_die("cd %s/%s && cvs add %s && CVS_RSH=ssh cvs commit && rm -fr %s" \
+                  % (tmpdir, savannah_name, " ".join(web_deliverables), tmpdir))
     def sourceforge():
         upload_or_die("rsync -avP -e ssh %s %s,%s@frs.sourceforge.net:/home/frs/project/%s/%s/%s/%s/" % (
             " ".join(download_deliverables),
