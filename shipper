@@ -396,16 +396,6 @@ try:
         securecheck(here_profile)
         execfile(here_profile)
 
-    # Hack the destinations variable if need be, might mean we can avoid some
-    # builds.
-    if options.excluded:
-        for excludee in options.excluded.split(","):
-            if excludee in destinations:
-                destinations.remove(excludee)
-            else:
-                print >>sys.stderr, "shipper: %s isn't in the destinations!" % excludee
-                raise SystemExit,1
-
     # Set various sensible defaults
     if not whoami:
         whoami = whoami_really()
@@ -468,6 +458,16 @@ try:
             for removable in map(lambda s: s[1:], negations):
                 if removable in destinations:
                     destinations.remove(removable)
+
+    # Hack the destinations variable if need be, might mean we can avoid some
+    # builds.
+    if options.excluded:
+        for excludee in options.excluded.split(","):
+            if excludee in destinations:
+                destinations.remove(excludee)
+            else:
+                print >>sys.stderr, "shipper: %s isn't in the destinations!" % excludee
+                raise SystemExit,1
 
     print "# Uploading version %s of %s" % (version, package)
 
