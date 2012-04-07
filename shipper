@@ -10,6 +10,9 @@ version="0.14"
 #
 # State variables
 #
+# Note: When you add a variable to this set, be sure also to tweak
+# the state-dumping code.
+#
 destinations = []	# List of remote directories to update
 whoami = None		# Who am I? (Used for FTP logins and mail signatures)
 date = None		# User has not yet set a date
@@ -20,12 +23,13 @@ freecode_name = None	# Name of the project on Freecode
 savannah_name = None	# Name of the project on savannah.org (non-gnu)
 gitorious_url = None    # Name of the project on gitorious
 sourceforge_name = None # Name of the project on sourceforge.net
+summary = None   	# One-line summary of the package
+logo = ""               # Project logo
+#Stuff after this point is multiline
+description = None	# Multiline a description
 changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
-summary = None   	# One-line summary of the package
-description = None	# Nor a description
 extralines = ""         # Extra lines for HTML template
-logo = ""               # Project logo
 
 # Policy choices
 tag_template = "%s"
@@ -633,12 +637,16 @@ try:
     # Might be time to dump
     #
     if options.nobuild:
+        # Single-line 
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'project_tags', 
-                         'freecode_name', 'savannah_name', 'sourceforge_name',
-                         'summary', 'tag_template', 'tag_message'):
+                         'freecode_name', 'savannah_name',
+                         'gitorious_url', 'sourceforge_name',
+                         'summary', 'logo', 'tag_template', 'tag_message'):
             print "%s = %s" % (variable, `eval(variable)`)
-        for variable in ('description', 'changelog', 'lastchange', 'mailtemplate', 'indextemplate'):
+        # Free text, multiline
+        for variable in ('description', 'changelog', 'lastchange',
+                         'extralines', 'mailtemplate', 'indextemplate'):
             if not eval(variable):
                 print "No %s" % variable
             else:
