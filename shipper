@@ -24,6 +24,7 @@ savannah_name = None	# Name of the project on savannah.org (non-gnu)
 gitorious_url = None    # Name of the project on gitorious
 sourceforge_name = None # Name of the project on sourceforge.net
 summary = None   	# One-line summary of the package
+webdir = None           # Web directory to be mirrored to a project site
 logo = ""               # Project logo
 #Stuff after this point is multiline
 description = None	# Multiline a description
@@ -376,6 +377,9 @@ try:
     parser.add_option("-x", "--exclude",
                       dest="excluded", default="",
                       help="exclude some shipping targets")
+    parser.add_option("-w", "--web-only",
+                      action="store_true", dest="webonly", default=False,
+                      help="do webspace update only")
     (options, args) = parser.parse_args()
 
     #
@@ -503,6 +507,7 @@ try:
         sourceforge_userid = myuserid
     gitorious_url = metadata.extract("Gitorious-URL")
     logo = metadata.extract("Logo")
+    webdir = metadata.extract("Web-Directory")
     resourcetable = ""
 
     if options.verbose:
@@ -642,7 +647,8 @@ try:
                          'package', 'website', 'project_tags', 
                          'freecode_name', 'savannah_name',
                          'gitorious_url', 'sourceforge_name',
-                         'summary', 'logo', 'tag_template', 'tag_message'):
+                         'summary', 'webdir', 'logo',
+                         'tag_template', 'tag_message'):
             print "%s = %s" % (variable, `eval(variable)`)
         # Free text, multiline
         for variable in ('description', 'changelog', 'lastchange',
@@ -665,33 +671,34 @@ try:
     if options.verbose:
         print "shipper: sanity checks passed"
 
-    # Compute other deliverables, we need this even if not rebuilding
-    # the index. Includes anything with an HTML, Javascript, or CSS
-    # extension.
-    for filename in glob.glob('*.html')+glob.glob('*.xhtml')+glob.glob('*.js')+glob.glob('*.css'):
-        if filename == 'index.html':
-            continue
-        stem = filename[:-4]
-        for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
-            if os.path.exists(stem + ext):
-                explanation = "HTML rendering of " + stem + ext
-                break
-        else:
-            explanation = "HTML page."
-        deliverables.append((filename, explanation, None, False))
+    if not webdir:
+        # Compute web-related deliverables, we need this even if not rebuilding
+        # the index. Includes anything with an HTML, Javascript, or CSS
+        # extension.
+        for filename in glob.glob('*.html')+glob.glob('*.xhtml')+glob.glob('*.js')+glob.glob('*.css'):
+            if filename == 'index.html':
+                continue
+            stem = filename[:-4]
+            for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
+                if os.path.exists(stem + ext):
+                    explanation = "HTML rendering of " + stem + ext
+                    break
+            else:
+                explanation = "HTML page."
+            deliverables.append((filename, explanation, None, False))
 
-    # If a web page doesn't already exist, but the index template
-    # variable is nonempty (which is the default) make one.  
-    if indextemplate and options.makeindex:
-        make_index_page(deliverables, globals())
-        # Now that the web page has been generated, it can add
-        # itself to the deliverables without having it show up in
-        # the resource table.
-        deliverables.append(("index.html", "index web page", None, False))
+        # If a web page doesn't already exist, but the index template
+        # variable is nonempty (which is the default) make one.  
+        if indextemplate and options.makeindex:
+            make_index_page(deliverables, globals())
+            # Now that the web page has been generated, it can add
+            # itself to the deliverables without having it show up in
+            # the resource table.
+            deliverables.append(("index.html", "index web page", None, False))
 
-    # We'll want the logo if it exists, too
-    if logo:
-        deliverables.append((logo, "project logo", None, False))
+        # We'll want the logo if it exists, too
+        if logo:
+            deliverables.append((logo, "project logo", None, False))
 
     # The freecode announcement
     if 'freecode' in destinations and not os.path.exists("SHIPPER.FREECODE"):
@@ -766,8 +773,9 @@ try:
     def freecode():
         freecode_ship("SHIPPER.FREECODE")
     def savannah():
-        upload("dl.sv.nongnu.org:/releases/%s/" % savannah_name,
-               download_deliverables)
+        if not options.webonly:
+            upload("dl.sv.nongnu.org:/releases/%s/" % savannah_name,
+                   download_deliverables)
         # See http://savannah.gnu.org/maintenance/HomepageUpload
         tmpdir = tempfile.mkdtemp()
         upload_or_die("cd %s; CVS_RSH=ssh cvs -z3 -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
@@ -776,14 +784,15 @@ try:
         upload_or_die("cd %s/%s && cvs add %s && CVS_RSH=ssh cvs commit && rm -fr %s" \
                   % (tmpdir, savannah_name, " ".join(web_deliverables), tmpdir))
     def sourceforge():
-        upload_or_die("rsync -avP -e ssh %s %s,%s@frs.sourceforge.net:/home/frs/project/%s/%s/%s/%s/" % (
-            " ".join(download_deliverables),
-            sourceforge_userid, 
-            sourceforge_name,
-            sourceforge_name[:1],
-            sourceforge_name[:2],
-            sourceforge_name,
-            version))
+        if not options.webonly:
+            upload_or_die("rsync -avP -e ssh %s %s,%s@frs.sourceforge.net:/home/frs/project/%s/%s/%s/%s/" % (
+                " ".join(download_deliverables),
+                sourceforge_userid, 
+                sourceforge_name,
+                sourceforge_name[:1],
+                sourceforge_name[:2],
+                sourceforge_name,
+                version))
         upload_or_die("rsync -aiv %s %s,%s@web.sourceforge.net:htdocs/" % (
             " ".join(web_deliverables),
             sourceforge_userid,
@@ -799,49 +808,55 @@ try:
             print "# Shipping to public destination", destination
             eval(destination + "()")
         elif destination.startswith("ftp:"):
-            upload(destination, download_deliverables)
+            if not options.webonly:
+                upload(destination, download_deliverables)
         elif destination not in hardwired:
-            upload(destination, all_deliverables)
-    mailaddrs = filter(lambda d: d.startswith("mailto:"),destinations)
-    if mailaddrs:
-        mailaddrs = map(lambda a: a[8:], mailaddrs)
-        print "# Mailing to %s" % ", ".join(mailaddrs)
-        content = open("SHIPPER.EMAIL").read()
-        if options.upload:
-            server = smtplib.SMTP('localhost')
-            server.sendmail(whoami, mailaddrs, content)
-            server.quit()
-        else:
-            print "mail %s <<EOF" % ", ".join(mailaddrs)
-            print content
-            print "EOF"
+            if options.webonly:
+                upload(destination, web_deliverables)
+            else:
+                upload(destination, all_deliverables)
 
-    # Shipping has succeeded.
-    if options.vcstag and tag_template and tag_message:
-        tagname = tag_template % version
-        tag_message = tag_message % version
+    if not options.webonly:
+        mailaddrs = filter(lambda d: d.startswith("mailto:"),destinations)
+        if mailaddrs:
+            mailaddrs = map(lambda a: a[8:], mailaddrs)
+            print "# Mailing to %s" % ", ".join(mailaddrs)
+            content = open("SHIPPER.EMAIL").read()
+            if options.upload:
+                server = smtplib.SMTP('localhost')
+                server.sendmail(whoami, mailaddrs, content)
+                server.quit()
+            else:
+                print "mail %s <<EOF" % ", ".join(mailaddrs)
+                print content
+                print "EOF"
 
-        # If we're in the trunk of an SVN repository, we want to tag
-        # what just got shipped as an external release.
-        if os.path.basename(os.getcwd())=='trunk' and os.path.exists(".svn"):
-            print "# This is a Subversion trunk directory..."
-            if os.path.exists("../tags"):
-                print "# I see an svn peer tags directory..."
-                if os.path.exists("../tags/" + tagname):
-                    print "# This release has aleady been tagged."
-                else:
-                    print "# I will copy and tag this release as %s." % tagname
-                    upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
-        for (idir, what, cmnd) in (
-            (".git", "git", "git tag -a %(tagname)s -m '%(tag_message)s'"),
-            (".hg",  "hg",  "hg tag %(tagname)s -m '%(tag_message)s'"),
-            (".bzr", "bzr", "bzr tag %(tagname)s"),
-            ):
-            if os.path.exists(idir):
-                print "# I will %s-tag this release as %s." % (what, tagname)
-                upload_or_die(cmnd % globals())
-        if gitorious_url:
-            print "# Don't forget to push to the gitorious repo."
+        # Shipping has succeeded.
+        if options.vcstag and tag_template and tag_message:
+            tagname = tag_template % version
+            tag_message = tag_message % version
+
+            # If we're in the trunk of an SVN repository, we want to tag
+            # what just got shipped as an external release.
+            if os.path.basename(os.getcwd())=='trunk' and os.path.exists(".svn"):
+                print "# This is a Subversion trunk directory..."
+                if os.path.exists("../tags"):
+                    print "# I see an svn peer tags directory..."
+                    if os.path.exists("../tags/" + tagname):
+                        print "# This release has aleady been tagged."
+                    else:
+                        print "# I will copy and tag this release as %s." % tagname
+                        upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
+            for (idir, what, cmnd) in (
+                (".git", "git", "git tag -a %(tagname)s -m '%(tag_message)s'"),
+                (".hg",  "hg",  "hg tag %(tagname)s -m '%(tag_message)s'"),
+                (".bzr", "bzr", "bzr tag %(tagname)s"),
+                ):
+                if os.path.exists(idir):
+                    print "# I will %s-tag this release as %s." % (what, tagname)
+                    upload_or_die(cmnd % globals())
+            if gitorious_url:
+                print "# Don't forget to push to the gitorious repo."
     print "# Done"
 except KeyboardInterrupt:
     print "# Bye!"

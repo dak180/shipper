@@ -22,6 +22,7 @@
   <arg choice='opt'>-v</arg>
   <arg choice='opt'>-m</arg>
   <arg choice='opt'>-t</arg>
+  <arg choice='opt'>-w</arg>
   <arg choice='opt'>-x <replaceable>destinations</replaceable></arg>
 </cmdsynopsis>
 </refsynopsisdiv>
@@ -104,6 +105,11 @@ displaying the exact upload commands that would have been used to ship
 deliverables.  Thus, the command <command>shipper</command> with no
 options will show you exactly what <application>shipper</application>
 would do for a real upload.</para>
+
+<para>The option <option>-u</option> (web-only) tells shipper to update
+web pages only rather than shipping (and possibly tagging) a release. This
+will be useful for forges like Savannah that have a tricky procedure for
+website updates.</para> 
 
 <para>Otherwise, <application>shipper</application> then uploads
 deliverables and posts all announcements.  The <option>-x</option> may
@@ -213,7 +219,7 @@ appending the value of <varname>package</varname> to
 the destination you're shipping to.</para>
 
 <para>A destination entry of <quote>~</quote> can be used to clear the
-previously-set value, so an individial project control file can ignore
+previously-set value, so an individual project control file can ignore
 desrinations set in your home-directory
 <filename>~/.shipper</filename> file.  Additionally, <quote>~</quote>
 followed by a destination causes that individual destination to be
