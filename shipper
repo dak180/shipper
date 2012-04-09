@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #
 # shipper -- a tool for shipping software
+#
+# Requires Python 2.72 or later.
 
 import sys, os, readline, re, commands, time, tempfile
 import glob, optparse, stat, email, smtplib, ConfigParser
@@ -116,14 +118,14 @@ def croak(msg):
 def do_or_die(cmd):
     "Either execute a command or fail noisily, letting output go to stdout."
     if options.verbose:
-        print "***", cmd
+        print("***", cmd)
     if os.system(cmd):
         croak("command '%s' failed!" % cmd)
 
 def trap_or_die(cmd):
     "Either execute a command or fail noisily, capturing output."
     if options.verbose:
-        print "***", cmd
+        print("***", cmd)
     (status, output) =  commands.getstatusoutput(cmd)
     if status:
         croak("command '%s' failed!" % cmd)
@@ -134,14 +136,14 @@ def upload_or_die(cmd):
     if options.upload:
         do_or_die(cmd)
     else:
-        print cmd
+        print(cmd)
 
 def upload(destination, files, subdir=None):
     "Upload a file via ftp or scp."
     if subdir == None:
         subdir=package
-    print "# Uploading to %s" % destination
-    files = filter(os.path.exists, files)
+    print("# Uploading to %s" % destination)
+    files = list(filter(os.path.exists, files))
     if destination.startswith("ftp://"):
         destination = destination[6:].split("/")
         host = destination.pop(0)
@@ -156,7 +158,7 @@ def upload(destination, files, subdir=None):
             pfp.writelines(commands)
             pfp.close()
         else:
-            print "".join(commands)
+            print("".join(commands))
     elif destination.find(":") > -1:
         (host, directory) = destination.split(":")
         for file in files:
@@ -173,13 +175,13 @@ def freecode_ship(job_card):
     "Ship a specified update to freecode."
     if options.upload:
         upload_or_die("freecode-submit <" + job_card)
-    print "Announcing to freecode <<EOF"
+    print("Announcing to freecode <<EOF")
     sys.stdout.write(open(job_card).read())
-    print "EOF"
+    print("EOF")
 
 def make_index_page(deliverables, substitutions):
     "Make index page, listing specified deliverables."
-    print "# Building index.html..."
+    print("# Building index.html...")
     global extralines
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
     for (ifile, explanation, tag, bulky) in deliverables:
@@ -390,7 +392,7 @@ try:
 
     # Security check, don't let an attacker elevate privileges 
     def securecheck(file):
-        if stat.S_IMODE(os.stat(file).st_mode) & 00002:
+        if stat.S_IMODE(os.stat(file).st_mode) & 0o0002:
             croak("%s must not be world-writeable!" % file)
 
     # Read in variable overrides
@@ -398,11 +400,11 @@ try:
     home_profile = os.path.join(os.getenv('HOME'), ".shipper")
     if os.path.exists(home_profile):
         securecheck(home_profile)
-        execfile(home_profile)
+        exec(compile(open(home_profile).read(), home_profile, 'exec'))
     here_profile = ".shipper"
     if os.path.exists(here_profile):
         securecheck(here_profile)
-        execfile(here_profile)
+        exec(compile(open(here_profile).read(), here_profile, 'exec'))
 
     # Set various sensible defaults
     if not whoami:
@@ -455,15 +457,14 @@ try:
     # Specfiles may set their own destinations
     local_destinations = metadata.extract("Destinations")
     if local_destinations:
-        local_destinations = map(lambda x: x.strip(), local_destinations.split(","))
-        negations = filter(lambda s: s.startswith("~"), local_destinations)
-        local_destinations = filter(lambda s: not s.startswith("~"),
-                               local_destinations)
+        local_destinations = [x.strip() for x in local_destinations.split(",")]
+        negations = [s for s in local_destinations if s.startswith("~")]
+        local_destinations = [s for s in local_destinations if not s.startswith("~")]
         if "~" in negations:
             destinations = local_destinations
         else:
             destinations += local_destinations
-            for removable in map(lambda s: s[1:], negations):
+            for removable in [s[1:] for s in negations]:
                 if removable in destinations:
                     destinations.remove(removable)
 
@@ -475,9 +476,9 @@ try:
                 destinations.remove(excludee)
             else:
                 print >>sys.stderr, "shipper: %s isn't in the destinations!" % excludee
-                raise SystemExit,1
+                raise SystemExit(1)
 
-    print "# Uploading version %s of %s" % (version, package)
+    print("# Uploading version %s of %s" % (version, package))
 
     # Extract remaining variables for templating
     if not website:
@@ -519,7 +520,7 @@ try:
     for filename in ("NEWS", "HISTORY", "ChangeLog"):
         if not lastchange and os.path.exists(filename):
             if options.verbose:
-                print "shipper: I see a %s file" % filename
+                print("shipper: I see a %s file" % filename)
             state = 0
             for line in open(filename, "r"):
                 if state == 0:       # Skipping header
@@ -569,7 +570,7 @@ try:
         return re.search("[0-9]", filename)
 
     if options.verbose:
-        print "shipper: starting deliverables computation"
+        print("shipper: starting deliverables computation")
 
     # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FREECODE.
     deliverable_types = (
@@ -636,7 +637,7 @@ try:
             if pattern.search(filename):
                 deliverables.append((filename, explanation, tag, bulky))
     if options.verbose:
-        print "Deliverables:", " ".join(map(lambda x: x[0], deliverables))
+        print("Deliverables:", " ".join([x[0] for x in deliverables]))
 
     #
     # Might be time to dump
@@ -649,27 +650,27 @@ try:
                          'gitorious_url', 'sourceforge_name',
                          'summary', 'webdir', 'logo',
                          'tag_template', 'tag_message'):
-            print "%s = %s" % (variable, `eval(variable)`)
+            print("%s = %s" % (variable, repr(eval(variable))))
         # Free text, multiline
         for variable in ('description', 'changelog', 'lastchange',
                          'extralines', 'mailtemplate', 'indextemplate'):
             if not eval(variable):
-                print "No %s" % variable
+                print("No %s" % variable)
             else:
-                print "%s = <<EOF\n%sEOF" % (variable, eval(variable))
-        raise SystemExit, 0
+                print("%s = <<EOF\n%sEOF" % (variable, eval(variable)))
+        raise SystemExit(0)
     #
     # Build deliverables
     #
 
     # Sanity checks
-    if not filter(versioned, map(lambda (f, e, t, b): f, deliverables)):
+    if not list(filter(versioned, [f_e_t_b[0] for f_e_t_b in deliverables])):
         croak("no deliverables with versions!")
     if not destinations:
         croak("the Destinations list is empty; nothing to do.")
 
     if options.verbose:
-        print "shipper: sanity checks passed"
+        print("shipper: sanity checks passed")
 
     if not webdir:
         # Compute web-related deliverables, we need this even if not rebuilding
@@ -702,26 +703,26 @@ try:
 
     # The freecode announcement
     if 'freecode' in destinations and not os.path.exists("SHIPPER.FREECODE"):
-        print "# Building SHIPPER.FREECODE..."
+        print("# Building SHIPPER.FREECODE...")
         if not website:
-            print "# Can't announce to freecode without a primary website!"
+            print("# Can't announce to freecode without a primary website!")
             destinations.remove("freecode")
         elif not lastchange:
-            print "# Can't announce to freecode without a changes field!"
+            print("# Can't announce to freecode without a changes field!")
             destinations.remove("freecode")
         else:
             while True:
-                focus = raw_input("# freecode.com release focus (? for list): ")
+                focus = input("# freecode.com release focus (? for list): ")
                 if focus == '?':
                     i = 0
                     for f in freecode_focus_types:
-                        print "%d: %s" % (i, f)
+                        print("%d: %s" % (i, f))
                         i += 1
                 elif focus in "0123456789":
                     focus = freecode_focus_types[int(focus)]
-                    print "# OK:", focus
+                    print("# OK:", focus)
                     break
-                elif focus.lower() in map(lambda x: x.lower(), freecode_focus_types):
+                elif focus.lower() in [x.lower() for x in freecode_focus_types]:
                     break
                 else:
                     croak("not a valid freecode.com release focus!")
@@ -741,16 +742,16 @@ try:
                     url = os.path.join(url, f)
                     ofp.write("%s-URL: %s\n" % (s, url))
             # freecode.com doesn't like bulleted entries.
-            freecodelog = map(lambda s: s.lstrip(), lastchange.split("\n"))
+            freecodelog = [s.lstrip() for s in lastchange.split("\n")]
             ofp.write("\n" + "\n".join(freecodelog))
             ofp.close()
 
     # Finally, email notification
-    maildests = filter(lambda x: x.startswith("mailto:"), destinations)
+    maildests = [x for x in destinations if x.startswith("mailto:")]
     if maildests and not os.path.exists("SHIPPER.EMAIL"):
-        print "# Building SHIPPER.EMAIL..."
+        print("# Building SHIPPER.EMAIL...")
         ofp = open("SHIPPER.EMAIL", "w")
-        ofp.write("To: " + ", ".join(map(lambda x: x[7:], maildests)) + "\n")
+        ofp.write("To: " + ", ".join([x[7:] for x in maildests]) + "\n")
         ofp.write(mailtemplate % globals())
         ofp.close()
 
@@ -761,13 +762,9 @@ try:
     # Compute final deliverables.  This computation needs to coincide
     # with the way web deliverables are distinguished from download
     # deliverables in make_index_page(), otherwise havoc will ensue.
-    all_deliverables = map(lambda x: x[0], deliverables)
-    download_deliverables = map(lambda x: x[0],
-                                filter(lambda (f, e, s, b): b,
-                                deliverables))
-    web_deliverables = map(lambda x: x[0],
-                                filter(lambda (f, e, s, b): not b,
-                                deliverables))
+    all_deliverables = [x[0] for x in deliverables]
+    download_deliverables = [x[0] for x in [f_e_s_b for f_e_s_b in deliverables if f_e_s_b[3]]]
+    web_deliverables = [x[0] for x in [f_e_s_b1 for f_e_s_b1 in deliverables if not f_e_s_b1[3]]]
 
     # Shipping methods for public destinations.
     def freecode():
@@ -811,12 +808,12 @@ try:
     hardwired = ("freecode", "savannah", "sourceforge")
 
     if options.verbose:
-        print "Destinations: ", ", ".join(destinations)
+        print("Destinations: ", ", ".join(destinations))
 
     # OK, ship everything.  First, the non-mail destinations
-    for destination in filter(lambda d: not d.startswith("mailto:"),destinations):
+    for destination in [d for d in destinations if not d.startswith("mailto:")]:
         if destination in hardwired:
-            print "# Shipping to public destination", destination
+            print("# Shipping to public destination", destination)
             eval(destination + "()")
         elif destination.startswith("ftp:"):
             if not options.webonly:
@@ -828,19 +825,19 @@ try:
                 upload(destination, all_deliverables)
 
     if not options.webonly:
-        mailaddrs = filter(lambda d: d.startswith("mailto:"),destinations)
+        mailaddrs = [d for d in destinations if d.startswith("mailto:")]
         if mailaddrs:
-            mailaddrs = map(lambda a: a[8:], mailaddrs)
-            print "# Mailing to %s" % ", ".join(mailaddrs)
+            mailaddrs = [a[8:] for a in mailaddrs]
+            print("# Mailing to %s" % ", ".join(mailaddrs))
             content = open("SHIPPER.EMAIL").read()
             if options.upload:
                 server = smtplib.SMTP('localhost')
                 server.sendmail(whoami, mailaddrs, content)
                 server.quit()
             else:
-                print "mail %s <<EOF" % ", ".join(mailaddrs)
-                print content
-                print "EOF"
+                print("mail %s <<EOF" % ", ".join(mailaddrs))
+                print(content)
+                print("EOF")
 
         # Shipping has succeeded.
         if options.vcstag and tag_template and tag_message:
@@ -850,13 +847,13 @@ try:
             # If we're in the trunk of an SVN repository, we want to tag
             # what just got shipped as an external release.
             if os.path.basename(os.getcwd())=='trunk' and os.path.exists(".svn"):
-                print "# This is a Subversion trunk directory..."
+                print("# This is a Subversion trunk directory...")
                 if os.path.exists("../tags"):
-                    print "# I see an svn peer tags directory..."
+                    print("# I see an svn peer tags directory...")
                     if os.path.exists("../tags/" + tagname):
-                        print "# This release has aleady been tagged."
+                        print("# This release has aleady been tagged.")
                     else:
-                        print "# I will copy and tag this release as %s." % tagname
+                        print("# I will copy and tag this release as %s." % tagname)
                         upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
             for (idir, what, cmnd) in (
                 (".git", "git", "git tag -a %(tagname)s -m '%(tag_message)s'"),
@@ -864,13 +861,13 @@ try:
                 (".bzr", "bzr", "bzr tag %(tagname)s"),
                 ):
                 if os.path.exists(idir):
-                    print "# I will %s-tag this release as %s." % (what, tagname)
+                    print("# I will %s-tag this release as %s." % (what, tagname))
                     upload_or_die(cmnd % globals())
             if gitorious_url:
-                print "# Don't forget to push to the gitorious repo."
-    print "# Done"
+                print("# Don't forget to push to the gitorious repo.")
+    print("# Done")
 except KeyboardInterrupt:
-    print "# Bye!"
+    print("# Bye!")
 
 # The following sets edit modes for GNU EMACS
 # Local Variables:
