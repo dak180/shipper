@@ -793,8 +793,12 @@ try:
                 sourceforge_name[:2],
                 sourceforge_name,
                 version))
+        if webdir:
+            websources = webdir + '/'
+        else:
+            websources = " ".join(web_deliverables),
         upload_or_die("rsync -aiv %s %s,%s@web.sourceforge.net:htdocs/" % (
-            " ".join(web_deliverables),
+            websources,
             sourceforge_userid,
             sourceforge_name))
     hardwired = ("freecode", "savannah", "sourceforge")

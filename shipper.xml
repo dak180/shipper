@@ -106,7 +106,7 @@ deliverables.  Thus, the command <command>shipper</command> with no
 options will show you exactly what <application>shipper</application>
 would do for a real upload.</para>
 
-<para>The option <option>-u</option> (web-only) tells shipper to update
+<para>The option <option>-w</option> (web-only) tells shipper to update
 web pages only rather than shipping (and possibly tagging) a release. This
 will be useful for forges like Savannah that have a tricky procedure for
 website updates.</para> 
@@ -419,6 +419,20 @@ for example, create a link to the project's Freecode page.</para>
 <entry>
 <para>A logo or icon for the project.  The default web page template will
 embed this in the page header.</para>
+</entry>
+</row>
+<row>
+<entry><varname>webdir</varname></entry>
+<entry>#Web-Directory</entry>
+<entry>#XBS-Web-Directory</entry>
+<entry>
+<para>The relative path of a web directory to be mirrored to project
+webspace at a forge location. If this is defined it overrides the normal
+web page templating mechanism associated with the <option>-m</option> 
+option.</para>
+<para>Usually shipper just generates an rsync of this directory to
+the host location, but it may take special action for forges like Savannah
+that have tortuous procedures for updating webspace.</para>
 </entry>
 </row>
 </tbody>
