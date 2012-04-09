@@ -1,6 +1,6 @@
 # Makefile for the shipper project
 
-VERS=$(shell sed <shipper -n -e '/^version=\(.*\)/s//\1/p')
+VERS=$(shell sed <shipper -n -e '/^version *= *\(.*\)/s//\1/p')
 
 MANDIR=$(DESTDIR)/usr/share/man/man1
 BINDIR=$(DESTDIR)/usr/bin
@@ -30,6 +30,10 @@ clean:
 
 version:
 	echo $(VERS)
+
+PYLINTOPTS = --rcfile=/dev/null --reports=n --include-ids=y --disable=C0103,C0111,C0301,W0511,R0902,R0912,R0915
+pylint:
+	@pylint --output-format=parseable $(PYLINTOPTS) shipper
 
 dist: shipper-$(VERS).tar.gz
 

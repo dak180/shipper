@@ -4,10 +4,10 @@
 #
 # Requires Python 2.72 or later.
 
-import sys, os, readline, re, commands, time, tempfile
-import glob, optparse, stat, email, smtplib, ConfigParser
+import sys, os, re, commands, time, tempfile
+import glob, optparse, stat, email, smtplib
 
-version="0.14"
+version = "0.14"
 
 #
 # State variables
@@ -138,38 +138,38 @@ def upload_or_die(cmd):
     else:
         print(cmd)
 
-def upload(destination, files, subdir=None):
+def upload(dest, files, subdir=None):
     "Upload a file via ftp or scp."
     if subdir == None:
-        subdir=package
-    print("# Uploading to %s" % destination)
+        subdir = package
+    print("# Uploading to %s" % dest)
     files = list(filter(os.path.exists, files))
-    if destination.startswith("ftp://"):
-        destination = destination[6:].split("/")
-        host = destination.pop(0)
-        directory = "/".join(destination)
-        commands = ["lftp\n", "open -u anonymous," + myaddress + " " + host + "\n"]
+    if dest.startswith("ftp://"):
+        dest = dest[6:].split("/")
+        host = dest.pop(0)
+        directory = "/".join(dest)
+        upcmds = ["lftp\n", "open -u anonymous," + myaddress + " " + host + "\n"]
         if directory:
-            commands.append("cd " + directory + "\n")
-        commands.append("mput " + " ".join(files) + "\n")
-        commands.append("close\n")
+            upcmds.append("cd " + directory + "\n")
+        upcmds.append("mput " + " ".join(files) + "\n")
+        upcmds.append("close\n")
         if options.upload:
-            pfp = os.popen(commands.pop(0), "w")
-            pfp.writelines(commands)
+            pfp = os.popen(upcmds.pop(0), "w")
+            pfp.writelines(upcmds)
             pfp.close()
         else:
-            print("".join(commands))
-    elif destination.find(":") > -1:
-        (host, directory) = destination.split(":")
-        for file in files:
+            print("".join(upcmds))
+    elif dest.find(":") > -1:
+        (host, directory) = dest.split(":")
+        for fn in files:
             # Requires your files to be writeable by you - maybe not so if they
             # were RCSed but not locked! If they are, the -p option to scp
             # will set that permission on the remote host and allow you to
             # update the files with scp later.
-            remote = os.path.join(directory, subdir, os.path.basename(file))
-            upload_or_die("scp -p " + file + " " + host + ":" + remote)
+            remote = os.path.join(directory, subdir, os.path.basename(fn))
+            upload_or_die("scp -p " + fn + " " + host + ":" + remote)
     else:
-        sys.stderr.write("Don't know what to do with destination %s!\n" % destination)
+        sys.stderr.write("Don't know what to do with destination %s!\n" % dest)
 
 def freecode_ship(job_card):
     "Ship a specified update to freecode."
@@ -190,7 +190,7 @@ def make_index_page(deliverables, substitutions):
         else:
             url = website
         url = os.path.join(url, ifile)
-        resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (url,ifile,explanation)
+        resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (url, ifile, explanation)
     resourcetable += "</table>"
     if gitorious_url:
         extralines += "<p>The project is hosted on <a href='%s'>gitorious</a>.</p>\n" % \
@@ -342,7 +342,7 @@ def whoami_really():
         ("~/.hgrc", r"username\s*=\s*(.*)"),                # Mercurial
         ("~/.lynxrc", r"personal_mail_address\s*=\s*(.*)")  # Lynx
         ):
-        fn = os.expanduser(fn)
+        fn = os.path.expanduser(fn)
         if os.path.exists(fn):
             for line in file(fn):
                 m = re.search(mine, line)
@@ -388,12 +388,13 @@ try:
     # Extract metadata and compute control information
     #
 
-    def disable(s): destinations.remove(s)
+    def disable(s):
+        destinations.remove(s)
 
     # Security check, don't let an attacker elevate privileges 
-    def securecheck(file):
-        if stat.S_IMODE(os.stat(file).st_mode) & 0o0002:
-            croak("%s must not be world-writeable!" % file)
+    def securecheck(fn):
+        if stat.S_IMODE(os.stat(fn).st_mode) & 0o0002:
+            croak("%s must not be world-writeable!" % fn)
 
     # Read in variable overrides
     securecheck(".")
@@ -446,7 +447,7 @@ try:
     if os.path.exists("SConstruct"):
         makevers = grep('version *= "*(.*)"', "SConstruct")
     if makevers and metadata.version and metadata.version != makevers:
-        croak("specfile version %s != Makefile version %s"%(metadata.version,makevers))
+        croak("specfile version %s != Makefile version %s" % (metadata.version, makevers))
     else:
         version = makevers or metadata.version
     if version == None:
@@ -565,9 +566,9 @@ try:
     #
     # Now compute the names of deliverables
     #
-    def versioned(filename):
+    def versioned(fn):
         "Does the specified filename contain a version number?"
-        return re.search("[0-9]", filename)
+        return re.search("[0-9]", fn)
 
     if options.verbose:
         print("shipper: starting deliverables computation")
