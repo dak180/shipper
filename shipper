@@ -780,9 +780,16 @@ try:
         tmpdir = tempfile.mkdtemp()
         upload_or_die("cd %s; CVS_RSH=ssh cvs -z3 -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
                   % (tmpdir, savannah_id, savannah_name, savannah_name))
-        upload_or_die("cp %s %s/%s" % (" ".join(web_deliverables), tmpdir, savannah_name))
-        upload_or_die("cd %s/%s && cvs add %s && CVS_RSH=ssh cvs commit && rm -fr %s" \
-                  % (tmpdir, savannah_name, " ".join(web_deliverables), tmpdir))
+        checkout = tmpdir + os.sep + savannah_name
+        if not webdir:
+            deliver = " ".join(web_deliverables)
+            upload_or_die("cp %s %s" % (deliver, checkout))
+            upload_or_die("cd %s && cvs add %s" % (checkout, deliver))
+        else:
+            # FIXME: Generate add of new files
+            upload_or_die("cp -r %s/* %s" % (webdir, checkout))
+        upload_or_die("cd %s/%s && CVS_RSH=ssh cvs commit && rm -fr %s" \
+                  % (tmpdir, savannah_name, tmpdir))
     def sourceforge():
         if not options.webonly:
             upload_or_die("rsync -avP -e ssh %s %s,%s@frs.sourceforge.net:/home/frs/project/%s/%s/%s/%s/" % (
