@@ -31,7 +31,7 @@ clean:
 version:
 	echo $(VERS)
 
-PYLINTOPTS = --rcfile=/dev/null --reports=n --include-ids=y --disable=C0103,C0111,C0301,W0511,R0902,R0912,R0915
+PYLINTOPTS = --rcfile=/dev/null --reports=n --include-ids=y --disable=C0103,C0111,C0301,W0122,W0511,R0902,R0912,R0915
 pylint:
 	@pylint --output-format=parseable $(PYLINTOPTS) shipper
 

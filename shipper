@@ -143,7 +143,7 @@ def upload(dest, files, subdir=None):
     if subdir == None:
         subdir = package
     print("# Uploading to %s" % dest)
-    files = list(filter(os.path.exists, files))
+    files = [x for x in files if os.path.exists(x)]
     if dest.startswith("ftp://"):
         dest = dest[6:].split("/")
         host = dest.pop(0)
@@ -184,13 +184,13 @@ def make_index_page(deliverables, substitutions):
     print("# Building index.html...")
     global extralines
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
-    for (ifile, explanation, tag, bulky) in deliverables:
-        if bulky:
-            url = download
+    for (ifile, explanation, tag, big) in deliverables:
+        if big:
+            indurl = download
         else:
-            url = website
-        url = os.path.join(url, ifile)
-        resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (url, ifile, explanation)
+            indurl = website
+        indurl = os.path.join(indurl, ifile)
+        resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (indurl, ifile, explanation)
     resourcetable += "</table>"
     if gitorious_url:
         extralines += "<p>The project is hosted on <a href='%s'>gitorious</a>.</p>\n" % \
@@ -213,16 +213,16 @@ def make_index_page(deliverables, substitutions):
 # Metadata extraction
 #
 
-def grep(pattern, file):
-    "Mine for a specified pattern in a file."
+def grep(regexp, fp):
+    "Mine for a specified regexp in a file."
     # Note: this blank-strips its output!
-    fp = open(file)
+    fp = open(fp)
     try:
         while True:
             line = fp.readline()
             if not line:
                 return None
-            m = re.search(pattern, line)
+            m = re.search(regexp, line)
             if m:
                 return m.group(1).strip()
     finally:
@@ -634,8 +634,8 @@ try:
         )
     deliverables = []
     for filename in os.listdir("."):
-        for (pattern, explanation, tag, bulky) in deliverable_types: 
-            if pattern.search(filename):
+        for (regexp, explanation, tag, bulky) in deliverable_types: 
+            if regexp.search(filename):
                 deliverables.append((filename, explanation, tag, bulky))
     if options.verbose:
         print("Deliverables:", " ".join([x[0] for x in deliverables]))
