@@ -667,7 +667,7 @@ try:
     # Sanity checks
     if not destinations:
         croak("the Destinations list is empty; nothing to do.")
-    if not options.webonly and not [f_e_t_b[0] for f_e_t_b in deliverables and versioned(f_e_t_b[0])]:
+    if not options.webonly and not [f_e_t_b[0] for f_e_t_b in deliverables if versioned(f_e_t_b[0])]:
         croak("no deliverables with versions!")
 
     if options.verbose:
