@@ -22,6 +22,7 @@ package = None   	# Nor a package name
 website = None		# Nor a home page
 project_tags = None  	# Keywords for tagging
 freecode_name = None	# Name of the project on Freecode
+savannah_id = None      # User ID to use for CVS on Savannah
 savannah_name = None	# Name of the project on savannah.org (non-gnu)
 gitorious_url = None    # Name of the project on gitorious
 sourceforge_name = None # Name of the project on sourceforge.net
@@ -184,7 +185,7 @@ def make_index_page(deliverables, substitutions):
     print("# Building index.html...")
     global extralines
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
-    for (ifile, explanation, tag, big) in deliverables:
+    for (ifile, explanation, __tag, big) in deliverables:
         if big:
             indurl = download
         else:
@@ -302,9 +303,8 @@ class Specfile:
             return grep("^(?:XBS-)?"+fld+": (.*)", self.filename)
     def rpm_get_multiline(self, fieldname):
         "Grab everything from leader line to just before the next leader line."
-        global desc
         fp = open(self.filename)
-        desc = ""
+        data = ""
         gather = False
         while True:
             line = fp.readline()
@@ -317,10 +317,10 @@ class Specfile:
             elif line[0] == "%":
                 gather = False
             if gather:
-                desc += line
+                data += line
         fp.close()
-        if desc:
-            return desc.strip() + "\n"
+        if data:
+            return data.strip() + "\n"
         else:
             return None
 #
@@ -476,7 +476,7 @@ try:
             if excludee in destinations:
                 destinations.remove(excludee)
             else:
-                print >>sys.stderr, "shipper: %s isn't in the destinations!" % excludee
+                sys.stderr.write("shipper: %s isn't in the destinations!\n" % excludee)
                 raise SystemExit(1)
 
     print("# Uploading version %s of %s" % (version, package))
@@ -647,7 +647,7 @@ try:
         # Single-line 
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'project_tags', 
-                         'freecode_name', 'savannah_name',
+                         'freecode_name', 'savannah_id', 'savannah_name',
                          'gitorious_url', 'sourceforge_name',
                          'summary', 'webdir', 'logo',
                          'tag_template', 'tag_message'):
@@ -665,10 +665,10 @@ try:
     #
 
     # Sanity checks
-    if not list(filter(versioned, [f_e_t_b[0] for f_e_t_b in deliverables])):
-        croak("no deliverables with versions!")
     if not destinations:
         croak("the Destinations list is empty; nothing to do.")
+    if not options.webonly and not [f_e_t_b[0] for f_e_t_b in deliverables and versioned(f_e_t_b[0])]:
+        croak("no deliverables with versions!")
 
     if options.verbose:
         print("shipper: sanity checks passed")
@@ -713,7 +713,7 @@ try:
             destinations.remove("freecode")
         else:
             while True:
-                focus = input("# freecode.com release focus (? for list): ")
+                focus = raw_input("# freecode.com release focus (? for list): ")
                 if focus == '?':
                     i = 0
                     for f in freecode_focus_types:
@@ -814,7 +814,7 @@ try:
     # OK, ship everything.  First, the non-mail destinations
     for destination in [d for d in destinations if not d.startswith("mailto:")]:
         if destination in hardwired:
-            print("# Shipping to public destination", destination)
+            print("# Shipping to public destination %s" % destination)
             eval(destination + "()")
         elif destination.startswith("ftp:"):
             if not options.webonly:
