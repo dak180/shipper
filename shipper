@@ -778,14 +778,13 @@ try:
         tmpdir = tempfile.mkdtemp()
         upload_or_die("cd %s; CVS_RSH=ssh cvs -z3 -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
                   % (tmpdir, savannah_id, savannah_name, savannah_name))
-        checkout = tmpdir + os.sep + savannah_name
         # Using -kb to avoid keyword expansion on binary files.
         if not webdir:
             deliver = " ".join(web_deliverables)
-            upload_or_die("cp %s %s" % (deliver, checkout))
-            upload_or_die("cd %s && cvs add -kb %s" % (checkout, deliver))
+            upload_or_die("cp %s %s" % (deliver, tmpdir))
+            upload_or_die("cd %s && cvs add -kb %s" % (tmpdir, deliver))
         else:
-            upload_or_die("cp -r %s/* %s" % (webdir, checkout))
+            upload_or_die("cp -r %s/* %s" % (webdir, tmpdir))
         #upload_or_die("(cd %s/%s && echo CVS_RSH=ssh cvs commit) && rm -fr %s" \
         #          % (tmpdir, savannah_name, tmpdir))
     def sourceforge():
