@@ -789,20 +789,19 @@ try:
         #          % (tmpdir, savannah_name, tmpdir))
     def sourceforge():
         if not options.webonly:
-            upload_or_die("rsync -avP -e ssh %s %s,%s@frs.sourceforge.net:/home/frs/project/%s/%s/%s/%s/" % (
+            # See https://sourceforge.net/apps/trac/sourceforge/wiki/Release%20files%20for%20download
+            upload_or_die("rsync -avP -e ssh %s %s@frs.sourceforge.net:/home/frs/project/%s/%s" % (
                 " ".join(download_deliverables),
                 sourceforge_userid, 
-                sourceforge_name,
-                sourceforge_name[:1],
-                sourceforge_name[:2],
                 sourceforge_name,
                 version))
         if webdir:
             websources = webdir + '/'
         else:
             websources = " ".join(web_deliverables),
-        upload_or_die("rsync -aiv %s %s,%s@web.sourceforge.net:htdocs/" % (
-            " ".join(websources),
+        # https://sourceforge.net/apps/trac/sourceforge/wiki/Rsync%20over%20SSH
+        upload_or_die("rsync -aiv %s %s@web.sourceforge.net:/project-web/%s/htdocs/" % (
+            websources,
             sourceforge_userid,
             sourceforge_name))
     hardwired = ("freecode", "savannah", "sourceforge")
