@@ -721,7 +721,7 @@ try:
                         i += 1
                 elif focus in "0123456789":
                     focus = freecode_focus_types[int(focus)]
-                    print("# OK:", focus)
+                    print("# OK: " + focus)
                     break
                 elif focus.lower() in [x.lower() for x in freecode_focus_types]:
                     break
@@ -802,7 +802,7 @@ try:
         else:
             websources = " ".join(web_deliverables),
         upload_or_die("rsync -aiv %s %s,%s@web.sourceforge.net:htdocs/" % (
-            websources,
+            " ".join(websources),
             sourceforge_userid,
             sourceforge_name))
     hardwired = ("freecode", "savannah", "sourceforge")
