@@ -545,13 +545,19 @@ ${package}.*-${version}.*.deb.</para>
 <row>
 <entry>*.{html,xhtml,css,js}</entry>
 <entry>
-<para>Any files with an .html, .js, or .css extension will be shipped to all 
-website destinations.</para>
+<para>Any files with an .html, .js, or .css extension will normally be
+shipped to all website destinations. This is overridden if you have
+declared a web directory to mirror to website destinations.</para>
 </entry>
 </row>
 </tbody>
 </tgroup>
 </informaltable>
+
+<para>Stock deliverables which are textfiles and contain the string
+"shipper: ignore this." will not be shipped.  This is especially useful
+for archival GNU-style ChangeLogs, which you may want to avoid shipping
+but which need to be present to pacify autotools.</para>
 
 <para>Here are the generated deliverables that
 <application>shipper</application> will build and ship, if they don't

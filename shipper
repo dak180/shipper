@@ -640,6 +640,10 @@ try:
     for filename in os.listdir("."):
         for (regexp, explanation, tag, bulky) in deliverable_types: 
             if regexp.search(filename):
+                if not bulky:
+                    with open(filename) as fp:
+                        if re.search("^shipper: ignore this", fp.read()):
+                            continue
                 deliverables.append((filename, explanation, tag, bulky))
     if options.verbose:
         print("Deliverables:" + " ".join([x[0] for x in deliverables]))
