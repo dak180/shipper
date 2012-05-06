@@ -355,6 +355,16 @@ is present, the user ID from whoami will be assumed.</para>
 </entry>
 </row>
 <row>
+<entry><varname>sourceforge_folder</varname></entry>
+<entry>#SourceForge-Folder:</entry>
+<entry>XBS-SourceForge-Folder:</entry>
+<entry>
+<para>Path componenent to be appended to the destination for file
+updates. Useful when you want to organize release tarballs into
+subdirectories for historical or other reasons.</para>
+</entry>
+</row>
+<row>
 <entry><varname>gitorious_url</varname></entry>
 <entry>#Gitorious-URL:</entry>
 <entry>XBS-Gitorious-URL:</entry>

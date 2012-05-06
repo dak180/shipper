@@ -26,6 +26,7 @@ savannah_id = None      # User ID to use for CVS on Savannah
 savannah_name = None	# Name of the project on savannah.org (non-gnu)
 gitorious_url = None    # Name of the project on gitorious
 sourceforge_name = None # Name of the project on sourceforge.net
+sourceforge_folder = "" # Subfolder for file releases 
 summary = None   	# One-line summary of the package
 webdir = None           # Web directory to be mirrored to a project site
 logo = ""               # Project logo
@@ -482,6 +483,8 @@ try:
     print("# Uploading version %s of %s" % (version, package))
 
     # Extract remaining variables for templating
+    # Note: When you add a variable here,
+    # don't forget to update the dump code down below.
     if not website:
         website = metadata.website
     if not date:
@@ -507,6 +510,7 @@ try:
     else:
         sourceforge_name = package
         sourceforge_userid = myuserid
+    sourceforge_folder = metadata.extract("SourceForge-Folder")
     gitorious_url = metadata.extract("Gitorious-URL")
     logo = metadata.extract("Logo")
     webdir = metadata.extract("Web-Directory")
@@ -555,11 +559,11 @@ try:
     if website:
         if "savannah" in website:
             download = "http://download.savannah.nongnu.org/releases/%s/"+(savannah_name or package)
-        elif "sourceforge"in website:
-            download = "http://sourceforge.net/projects/%s/files/%s/%s" % (
-                sourceforge_name,
-                sourceforge_name,
-                version)
+        elif "sourceforge" in website:
+            download = "http://sourceforge.net/projects/%s/files/" % (
+                sourceforge_name)
+            if sourceforge_folder:
+                download += sourceforge_folder + '/'
         else:
             download = website 
 
@@ -638,7 +642,7 @@ try:
             if regexp.search(filename):
                 deliverables.append((filename, explanation, tag, bulky))
     if options.verbose:
-        print("Deliverables:", " ".join([x[0] for x in deliverables]))
+        print("Deliverables:" + " ".join([x[0] for x in deliverables]))
 
     #
     # Might be time to dump
@@ -648,7 +652,8 @@ try:
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'project_tags', 
                          'freecode_name', 'savannah_id', 'savannah_name',
-                         'gitorious_url', 'sourceforge_name',
+                         'gitorious_url',
+                         'sourceforge_name', 'sourceforge_folder',
                          'summary', 'webdir', 'logo',
                          'tag_template', 'tag_message'):
             print("%s = %s" % (variable, repr(eval(variable))))
@@ -790,11 +795,13 @@ try:
     def sourceforge():
         if not options.webonly:
             # See https://sourceforge.net/apps/trac/sourceforge/wiki/Release%20files%20for%20download
-            upload_or_die("rsync -avP -e ssh %s %s@frs.sourceforge.net:/home/frs/project/%s/%s" % (
+            destdir =  "/home/frs/project/%s" % sourceforge_name
+            if sourceforge_folder:
+                destdir += "/" + sourceforge_folder
+            upload_or_die("rsync -avP -e ssh %s '%s@frs.sourceforge.net:%s'" % (
                 " ".join(download_deliverables),
                 sourceforge_userid, 
-                sourceforge_name,
-                version))
+                destdir))
         if webdir:
             websources = webdir + '/'
         else:
@@ -807,7 +814,7 @@ try:
     hardwired = ("freecode", "savannah", "sourceforge")
 
     if options.verbose:
-        print("Destinations: ", ", ".join(destinations))
+        print("Destinations: " + ", ".join(destinations))
 
     # OK, ship everything.  First, the non-mail destinations
     for destination in [d for d in destinations if not d.startswith("mailto:")]:
