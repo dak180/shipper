@@ -738,7 +738,8 @@ try:
                     croak("not a valid freecode.com release focus!")
             ofp = open("SHIPPER.FREECODE", "w")
             ofp.write("Project: %s\n" % (freecode_name or package))
-            ofp.write("Version: %s\n" % version)
+            ofp.write("Version: %s\n" % version)            
+            ofp.write("Description: %s" % description.replace("\n", "\n    "))
             if project_tags:
                 ofp.write("Project-Tag-List: %s\n" % project_tags)
             ofp.write("Release-Focus: %s\n" % focus)
