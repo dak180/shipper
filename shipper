@@ -803,18 +803,20 @@ try:
             destdir =  "/home/frs/project/%s" % sourceforge_name
             if sourceforge_folder:
                 destdir += "/" + sourceforge_folder
-            upload_or_die("rsync -avP -e ssh %s '%s@frs.sourceforge.net:%s'" % (
+            upload_or_die("rsync -avP -e ssh %s '%s,%s@frs.sourceforge.net:%s'" % (
                 " ".join(download_deliverables),
-                sourceforge_userid, 
+                sourceforge_userid,
+                sourceforge_name,
                 destdir))
         if webdir:
             websources = webdir + '/'
         else:
             websources = " ".join(web_deliverables),
         # https://sourceforge.net/apps/trac/sourceforge/wiki/Rsync%20over%20SSH
-        upload_or_die("rsync -aiv %s %s@web.sourceforge.net:/project-web/%s/htdocs/" % (
+        upload_or_die("rsync -aiv %s %s,%s@web.sourceforge.net:/home/project-web/%s/htdocs/" % (
             websources,
             sourceforge_userid,
+            sourceforge_name,
             sourceforge_name))
     hardwired = ("freecode", "savannah", "sourceforge")
 
