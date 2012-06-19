@@ -739,7 +739,7 @@ try:
             ofp = open("SHIPPER.FREECODE", "w")
             ofp.write("Project: %s\n" % (freecode_name or package))
             ofp.write("Version: %s\n" % version)            
-            ofp.write("Description: %s" % description.replace("\n", "\n    "))
+            ofp.write("Description: %s" % description.replace("\n", "\n    ")[:-4])
             if project_tags:
                 ofp.write("Project-Tag-List: %s\n" % project_tags)
             ofp.write("Release-Focus: %s\n" % focus)
