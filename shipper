@@ -120,7 +120,7 @@ def croak(msg):
 def do_or_die(cmd):
     "Either execute a command or fail noisily, letting output go to stdout."
     if options.verbose:
-        print("***", cmd)
+        print("***" + cmd)
     if os.system(cmd):
         croak("command '%s' failed!" % cmd)
 
