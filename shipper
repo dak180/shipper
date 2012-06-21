@@ -712,7 +712,7 @@ try:
             deliverables.append((logo, "project logo", None, False))
 
     # The freecode announcement
-    if 'freecode' in destinations and not os.path.exists("SHIPPER.FREECODE"):
+    if not options.webonly and 'freecode' in destinations and not os.path.exists("SHIPPER.FREECODE"):
         print("# Building SHIPPER.FREECODE...")
         if not website:
             print("# Can't announce to freecode without a primary website!")
@@ -826,6 +826,8 @@ try:
     # OK, ship everything.  First, the non-mail destinations
     for destination in [d for d in destinations if not d.startswith("mailto:")]:
         if destination in hardwired:
+            if destination == 'freecode' and options.webonly:
+                continue
             print("# Shipping to public destination %s" % destination)
             eval(destination + "()")
         elif destination.startswith("ftp:"):
