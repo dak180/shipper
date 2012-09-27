@@ -273,7 +273,7 @@ class Specfile:
             self.website = self.extract("Homepage")
             self.summary = self.extract("Description")
             fp = open(self.filename)
-            desc = ""
+            desc = self.summary
             gather = False
             while True:
                 line = fp.readline()
