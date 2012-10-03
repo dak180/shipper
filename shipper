@@ -20,6 +20,7 @@ whoami = None		# Who am I? (Used for FTP logins and mail signatures)
 date = None		# User has not yet set a date
 package = None   	# Nor a package name
 website = None		# Nor a home page
+irc_channel = None	# Nor an IRC channel
 project_tags = None  	# Keywords for tagging
 freecode_name = None	# Name of the project on Freecode
 savannah_id = None      # User ID to use for CVS on Savannah
@@ -197,6 +198,8 @@ def make_index_page(deliverables, substitutions):
     if gitorious_url:
         extralines += "<p>The project is hosted on <a href='%s'>gitorious</a>.</p>\n" % \
                       gitorious_url
+    if irc_channel:
+        extralines += '<p>There is a project <a href="%s">IRC channel</p>\n' % irc_channel
     # Handle the old name of freecode.com for backwards compatibility.
     if 'freecode' in destinations or 'freshmeat' in destinations:
         extralines += "<p>There is a Freecode <a href='http://freecode.com/projects/%s'>%s page</a>.</p>\n" % \
@@ -512,6 +515,7 @@ try:
         sourceforge_userid = myuserid
     sourceforge_folder = metadata.extract("SourceForge-Folder")
     gitorious_url = metadata.extract("Gitorious-URL")
+    irc_channel = metadata.extract("IRC-Channel")
     logo = metadata.extract("Logo")
     webdir = metadata.extract("Web-Directory")
     resourcetable = ""
@@ -656,7 +660,7 @@ try:
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'project_tags', 
                          'freecode_name', 'savannah_id', 'savannah_name',
-                         'gitorious_url',
+                         'gitorious_url', 'ircchannel',
                          'sourceforge_name', 'sourceforge_folder',
                          'summary', 'webdir', 'logo',
                          'tag_template', 'tag_message'):

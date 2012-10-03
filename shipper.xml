@@ -374,6 +374,14 @@ exists, it should point at a git repository for the source code.</para>
 </entry>
 </row>
 <row>
+<entry><varname>irc_channel</varname></entry>
+<entry>#IRC-Channel:</entry>
+<entry>XBS-IRC-Channel:</entry>
+<entry>
+<para>URL pointing at an IRC chat channel for the project.</para>
+</entry>
+</row>
+<row>
 <entry><varname>summary</varname></entry>
 <entry>Summary</entry>
 <entry>Description:</entry>
@@ -415,7 +423,7 @@ of it in the startup files is ignored.</para>
 </row>
 <row>
 <entry><varname>extralines</varname></entry> <entry
-align='center'>-</entry> <entry align='center'>-</entry>
+align='center'>Extra-Lines:</entry> <entry align='center'>-</entry>
 <entry>
 <para>Lines to be inserted after the table of resources.  You
 can set this; <application>shipper</application> may add to it to,
