@@ -699,7 +699,12 @@ try:
                     explanation = "HTML rendering of " + stem + ext
                     break
             else:
-                explanation = "HTML page."
+                # If the HTML has a <title> element, use it.
+                m = re.search("<title>([^<]*)</title>", open(filename).read())
+                if m:
+                    explanation = m.group(1)
+                else:
+                    explanation = "HTML page."
             deliverables.append((filename, explanation, None, False))
 
         # If a web page doesn't already exist, but the index template

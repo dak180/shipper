@@ -4,7 +4,8 @@
   SourceForge upload locations for FRS and project web have changed.
   Add and document the the sourceforge-folder variable.
   Ship project description with updates.
-  Added an IRC chat channel URL to optional metadata.
+  Added IRC chat channel and gitorious URLs to optional metadata.
+  Extract HTML page descriptions from <title> elements.
 
 * Fri 04 Nov 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 0.15
   Remove Berlios support (it's shutting down) and clean up docs.
