@@ -28,6 +28,7 @@ savannah_name = None	# Name of the project on savannah.org (non-gnu)
 gitorious_url = None    # Name of the project on gitorious
 sourceforge_name = None # Name of the project on sourceforge.net
 sourceforge_folder = "" # Subfolder for file releases 
+ohloh_url = ""		# Where the Ohloh stats live
 summary = None   	# One-line summary of the package
 webdir = None           # Web directory to be mirrored to a project site
 logo = ""               # Project logo
@@ -196,8 +197,11 @@ def make_index_page(deliverables, substitutions):
         resourcetable += "<tr><td><a href='%s'>%s</a></td><td>%s</td></tr>\n" % (indurl, ifile, explanation)
     resourcetable += "</table>"
     if gitorious_url:
-        extralines += "<p>The project is hosted on <a href='%s'>gitorious</a>.</p>\n" % \
+        extralines += "<p>The project repository is on <a href='%s'>gitorious</a>.</p>\n" % \
                       gitorious_url
+    if ohloh_url:
+        extralines += "<p>Project statistics are available at <a href='%s'>Ohloh</a>.</p>\n" % \
+                      ohloh_url
     if irc_channel:
         extralines += '<p>There is a project <a href="%s">IRC channel</a>.</p>\n' % irc_channel
     # Handle the old name of freecode.com for backwards compatibility.
@@ -515,6 +519,7 @@ try:
         sourceforge_userid = myuserid
     sourceforge_folder = metadata.extract("SourceForge-Folder")
     gitorious_url = metadata.extract("Gitorious-URL")
+    ohloh_url = metadata.extract("Ohloh-URL")
     irc_channel = metadata.extract("IRC-Channel")
     logo = metadata.extract("Logo")
     webdir = metadata.extract("Web-Directory")
@@ -660,7 +665,7 @@ try:
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'project_tags', 
                          'freecode_name', 'savannah_id', 'savannah_name',
-                         'gitorious_url', 'ircchannel',
+                         'gitorious_url', 'ohloh_url', 'irc_channel',
                          'sourceforge_name', 'sourceforge_folder',
                          'summary', 'webdir', 'logo',
                          'tag_template', 'tag_message'):

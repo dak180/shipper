@@ -374,6 +374,14 @@ exists, it should point at a git repository for the source code.</para>
 </entry>
 </row>
 <row>
+<entry><varname>ohloh_url</varname></entry>
+<entry>#Ohloh-URL:</entry>
+<entry>XBS-Ohloh-URL:</entry>
+<entry>
+<para>URL pointing at Ohloh statistics.</para>
+</entry>
+</row>
+<row>
 <entry><varname>irc_channel</varname></entry>
 <entry>#IRC-Channel:</entry>
 <entry>XBS-IRC-Channel:</entry>
