@@ -26,6 +26,7 @@ freecode_name = None	# Name of the project on Freecode
 savannah_id = None      # User ID to use for CVS on Savannah
 savannah_name = None	# Name of the project on savannah.org (non-gnu)
 gitorious_url = None    # Name of the project on gitorious
+github_url = None	# Name of the project on github
 sourceforge_name = None # Name of the project on sourceforge.net
 sourceforge_folder = "" # Subfolder for file releases 
 ohloh_url = ""		# Where the Ohloh stats live
@@ -199,6 +200,9 @@ def make_index_page(deliverables, substitutions):
     if gitorious_url:
         extralines += "<p>The project repository is on <a href='%s'>gitorious</a>.</p>\n" % \
                       gitorious_url
+    if github_url:
+        extralines += "<p>The project repository is on <a href='%s'>github</a>.</p>\n" % \
+                      github_url
     if ohloh_url:
         extralines += "<p>Project statistics are available at <a href='%s'>Ohloh</a>.</p>\n" % \
                       ohloh_url
@@ -519,6 +523,7 @@ try:
         sourceforge_userid = myuserid
     sourceforge_folder = metadata.extract("SourceForge-Folder")
     gitorious_url = metadata.extract("Gitorious-URL")
+    github_url = metadata.extract("Github-URL")
     ohloh_url = metadata.extract("Ohloh-URL")
     irc_channel = metadata.extract("IRC-Channel")
     logo = metadata.extract("Logo")
@@ -665,7 +670,8 @@ try:
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'project_tags', 
                          'freecode_name', 'savannah_id', 'savannah_name',
-                         'gitorious_url', 'ohloh_url', 'irc_channel',
+                         'gitorious_url', 'github_url', 'ohloh_url',
+                         'irc_channel',
                          'sourceforge_name', 'sourceforge_folder',
                          'summary', 'webdir', 'logo',
                          'tag_template', 'tag_message'):
@@ -912,8 +918,12 @@ try:
                 if os.path.exists(idir):
                     print("# I will %s-tag this release as %s." % (what, tagname))
                     upload_or_die(cmnd % globals())
+                    if 'sourceforge' in destinations:
+                        print("# Don't forget to push changes and tags to the SourceForge %s repo." % what)
             if gitorious_url:
                 print("# Don't forget to push to the gitorious repo.")
+            if github_url:
+                print("# Don't forget to push to the github repo.")
     print("# Done")
 except KeyboardInterrupt:
     print("# Bye!")
