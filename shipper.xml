@@ -374,6 +374,15 @@ exists, it should point at a git repository for the source code.</para>
 </entry>
 </row>
 <row>
+<entry><varname>github_url</varname></entry>
+<entry>#Github-URL:</entry>
+<entry>XBS-Github-URL:</entry>
+<entry>
+<para>URL pointing at GitHub hosting space for the project. If it
+exists, it should point at a git repository for the source code.</para>
+</entry>
+</row>
+<row>
 <entry><varname>ohloh_url</varname></entry>
 <entry>#Ohloh-URL:</entry>
 <entry>XBS-Ohloh-URL:</entry>
@@ -769,8 +778,9 @@ trunk.</para>
 <para>If it is in a git, hg, or bzr repository (that is, there is a
 subdirectory named <filename>.git</filename>,
 <filename>.bzr</filename>, or <filename>.hg</filename>) it will tag
-the release. In all three of these cases the tag attempt will fail if
-the tag previously existed.</para>
+the release. If there is a remote repo to be pushed to, local changes
+and tags wil be pushed. In all three of these cases the tag attempt
+will fail if the tag previously existed.</para>
 
 <para>You can change this action by setting the variable
 <varname>tag_template</varname>. If you set it to None,
@@ -792,7 +802,7 @@ variable will be ignored in this case.</para>
 <para>The <option>-n</option> generates a
 configuration dump to standard output.</para>
 
-<para>The <option>-u</option> option enables uploading.</para>
+<para>The <option>-u</option> option enables uploading and tag pushing.</para>
 
 <para>The <option>-m</option> option tells
 <application>shipper</application> to generate a web page an upload it

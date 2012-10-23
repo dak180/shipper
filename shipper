@@ -910,20 +910,24 @@ try:
                     else:
                         print("# I will copy and tag this release as %s." % tagname)
                         upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
-            for (idir, what, cmnd) in (
-                (".git", "git", "git tag -a %(tagname)s -m '%(tag_message)s'"),
-                (".hg",  "hg",  "hg tag %(tagname)s -m '%(tag_message)s'"),
-                (".bzr", "bzr", "bzr tag %(tagname)s"),
+            for (idir, what, tagger, pusher) in (
+                (".git", "git", "git tag -a %(tagname)s -m '%(tag_message)s'", "git push; git push --tags"),
+                (".hg",  "hg",  "hg tag %(tagname)s -m '%(tag_message)s'", "hg push"),
+                (".bzr", "bzr", "bzr tag %(tagname)s", "bzr push"),
                 ):
                 if os.path.exists(idir):
                     print("# I will %s-tag this release as %s." % (what, tagname))
-                    upload_or_die(cmnd % globals())
-                    if 'sourceforge' in destinations:
-                        print("# Don't forget to push changes and tags to the SourceForge %s repo." % what)
-            if gitorious_url:
-                print("# Don't forget to push to the gitorious repo.")
-            if github_url:
-                print("# Don't forget to push to the github repo.")
+                    upload_or_die(tagger % globals())
+                    if update:
+                        print("# I will update the remote repo.")
+                        upload_or_die(pusher % globals())
+            if not update:
+                if 'sourceforge' in destinations:
+                    print("# Don't forget to push changes and tags to the SourceForge %s repo." % what)
+                    if gitorious_url:
+                        print("# Don't forget to push to the gitorious repo.")
+                    if github_url:
+                        print("# Don't forget to push to the github repo.")
     print("# Done")
 except KeyboardInterrupt:
     print("# Bye!")
