@@ -918,10 +918,10 @@ try:
                 if os.path.exists(idir):
                     print("# I will %s-tag this release as %s." % (what, tagname))
                     upload_or_die(tagger % globals())
-                    if update:
+                    if upload:
                         print("# I will update the remote repo.")
                         upload_or_die(pusher % globals())
-            if not update:
+            if not upload:
                 if 'sourceforge' in destinations:
                     print("# Don't forget to push changes and tags to the SourceForge %s repo." % what)
                     if gitorious_url:
