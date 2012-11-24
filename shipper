@@ -449,13 +449,15 @@ try:
         makefile = "Makefile"        
     if os.path.exists("makefile"):
         makefile = "makefile"
-    if makefile:
-        makevers = grep("^VERS[A-Z]* *= *(.*)", makefile)
-        # Maybe it's a shell command intended to extract version from specfile
-        if makevers and makevers[0] == '$':
-            makevers = commands.getoutput(makevers[7:-1])
-        if makevers[0] == '"' and makevers[-1] == '"':
-            makevers = makevers[1:-1]
+    for mk in ("makefile", "Makefile"):
+        makevers = grep("^VERS[A-Z]* *= *(.*)", mk)
+        if makevers:
+            # Maybe it's a shell command intended to extract version from specfile
+            if makevers and makevers[0] == '$':
+                makevers = commands.getoutput(makevers[7:-1])
+            if makevers[0] == '"' and makevers[-1] == '"':
+                makevers = makevers[1:-1]
+            break
     if os.path.exists("SConstruct"):
         makevers = grep('version *= "*(.*)"', "SConstruct")
     if makevers and metadata.version and metadata.version != makevers:
