@@ -470,6 +470,35 @@ the host location, but it may take special action for forges like Savannah
 that have tortuous procedures for updating webspace.</para>
 </entry>
 </row>
+<row>
+<entry><varname>tagtemplate</varname></entry>
+<entry>#Tagtemplate</entry>
+<entry>#XBS-Tagtemplate</entry>
+<entry>
+<para><para>You can change tagging behavior by setting the variable
+<varname>tagtemplate</varname>. If you set it to None,
+release tagging will be suppressed entirely.  If you set it to a
+nonempty string, that will become the template for the name of the
+tag.  "%s" in the string will be replaced with the
+version number.</para>
+</para>
+</entry>
+</row>
+<row>
+<entry><varname>tagmessage</varname></entry>
+<entry>#Tagmessage</entry>
+<entry>#XBS-Tagmessage</entry>
+<entry>
+<para><para>You can also customize the actual log message by setting
+the variable <varname>tagmessage</varname>.  See the default with
+<command>shipper -N</command>; the %s in it will be replaced with the
+version.</para>
+
+<para>bzr, however, cannot annotate tags.  The <varname>tagmessage</varname>
+variable will be ignored in this case.</para>
+</para>
+</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -780,21 +809,8 @@ subdirectory named <filename>.git</filename>,
 <filename>.bzr</filename>, or <filename>.hg</filename>) it will tag
 the release. If there is a remote repo to be pushed to, local changes
 and tags wil be pushed. In all three of these cases the tag attempt
-will fail if the tag previously existed.</para>
-
-<para>You can change this action by setting the variable
-<varname>tag_template</varname>. If you set it to None,
-release tagging will be suppressed entirely.  If you set it to a
-nonempty string, that will become the template for the name of the
-tag.  "%s" in the string will be replaced with the
-version number.</para>
-
-<para>You can also customize the actual log message by setting the variable
-<varname>tag_message</varname>.  See the default with <command>shipper
--N</command>; the %s in it will be replaced with the version.</para>
-
-<para>bzr, however, cannot annotate tags.  The <varname>tag_message</varname>
-variable will be ignored in this case.</para>
+will fail if the tag previously existed.  See also the discussion
+of the <varname>tagtemplate</varname> variable.</para>
 </refsect1>
 
 <refsect1><title>Command-line Options</title>
@@ -895,8 +911,8 @@ as they no longer accept RPM submissions.</para>
 <para>Trying to deduce a default whoami gave bad results and has been
 abandoned.</para>
 
-<para>The old variable <varname>subversion_tag_template</varname> is now
-<varname>tag_template</varname>.</para>
+<para>The old variable <varname>subversion_tagtemplate</varname> is now
+<varname>tagtemplate</varname>.</para>
 
 <para>The <varname>keywords</varname> variable is gone along with LSM
 support.</para>

@@ -33,15 +33,14 @@ ohloh_url = ""		# Where the Ohloh stats live
 summary = None   	# One-line summary of the package
 webdir = None           # Web directory to be mirrored to a project site
 logo = ""               # Project logo
+tagtemplate = "%s"
+tagmessage = "Tagged for external release %s"
 #Stuff after this point is multiline
-description = None	# Multiline a description
+description = None	# Multiline description
 changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
 extralines = ""         # Extra lines for HTML template
 
-# Policy choices
-tag_template = "%s"
-tag_message = "Tagged for external release %s"
 
 indextemplate = """
 <?xml version="1.0" encoding="ISO-8859-1"?>
@@ -252,6 +251,8 @@ class Specfile:
             self.version = self.extract("Version")
             self.website = self.extract("URL")
             self.summary = self.extract("Summary")
+            self.tagtemplate = self.extract("Tagtemplate")
+            self.tagmessage = self.extract("Tagmessage")
             self.description = self.rpm_get_multiline("description")
             last = ""
             state = 0
@@ -283,6 +284,8 @@ class Specfile:
                 self.version = self.version.split("-")[0]
             self.website = self.extract("Homepage")
             self.summary = self.extract("Description")
+            self.tagtemplate = self.extract("Tagtemplate")
+            self.tagmessage = self.extract("Tagmessage")
             fp = open(self.filename)
             desc = self.summary + "\n"
             gather = False
@@ -312,6 +315,7 @@ class Specfile:
         if self.type == "RPM":
             return grep("^#?"+fld+":\s*(.*)", self.filename)
         elif self.type == "deb":
+            fld = fld.replace('-', '[-_]')
             return grep("^(?:XBS-)?"+fld+": (.*)", self.filename)
     def rpm_get_multiline(self, fieldname):
         "Grab everything from leader line to just before the next leader line."
@@ -521,6 +525,10 @@ try:
     else:
         sourceforge_name = package
         sourceforge_userid = myuserid
+    if metadata.tagtemplate:
+        tagtemplate = metadata.tagtemplate
+    if metadata.tagmessage:
+        tagmessage = metadata.tagmessage
     sourceforge_folder = metadata.extract("SourceForge-Folder")
     gitorious_url = metadata.extract("Gitorious-URL")
     github_url = metadata.extract("Github-URL")
@@ -674,7 +682,7 @@ try:
                          'irc_channel',
                          'sourceforge_name', 'sourceforge_folder',
                          'summary', 'webdir', 'logo',
-                         'tag_template', 'tag_message'):
+                         'tagtemplate', 'tagmessage'):
             print("%s = %s" % (variable, repr(eval(variable))))
         # Free text, multiline
         for variable in ('description', 'changelog', 'lastchange',
@@ -895,9 +903,9 @@ try:
                 print("EOF")
 
         # Shipping has succeeded.
-        if options.vcstag and tag_template and tag_message:
-            tagname = tag_template % version
-            tag_message = tag_message % version
+        if options.vcstag and tagtemplate and tagmessage:
+            tagname = tagtemplate % version
+            tagmessage = tagmessage % version
 
             # If we're in the trunk of an SVN repository, we want to tag
             # what just got shipped as an external release.
@@ -909,10 +917,10 @@ try:
                         print("# This release has aleady been tagged.")
                     else:
                         print("# I will copy and tag this release as %s." % tagname)
-                        upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
+                        upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tagmessage))
             for (idir, what, tagger, pusher) in (
-                (".git", "git", "git tag -a %(tagname)s -m '%(tag_message)s'", "git push; git push --tags"),
-                (".hg",  "hg",  "hg tag %(tagname)s -m '%(tag_message)s'", "hg push"),
+                (".git", "git", "git tag -a %(tagname)s -m '%(tagmessage)s'", "git push; git push --tags"),
+                (".hg",  "hg",  "hg tag %(tagname)s -m '%(tagmessage)s'", "hg push"),
                 (".bzr", "bzr", "bzr tag %(tagname)s", "bzr push"),
                 ):
                 if os.path.exists(idir):
