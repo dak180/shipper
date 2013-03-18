@@ -305,7 +305,7 @@ that <application>shipper</application> builds.</para>
 <entry>Website:</entry>
 <entry>
 <para>Project website URL. Used when generating project announcements. When your
-upload destination is SourceForge, this will be generated for you
+upload destination is Berlios or SourceForge, this will be generated for you
 if you don't specify it.</para>
 </entry>
 </row>
@@ -337,6 +337,17 @@ computing the location of your project web directory on
 savannah.nongnu.org (no support for gnu projects yet). If this isn't
 present, it defaults to the project name; you only need to set it if
 they differ.</para>
+</entry>
+</row>
+<row>
+<entry><varname>berlios_name</varname></entry>
+<entry>#Berlios-Name:</entry>
+<entry>XBS-Berlios-Name:</entry>
+<entry>
+<para>Berlios shortname, used in generating berlios.de
+announcements and computing the location of your project web
+directory. If this isn't present, it defaults to the project
+name; you only need to set it if they differ.</para>
 </entry>
 </row>
 <row>
@@ -716,6 +727,21 @@ SourceForge web directory.</para>
 </entry>
 </row>
 <row>
+<entry>berlios</entry>
+<entry>tarball, zipfile, RPMs, debs, README, COPYING, ChangeLog, NEWS, HISTORY, *.{html,css,js}, 
+BUGS, TODO.</entry>
+<entry>-</entry>
+<entry>
+<para>If the berlios destination is on your list,
+<application>shipper</application> will attempt to ship a tarball and source
+and binary RPMs to the berlios.de submission directory via FTP.  It
+will also attempt to upload all web deliverables (README, CHANGES,
+NEWS, HISTORY, *.{html,css,js}, BUGS, TODO) to the project's Berlios web
+directory.
+</para>
+</entry>
+</row>
+<row>
 <entry>freecode</entry>
 <entry>SHIPPER.FREECODE</entry>
 <entry>-</entry>
@@ -878,6 +904,10 @@ with 'tarball' being a production that makes a release tarball.
 </refsect1>
 
 <refsect1><title>Bugs</title>
+<para>The program can deliver downloadables to Berlios incoming, but
+not script a Berlios release. That has to be done through the Berlios
+web interface.</para>
+
 <para>The Savannah support is not yet tested.</para>
 
 <para>The program can put downloadables in place on SourceForge, but not set
@@ -898,9 +928,6 @@ url="http://www.catb.org/~esr/shipper/">http://www.catb.org/~esr/shipper/</ulink
 <para>In late 2011 freshmeat.net changed its name to freecode.com.
 For backward compatibility, Freshmeat-Name is accepted as a synonym
 for Freecode-Name.</para>
-
-<para>Support for the hardwired "berlios" destination has been removed, 
-as Berlios is shutting down on 31 Dec 2011.</para>
 
 <para>Support for LSM files and shipping to the ibiblio submissions
 directory has been removed, as that portion of its archives is now

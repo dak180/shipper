@@ -23,6 +23,7 @@ website = None		# Nor a home page
 irc_channel = None	# Nor an IRC channel
 project_tags = None  	# Keywords for tagging
 freecode_name = None	# Name of the project on Freecode
+berlios_name = None	# Name of the project on berlios.de
 savannah_id = None      # User ID to use for CVS on Savannah
 savannah_name = None	# Name of the project on savannah.org (non-gnu)
 gitorious_url = None    # Name of the project on gitorious
@@ -518,6 +519,9 @@ try:
     savannah_name = metadata.extract("Savannah-Name")
     if not savannah_name:
         savannah_name = package
+    berlios_name = metadata.extract("Berlios-Name")
+    if not berlios_name:
+        berlios_name = package
     sourceforge_name = metadata.extract("SourceForge-Name")
     if sourceforge_name:
         if "@" in sourceforge_name:
@@ -575,12 +579,16 @@ try:
             website = "http://%s.sourceforge.net/" % sourceforge_name
         if "savannah" in destinations:
             website = "http://www.nongnu.org/%s/" % savannah_name
+        if "berlios" in destinations:
+            website = "http://%s.berlios.de/" % berlios_name
 
     # Download directory has to be computed differently at
     # special destinations.
     if website:
         if "savannah" in website:
             download = "http://download.savannah.nongnu.org/releases/%s/"+(savannah_name or package)
+        if "berlios"in website:
+            download = "http://download.berlios.de/"+(berlios_name or package)
         elif "sourceforge" in website:
             download = "http://sourceforge.net/projects/%s/files/" % (
                 sourceforge_name)
@@ -677,7 +685,8 @@ try:
         # Single-line 
         for variable in ('destinations', 'whoami', 'date', 
                          'package', 'website', 'project_tags', 
-                         'freecode_name', 'savannah_id', 'savannah_name',
+                         'freecode_name', 'berlios_name',
+                         'savannah_id', 'savannah_name',
                          'gitorious_url', 'github_url', 'ohloh_url',
                          'irc_channel',
                          'sourceforge_name', 'sourceforge_folder',
@@ -845,6 +854,13 @@ try:
                 upload_or_die("cd %s/%s; ls -R; cvs add -kb %s"
                                % (tmpdir, savannah_name, source))
         # cvs commit goes here
+        def berlios():
+            upload("ftp://ftp.berlios.de/incoming", download_deliverables)
+            berlios_webdir = \
+                           "shell.berlios.de:/home/groups/" \
+                           + (berlios_name or package) \
+                           + "/htdocs"
+            upload(berlios_webdir, web_deliverables, subdir="")
     def sourceforge():
         if not options.webonly:
             # See https://sourceforge.net/apps/trac/sourceforge/wiki/Release%20files%20for%20download
@@ -866,7 +882,7 @@ try:
             sourceforge_userid,
             sourceforge_name,
             sourceforge_name))
-    hardwired = ("freecode", "savannah", "sourceforge")
+    hardwired = ("freecode", "berlios", "savannah", "sourceforge")
 
     if options.verbose:
         print("Destinations: " + ", ".join(destinations))
