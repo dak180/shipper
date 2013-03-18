@@ -4,7 +4,7 @@
 #
 # Requires Python 2.72 or later.
 
-import sys, os, re, commands, time, tempfile, filecmp, shutil
+import sys, os, re, commands, time, tempfile, shutil
 import glob, optparse, stat, email, smtplib
 
 version = "0.14"
@@ -844,9 +844,10 @@ try:
                     if not os.path.exists(target_subdir):
                         os.mkdir(target_subdir)
                     else:
-                        sys.stderr("%s already exists as non-directory!" % \
-                                   target_subdir)
-                        raise SystemExit,1
+                        sys.stderr.write(
+                            "%s already exists as non-directory!" % \
+                            target_subdir)
+                        raise SystemExit, 1
             target = os.path.join(tmpdir, savannah_name, source)
             pre_existing = os.path.exists(target)
             shutil.copyfile(source, target)
