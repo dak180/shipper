@@ -33,6 +33,7 @@ sourceforge_folder = "" # Subfolder for file releases
 ohloh_url = ""		# Where the Ohloh stats live
 summary = None   	# One-line summary of the package
 webdir = None           # Web directory to be mirrored to a project site
+web_extras = None	# Extra web deliverables
 logo = ""               # Project logo
 tagtemplate = "%s"
 tagmessage = "Tagged for external release %s"
@@ -255,6 +256,7 @@ class Specfile:
             self.tagtemplate = self.extract("Tagtemplate")
             self.tagmessage = self.extract("Tagmessage")
             self.description = self.rpm_get_multiline("description")
+            self.web_extras = self.extract("Web-Extras")
             last = ""
             state = 0
             for line in open(self.filename):
@@ -310,6 +312,7 @@ class Specfile:
                 self.description = desc.strip() + "\n"
             else:
                 self.description = None
+            self.web_extras = self.extract("Web-Extras")
             self.lastchange = None
     def extract(self, fld):
         "Extract a one-line field, possibly embedded as a magic comment."
@@ -540,6 +543,7 @@ try:
     irc_channel = metadata.extract("IRC-Channel")
     logo = metadata.extract("Logo")
     webdir = metadata.extract("Web-Directory")
+    web_extras = metadata.extract("Web-Extras")
     resourcetable = ""
 
     if options.verbose:
@@ -690,7 +694,7 @@ try:
                          'gitorious_url', 'github_url', 'ohloh_url',
                          'irc_channel',
                          'sourceforge_name', 'sourceforge_folder',
-                         'summary', 'webdir', 'logo',
+                         'summary', 'webdir', 'web_extras', 'logo',
                          'tagtemplate', 'tagmessage'):
             print("%s = %s" % (variable, repr(eval(variable))))
         # Free text, multiline
@@ -734,6 +738,14 @@ try:
                 else:
                     explanation = "HTML page."
             deliverables.append((filename, explanation, None, False))
+        if web_extras is not None:
+            for fn in web_extras.split():
+                firstline = open(fn).readline()
+                if firstline.startswith("#"):
+                    explanation = firstline[1:].strip()
+                else:
+                    explanation = "Custom web deliverable"
+                deliverables.append((fn, explanation, None, False))
 
         # If a web page doesn't already exist, but the index template
         # variable is nonempty (which is the default) make one.  

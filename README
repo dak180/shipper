@@ -1,7 +1,0 @@
-		README for shipper
-
-shipper automates the tedious process of shipping a software release
-to several standard places, including your own hosted website.  It
-also knows how to post a release announcement to freecode.com via
-freecode-submit.
-
