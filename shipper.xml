@@ -96,7 +96,7 @@ upload.</para>
 
 <para>The last step before uploading may be to generate an
 <filename>index.html</filename> file for uploading, if no such file
-alreay exists and you have specified the <option>-m</option>
+already exists and you have specified the <option>-m</option>
 option.</para>
 
 <para>Without the <option>-u</option> (upload) option,
@@ -115,13 +115,13 @@ website updates.</para>
 deliverables and posts all announcements.  The <option>-x</option> may
 be use to suppress delivery to specified destinations that would
 normally be performed (e.g., due to a destination variable set in one
-of your <filename>.shipper</filename> files>); it may be a
+of your <filename>.shipper</filename> files); it may be a
 comma-separated list.</para>
 
 <para>After deliverables have shipped successfully and notifications
 posted, <application>shipper</application> determines if the directory
 it is in is a working copy in a version-control system that supports
-release tagging.  If so, and the <option>-t</option> has been
+release tagging.  If so, and the <option>-t</option> option has been
 selected, it tries to tag the release just shipped.  See <xref
 linkend='postinstall'/> for discussion of what version-control systems
 are supported and what actions will be taken.</para>
@@ -220,7 +220,7 @@ the destination you're shipping to.</para>
 
 <para>A destination entry of <quote>~</quote> can be used to clear the
 previously-set value, so an individual project control file can ignore
-desrinations set in your home-directory
+destinations set in your home-directory
 <filename>~/.shipper</filename> file.  Additionally, <quote>~</quote>
 followed by a destination causes that individual destination to be
 removed.</para>
@@ -252,7 +252,7 @@ email announcement templates.</para>
 <para>You can use the Python function time.strftime("...") in your
 <filename>~/.shipper</filename> file to format this date to your
 taste.  If you don't set this in the config file, the program will
-set it for you.</para>
+set a default for you.</para>
 </entry>
 </row>
 <row>
@@ -361,7 +361,7 @@ this isn't present, it defaults to the project name; you only need to
 set it if they differ.</para>
 
 <para>If your SourceForge-Name has a '@' in it, the prefix before that
-is removed an interpreted as your SourceForge user ID. If no such prefix
+is removed and interpreted as your SourceForge user ID. If no such prefix
 is present, the user ID from whoami will be assumed.</para>  
 </entry>
 </row>
@@ -667,7 +667,7 @@ changes may not be visible for up to an hour after submission!
 <para>If freecode is in the user's destination list,
 <application>shipper</application> will generate a file called
 SHIPPER.FREECODE, unless that file already exists (this is soo you
-can geberate the file with <command>shipper -n</command> and edit it
+can generate the file with <command>shipper -n</command> and edit it
 before running without <option>-n</option>). This file will be a job card
 that can be fed to freecode.com's API via
 <citerefentry><refentrytitle>freecode-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
