@@ -486,13 +486,12 @@ that have tortuous procedures for updating webspace.</para>
 <entry>#Tagtemplate</entry>
 <entry>#XBS-Tagtemplate</entry>
 <entry>
-<para><para>You can change tagging behavior by setting the variable
+<para>You can change tagging behavior by setting the variable
 <varname>tagtemplate</varname>. If you set it to None,
 release tagging will be suppressed entirely.  If you set it to a
 nonempty string, that will become the template for the name of the
 tag.  "%s" in the string will be replaced with the
 version number.</para>
-</para>
 </entry>
 </row>
 <row>
@@ -500,14 +499,13 @@ version number.</para>
 <entry>#Tagmessage</entry>
 <entry>#XBS-Tagmessage</entry>
 <entry>
-<para><para>You can also customize the actual log message by setting
+<para>You can also customize the actual log message by setting
 the variable <varname>tagmessage</varname>.  See the default with
 <command>shipper -N</command>; the %s in it will be replaced with the
 version.</para>
 
 <para>bzr, however, cannot annotate tags.  The <varname>tagmessage</varname>
 variable will be ignored in this case.</para>
-</para>
 </entry>
 </row>
 </tbody>
