@@ -1,72 +1,67 @@
 			shipper project news
 
-* Repository head
+0.15:
   SourceForge upload locations for FRS and project web have changed.
   Add and document the the sourceforge-folder variable.
   Ship project description with updates.
   Added IRC chat channel and Ohloh/github/gitorious URLs to optional metadata.
   Extract HTML page descriptions from <title> elements.
   Push changes and tags if -t and -u are both enabled.
-  Berlios support revived.
-  Beware, savannah-nongnu support is incomplete, web uploads don't work.
-
-* Fri 04 Nov 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 0.15
-  Remove Berlios support (it's shutting down) and clean up docs.
   Add untested support for savannah-nongnu.
 
-* Thu 03 Nov 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 0.14
+0.14: 2011-11-03
   Cope with the Freshmeat to Freecode name change.
 
-* Wed Dec 1 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.13
+0.13: 2010-12-01
   Set the Berlios download location correctly for SourceForge announcements.
 
-* Fri Nov 26 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.12
+0.12: 2010-11-26
   Can now tag releases under hg and bzr,
   Added the logo variable and logo embedding in the web-page template.
 
-* Mon Nov 22 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.11
+0.11: 2010-11-22
   Support for SourceForge as a destination.
 
-* Thu Nov 15 2010 Eric S. Raymond <esr@snark.thyrsus.com> - 0.10
+0.10: 2010-11-15
   Generate correct download directories in a Freshmeat announcement for a 
   Berlios project.  Check version in makefile as well as Makefile.
 
-* Thu Mar  3 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.9
+0.9: 2005-04-03
   The Channels variable is gone. There are no longer default public channels;
   you put the ones you want in your Destinations variable.  For safety's sake
   the force (-f) option is also gone; generated deliverables are now built 
   unconditionally, and you must explicitly make sure no index.html exists 
   in order to get one generated.  There is now a "berlios" channel.
 
-* Tue Feb  1 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.8
+0.8: 2005-02-01
   Strip trailing edit-mode lines out of RPM spec files.
 
-* Thu Jan 27 2005 Eric S. Raymond <esr@snark.thyrsus.com> - 0.7
+0.7: 2005-01-27
   Now handles packages that generate multiple binary RPMs correctly.
 
-* Sat Aug 21 2004 Eric S. Raymond <esr@snark.thyrsus.com> 0.6
+0.6: 2004-08-21
   Fixed a minor bug in the generation of lftp commands.  Also, generate
   a To line into email announcement.  Mailman doesn't like implicit
   addressing. 
 
-* Fri Feb 6 2004 Eric S. Raymond <esr@snark.thyrsus.com> 0.5
+0.5: 2004-02-06
   Added security check so the ~/.shipper and .shipper files can't be used
   for privilege elevation.  Fixed upload omission bug in case where neither 
   -n nor -f was on and the webpage wasn't being built.  Deliverables 
   created for upload are deleted at end of run.
 
-* Sun Jan 11 2004 Eric S. Raymond <esr@snark.thyrsus.com> 0.4
+0.4: 2004-01-11
   Correct extraction of freshmeat name.  Build generated deliverables
   only if we know they will be needed. Help is now available at the 
   freshmeat-focus prompt.
 
-* Sat Jan 10 2004 Eric S. Raymond <esr@snark.thyrsus.com> 0.3
+0.3: 2004-01-10
   First alpha release of unified shipper package.  It can ship itself.
 
-* Wed Dec 17 2003 Eric S. Raymond <esr@snark.thyrsus.com>
+0.2: 2003-12-17
   rpm2lsm now grabs an RPM from the current directory if no argument,
   and parses an AUTHORS file if present (GNU convention).  Also,
   this release fixes a bug in USERNAME handling.
 
-* Thu Aug  1 2002 Eric S. Raymond <esr@snark.thyrsus.com>
+0.1: 2002-08-01
   Initial release of rpm2lsm, since folded into shipper package.
