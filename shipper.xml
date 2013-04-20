@@ -752,9 +752,8 @@ announcement on freecode.com using
 <citerefentry><refentrytitle>freecode-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 The announcement will include URLs for whichever of the following
 deliverables are shipped, using the URL field from your specfile:
-tarballs, zipfiles, RPMs, debs, ChangeLog.  The user will be prompted for a
-Freecode release-focus.  This announcement is generated into the
-local deliverable SHIPPER.FREECODE.</para>
+tarballs, zipfiles, RPMs, debs, ChangeLog.  This announcement is
+generated into the local deliverable SHIPPER.FREECODE.</para>
 </entry>
 </row>
 <row>

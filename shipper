@@ -97,22 +97,6 @@ Here are the most recent changes:
                              shipper, acting for %(whoami)s
 """
 
-# It's unpleasant that we have to include these here, but
-# the new API doesn't have any facility that allow us to
-# validate these.
-freecode_focus_types = (
-"N/A",
-"Initial freecode announcement",
-"Documentation",
-"Code cleanup",
-"Minor feature enhancements",
-"Major feature enhancements",
-"Minor bugfixes",
-"Major bugfixes",
-"Minor security fixes",
-"Major security fixes",
-)
-
 def croak(msg):
     sys.stderr.write("shipper: " + msg + "\n")
     sys.exit(1)
@@ -770,28 +754,12 @@ try:
             print("# Can't announce to freecode without a changes field!")
             destinations.remove("freecode")
         else:
-            while True:
-                focus = raw_input("# freecode.com release focus (? for list): ")
-                if focus == '?':
-                    i = 0
-                    for f in freecode_focus_types:
-                        print("%d: %s" % (i, f))
-                        i += 1
-                elif focus in "0123456789":
-                    focus = freecode_focus_types[int(focus)]
-                    print("# OK: " + focus)
-                    break
-                elif focus.lower() in [x.lower() for x in freecode_focus_types]:
-                    break
-                else:
-                    croak("not a valid freecode.com release focus!")
             ofp = open("SHIPPER.FREECODE", "w")
             ofp.write("Project: %s\n" % (freecode_name or package))
             ofp.write("Version: %s\n" % version)            
             ofp.write("Description: %s" % description.replace("\n", "\n    ")[:-4])
             if project_tags:
                 ofp.write("Project-Tag-List: %s\n" % project_tags)
-            ofp.write("Release-Focus: %s\n" % focus)
             ofp.write("Website-URL: %s\n" % website)
             for (f, e, s, b) in deliverables:
                 if s:
