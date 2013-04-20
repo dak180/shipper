@@ -7,6 +7,8 @@
   Added IRC chat channel and Ohloh/github/gitorious URLs to optional metadata.
   Extract HTML page descriptions from <title> elements.
   Push changes and tags if -t and -u are both enabled.
+  Berlios support revived.
+  Beware, savannah-nongnu support is incomplete, web uploads don't work.
 
 * Fri 04 Nov 2011 Eric S. Raymond <esr@snark.thyrsus.com> - 0.15
   Remove Berlios support (it's shutting down) and clean up docs.
