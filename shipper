@@ -801,11 +801,17 @@ try:
         if not options.webonly:
             upload("dl.sv.nongnu.org:/releases/%s/" % savannah_name,
                    download_deliverables)
+        # This code is weird and complicated because what Savannah wants
+        # you to do is check out a per-project CVS repository for the
+        # web pages, make changes to that repo, and commit it.
         # See http://savannah.gnu.org/maintenance/HomepageUpload
+        # Sometime after this commit a cron job will run and check out
+        # the visible version of the webpage(s). 
+        #
+        # We're using -kb to avoid keyword expansion on binary files.
         tmpdir = tempfile.mkdtemp()
-        upload_or_die("cd %s; cvs -z3 -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
+        upload_or_die("cd %s; cvs -z3 -kb -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
                   % (tmpdir, savannah_id, savannah_name, savannah_name))
-        # Using -kb to avoid keyword expansion on binary files.
         if not webdir:
             deliver = " ".join(web_deliverables)
         else:
@@ -820,21 +826,25 @@ try:
                 target_subdir = os.path.join(tmpdir,
                                              savannah_name,
                                              source_subdir)
-                if not os.path.isdir(target_subdir):
-                    if not os.path.exists(target_subdir):
-                        os.mkdir(target_subdir)
-                    else:
-                        sys.stderr.write(
-                            "%s already exists as non-directory!" % \
-                            target_subdir)
-                        raise SystemExit, 1
+                if not os.path.exists(target_subdir):
+                    upload_or_die("cd %s/%s; cvs add %s"
+                                  % (tmpdir, savannah_name, source_subdir))
+                elif not os.path.isdir(target_subdir):
+                    # If this ever happens, you'll need to delete the
+                    # offending file by hand.
+                    sys.stderr.write(
+                        "%s already exists as non-directory!" % \
+                        target_subdir)
+                    raise SystemExit, 1
             target = os.path.join(tmpdir, savannah_name, source)
             pre_existing = os.path.exists(target)
             shutil.copyfile(source, target)
+            # This code handles additions, but you'll have to do
+            # deletions by hand. Assuming you ever care.  
             if not pre_existing:
-                upload_or_die("cd %s/%s; ls -R; cvs add -kb %s"
+                upload_or_die("cd %s/%s; cvs add %s"
                                % (tmpdir, savannah_name, source))
-        # cvs commit goes here
+        upload_or_die("cd %s/%s; cvs commit" % (tmpdir, savannah_name))
     def berlios():
         upload("ftp://ftp.berlios.de/incoming", download_deliverables)
         berlios_webdir = \
