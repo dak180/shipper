@@ -835,13 +835,13 @@ try:
                 upload_or_die("cd %s/%s; ls -R; cvs add -kb %s"
                                % (tmpdir, savannah_name, source))
         # cvs commit goes here
-        def berlios():
-            upload("ftp://ftp.berlios.de/incoming", download_deliverables)
-            berlios_webdir = \
-                           "shell.berlios.de:/home/groups/" \
-                           + (berlios_name or package) \
-                           + "/htdocs"
-            upload(berlios_webdir, web_deliverables, subdir="")
+    def berlios():
+        upload("ftp://ftp.berlios.de/incoming", download_deliverables)
+        berlios_webdir = \
+                       "shell.berlios.de:/home/groups/" \
+                       + (berlios_name or package) \
+                       + "/htdocs"
+        upload(berlios_webdir, web_deliverables, subdir="")
     def sourceforge():
         if not options.webonly:
             # See https://sourceforge.net/apps/trac/sourceforge/wiki/Release%20files%20for%20download
