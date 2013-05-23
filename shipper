@@ -274,7 +274,7 @@ class Specfile:
             self.tagtemplate = self.extract("Tagtemplate")
             self.tagmessage = self.extract("Tagmessage")
             fp = open(self.filename)
-            desc = self.summary + "\n"
+            desc = ""
             gather = False
             while True:
                 line = fp.readline()
