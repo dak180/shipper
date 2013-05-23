@@ -1,6 +1,7 @@
 			shipper project news
 
-0.15:
+0.15: 2013-05-23
+  The Fernando Poo Day double release! First spin of 0.15 had a wrong checksum.
   SourceForge upload locations for FRS and project web have changed.
   Add and document the the sourceforge-folder variable.
   Ship project description with updates.
