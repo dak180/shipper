@@ -2,8 +2,9 @@
 
 VERS=$(shell sed <shipper -n -e '/^version *= *\(.*\)/s//\1/p')
 
-MANDIR=$(DESTDIR)/usr/share/man/man1
-BINDIR=$(DESTDIR)/usr/bin
+prefix?=/usr/local
+mandir?=share/man
+target=$(DESTDIR)$(prefix)
 
 DOCS    = README TODO COPYING shipper.xml
 SOURCES = shipper Makefile $(DOCS) control shipper-logo.png
@@ -11,8 +12,10 @@ SOURCES = shipper Makefile $(DOCS) control shipper-logo.png
 all: shipper-$(VERS).tar.gz
 
 install: shipper.1
-	cp shipper $(BINDIR)
-	gzip <shipper.1 >$(MANDIR)/shipper.1.gz
+	install -d "$(target)/bin"
+	install -m 755 shipper "$(target)/bin/"
+	install -d "$(target)/$(mandir)/man1"
+	gzip <shipper.1 >"$(target)/$(mandir)/man1/shipper.1.gz"
 
 shipper.1: shipper.xml
 	xmlto man shipper.xml
