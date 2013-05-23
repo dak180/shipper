@@ -8,6 +8,7 @@
   Extract HTML page descriptions from <title> elements.
   Push changes and tags if -t and -u are both enabled.
   md5 and sha* checksum files added to automatic website uploads.
+  Release-Focus is gone; calling shipper is now a fire-and-forget operation.
   Add untested support for savannah-nongnu.
 
 0.14: 2011-11-03

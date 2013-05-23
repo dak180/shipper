@@ -5,7 +5,7 @@ VERS=$(shell sed <shipper -n -e '/^version *= *\(.*\)/s//\1/p')
 MANDIR=$(DESTDIR)/usr/share/man/man1
 BINDIR=$(DESTDIR)/usr/bin
 
-DOCS    = README COPYING shipper.xml shipper.1
+DOCS    = README TODO COPYING shipper.xml
 SOURCES = shipper Makefile $(DOCS) control shipper-logo.png
 
 all: shipper-$(VERS).tar.gz
@@ -19,9 +19,10 @@ shipper.1: shipper.xml
 shipper.html: shipper.xml
 	xmlto html-nochunks shipper.xml
 
-shipper-$(VERS).tar.gz: $(SOURCES)
+EXTRA = shipper.1
+shipper-$(VERS).tar.gz: $(SOURCES) $(EXTRA)
 	@mkdir shipper-$(VERS)
-	@cp $(SOURCES) shipper-$(VERS)
+	@cp $(SOURCES) $(EXTRA) shipper-$(VERS)
 	@tar -czf shipper-$(VERS).tar.gz shipper-$(VERS)
 	@rm -fr shipper-$(VERS)
 
