@@ -7,7 +7,7 @@
 import sys, os, re, commands, time, tempfile, shutil
 import glob, optparse, stat, email, smtplib
 
-version = "0.14"
+version = "0.15"
 
 #
 # State variables
