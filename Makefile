@@ -27,7 +27,7 @@ shipper-$(VERS).tar.gz: $(SOURCES) $(EXTRA)
 	@rm -fr shipper-$(VERS)
 
 shipper-$(VERS).md5: shipper-$(VERS).tar.gz
-	md5sum shipper-$(VERS).tar.gz >shipper-$(VERS).md5
+	@md5sum shipper-$(VERS).tar.gz >shipper-$(VERS).md5
 
 clean:
 	rm -f *.1 *.tar.gz *.rpm *.tar.gz SHIPPER.* *.html *.md5 *.sha*
