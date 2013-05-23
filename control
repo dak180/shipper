@@ -14,6 +14,8 @@ XBS-Destinations: freecode
 
 Homepage: http://www.catb.org/~esr/shipper
 
+Gitorious-URL: https://gitorious.org/shipper
+
 XBS-Logo: shipper-logo.png
 
 XBS-Project-Tag-List: packaging, distribution
