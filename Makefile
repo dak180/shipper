@@ -25,8 +25,11 @@ shipper-$(VERS).tar.gz: $(SOURCES)
 	@tar -czf shipper-$(VERS).tar.gz shipper-$(VERS)
 	@rm -fr shipper-$(VERS)
 
+shipper-$(VERS).md5: shipper-$(VERS).tar.gz
+	md5sum shipper-$(VERS).tar.gz >shipper-$(VERS).md5
+
 clean:
-	rm -f *.1 *.tar.gz *.rpm *.tar.gz SHIPPER.* *.html
+	rm -f *.1 *.tar.gz *.rpm *.tar.gz SHIPPER.* *.html *.md5 *.sha*
 
 version:
 	echo $(VERS)
@@ -35,7 +38,7 @@ PYLINTOPTS = --rcfile=/dev/null --reports=n --include-ids=y --disable=C0103,C011
 pylint:
 	@pylint --output-format=parseable $(PYLINTOPTS) shipper
 
-dist: shipper-$(VERS).tar.gz
+dist: shipper-$(VERS).tar.gz shipper-$(VERS).md5 
 
 release: shipper-$(VERS).tar.gz shipper.html
 	shipper -u -m -t; make clean

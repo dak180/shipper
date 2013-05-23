@@ -550,6 +550,14 @@ ${package}.*-${version}.tar.bz2.</para>
 </entry>
 </row>
 <row>
+<entry>checksum files</entry>
+<entry>
+<para>Current source tarball checksums, that is any files named
+${package}.*-${version}.md5 or 
+${package}.*-${version}.sh{224,356,384,512}.</para>
+</entry>
+</row>
+<row>
 <entry>RPMs</entry>
 <entry>
 <para>Current RPMs, that is any files named
@@ -876,12 +884,13 @@ the deliverables <application>shipper</application> knows about
 will be rebuilt before being shipped.</para>
 
 <programlisting>
-release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>.html 
+release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>-$(VERS).md5 <emphasis>package</emphasis>.html 
 	shipper -u -m -t
 </programlisting>
 
 <para>You will want to change <emphasis>package</emphasis> to your 
-project name.</para>
+project name. You will need to write a production that builds your
+tarball and checksum files.</para>
 
 <para>In an SConstruct file, you want:
 
@@ -895,7 +904,8 @@ and something like
 env.Alias("release", [tarball], 'shipper -u -m -t')
 </programlisting>
 
-with 'tarball' being a production that makes a release tarball.
+with 'tarball' being a production that makes a release tarball (and
+checksum, if desired).
 </para>
 
 </refsect1>
