@@ -242,6 +242,16 @@ attempting to deduce it.</para>
 </entry>
 </row>
 <row>
+<entry><varname>gittip_id</varname></entry>
+<entry align='center'>-</entry>
+<entry align='center'>-</entry>
+<entry>
+<para>Your ID on <ulink url="http//gittip.com">gittip.com</ulink>. If
+present, generated web pages will include a link to your gittip
+page where peple can leave tips.</para>
+</entry>
+</row>
+<row>
 <entry><varname>date</varname></entry>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>

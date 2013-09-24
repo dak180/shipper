@@ -1,5 +1,8 @@
 			shipper project news
 
+Repository head:
+  Added support for embedding a gittip link.
+
 0.15: 2013-05-23
   The Fernando Poo Day double release! First spin of 0.15 had a wrong checksum.
   SourceForge upload locations for FRS and project web have changed.
