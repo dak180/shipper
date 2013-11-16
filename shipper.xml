@@ -103,8 +103,9 @@ upload.</para>
 
 <para>The last step before uploading may be to generate an
 <filename>index.html</filename> file for uploading, if no such file
-already exists and you have specified the <option>-m</option>
-option.</para>
+already exists and you have specified either the
+<varname>html_target</varname> or the (deprecated) <option>-m</option>
+variable option.</para>
 
 <para>Without the <option>-u</option> (upload) option,
 <application>shipper</application> stops just before uploading,
@@ -279,15 +280,26 @@ set a default for you.</para>
 </entry>
 </row>
 <row>
-<entry><varname>indextemplate</varname></entry>
+<entry><varname>html_target</varname></entry>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>Template HTML from which to generate index.html for shipping.
+<para>Name of a file to which a templated web page generated from the
+release data should be generated.  If this variable is an empty string
+(the default), templated page generation is suppressed.  The
+most likely value for this, if you set it, is "index.html"</para>
+</entry>
+</row>
+<row>
+<entry><varname>html_template</varname></entry>
+<entry align='center'>-</entry>
+<entry align='center'>-</entry>
+<entry>
+<para>Template HTML from which to generate the page_file for shipping.
 There is a default which generates a very simple page containing a
 title, a date, and a table listing downloadable resources.  This is
-used when shipping to a web directory, if the <option>-m</option> option is
-set. If this variable in None, index page generation is
+used when shipping to a web directory if the <varname>html_target</varname> is
+set. If this variable is None or an empty string, index page generation is
 suppressed.</para>
 </entry>
 </row>
@@ -497,9 +509,11 @@ embed this in the page header.</para>
 <entry>#XBS-Web-Directory</entry>
 <entry>
 <para>The relative path of a web directory to be mirrored to project
-webspace at a forge location. If this is defined it overrides the normal
-web page templating mechanism associated with the <option>-m</option> 
-option.</para>
+webspace at a forge location. If this is defined it overrides the
+normal web page templating mechanism associated with the
+<varname>html_template</varname> and <varname>html_target</varname>
+variables.</para>
+
 <para>Usually shipper just generates an rsync of this directory to
 the host location, but it may take special action for forges like Savannah
 that have tortuous procedures for updating webspace.</para>
@@ -685,13 +699,6 @@ deleted after a successful upload.</para>
 </thead>
 <tbody>
 <row>
-<entry>index.html</entry>
-<entry>
-<para>An index web page, to be shipped to any website destination.
-Only generated if the <option>-m</option> option is set.</para>
-</entry>
-</row>
-<row>
 <entry>tarball, zipfile, RPMs, debs, README, COPYING, ChangeLog, NEWS, HISTORY,
 BUGS, TODO.</entry>
 <entry>
@@ -730,6 +737,10 @@ running with <option>-u</option>).</para>
 </tbody>
 </tgroup>
 </informaltable>
+
+<para>Additionally, if the <varname>html_template</varname> and
+<varname>html_target</varname> variables are set, a templated HTML
+page named by will be generated and shipped to websites.</para>
 </refsect1>
 
 <refsect1><title>Shipping to Destinations</title>
@@ -902,9 +913,11 @@ configuration dump to standard output.</para>
 
 <para>The <option>-u</option> option enables uploading and tag pushing.</para>
 
-<para>The <option>-m</option> option tells
-<application>shipper</application> to generate a web page and upload it
-to website destinations.</para>
+<para>The (deprecated) <option>-m</option> option tells
+<application>shipper</application> to generate a templated page named
+"index.html" and upload it to website destinations. This option may be
+removed in a future release; set the <varname>html_target</varname>
+variable to "index.html" instead.</para>
 
 <para>The <option>-t</option> option tells <application>shipper</application> to
 attempt to tag the local repo after shipping.</para>

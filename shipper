@@ -45,8 +45,8 @@ changelog = None	# Project changelog
 lastchange = None  	# Last entry in changelog
 extralines = ""         # Extra lines for HTML template
 
-
-indextemplate = """
+html_target = None	# Name to template a page to
+html_template = """
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN'
     'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
@@ -178,9 +178,9 @@ def freecode_ship(job_card):
     sys.stdout.write(open(job_card).read())
     print("EOF")
 
-def make_index_page(deliverables, substitutions):
-    "Make index page, listing specified deliverables."
-    print("# Building index.html...")
+def make_templated_page(deliverables, substitutions, outfile):
+    "Make templated page, listing specified deliverables."
+    print("# Building %s..." % outfile)
     global extralines
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
     for (ifile, explanation, __tag, big) in deliverables:
@@ -221,9 +221,9 @@ def make_index_page(deliverables, substitutions):
         centertext = '<img src="%s"/>' % substitutions["logo"]
     substitutions["description"] = "<p>" + substitutions["description"].replace("\n\n", "</p>\n\n<p>") + "</p>"
     substitutions.update(locals())
-    # OK, now build the index page itself
-    ofp = open("index.html", "w")
-    ofp.write(indextemplate % substitutions)
+    # OK, now build the templated page itself
+    ofp = open(outfile, "w")
+    ofp.write(html_template % substitutions)
     ofp.close()
 
 #
@@ -261,6 +261,7 @@ class Specfile:
             self.ircmessage = self.extract("IRC-Message")
             self.description = self.rpm_get_multiline("description")
             self.web_extras = self.extract("Web-Extras")
+            self.html_target = self.extract("HTML-Target")
             last = ""
             state = 0
             for line in open(self.filename):
@@ -294,6 +295,7 @@ class Specfile:
             self.tagtemplate = self.extract("Tagtemplate")
             self.tagmessage = self.extract("Tagmessage")
             self.ircmessage = self.extract("IRC-Message")
+            self.html_target = self.extract("NTML-Target")
             fp = open(self.filename)
             desc = ""
             gather = False
@@ -556,6 +558,7 @@ try:
     logo = metadata.extract("Logo")
     webdir = metadata.extract("Web-Directory")
     web_extras = metadata.extract("Web-Extras")
+    html_target = metadata.extract("HTML-Target")
     resourcetable = ""
 
     # Arguments can be variable settings
@@ -741,11 +744,12 @@ try:
                          'irc_channel',
                          'sourceforge_name', 'sourceforge_folder',
                          'summary', 'webdir', 'web_extras', 'logo',
-                         'tagtemplate', 'tagmessage', 'ircmessage'):
+                         'tagtemplate', 'tagmessage', 'ircmessage',
+                         "html_target"):
             print("%s = %s" % (variable, repr(eval(variable))))
         # Free text, multiline
         for variable in ('description', 'changelog', 'lastchange',
-                         'extralines', 'mailtemplate', 'indextemplate'):
+                         'extralines', 'mailtemplate', 'html_template'):
             if not eval(variable):
                 print("No %s" % variable)
             else:
@@ -766,10 +770,10 @@ try:
 
     if not webdir:
         # Compute web-related deliverables, we need this even if not rebuilding
-        # the index. Includes anything with an HTML, Javascript, or CSS
+        # the templated page. Includes anything with an HTML, Javascript, or CSS
         # extension.
         for filename in glob.glob('*.html')+glob.glob('*.xhtml')+glob.glob('*.js')+glob.glob('*.css'):
-            if filename == 'index.html':
+            if filename == html_target:
                 continue
             stem = filename[:-4]
             for ext in ("man", "1", "2", "3", "4", "5", "6", "7", "8", "9", "xml"):
@@ -793,14 +797,20 @@ try:
                     explanation = "Custom web deliverable"
                 deliverables.append((fn, explanation, None, False))
 
-        # If a web page doesn't already exist, but the index template
-        # variable is nonempty (which is the default) make one.  
-        if indextemplate and options.makeindex:
-            make_index_page(deliverables, globals())
+        # If a web page doesn't already exist, but the template
+        # variable is nonempty (which is the default) make one.
+        if options.makeindex:
+            print("shipper: -m is deprecated, set html_template instead.")
+            if html_target:
+                print("# Ignoring -m, HTML target already set to %s" % html_target)
+            else:
+                html_target = "index.html"
+        if html_template and html_target:
+            make_templated_page(deliverables, globals(), html_target)
             # Now that the web page has been generated, it can add
             # itself to the deliverables without having it show up in
             # the resource table.
-            deliverables.append(("index.html", "index web page", None, False))
+            deliverables.append((html_target, "templated web page", None, False))
 
         # We'll want the logo if it exists, too
         if logo:
@@ -851,7 +861,7 @@ try:
 
     # Compute final deliverables.  This computation needs to coincide
     # with the way web deliverables are distinguished from download
-    # deliverables in make_index_page(), otherwise havoc will ensue.
+    # deliverables in make_templated_page(), otherwise havoc will ensue.
     all_deliverables = [x[0] for x in deliverables]
     download_deliverables = [x[0] for x in [f_e_s_b for f_e_s_b in deliverables if f_e_s_b[3]]]
     web_deliverables = [x[0] for x in [f_e_s_b1 for f_e_s_b1 in deliverables if not f_e_s_b1[3]]]
