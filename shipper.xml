@@ -79,8 +79,10 @@ destinations.</para>
 
 <para>The <application>shipper</application> program's first step is
 to read the <filename>.shipper</filename> files in your home directory
-and the current directory.  These set various control variables and
-templates <application>shipper</application> will use later.</para>
+and the current directory (if you like XDG conventions, make a
+<filename>~/.config/shipper</filename> instead).  These set various
+control variables and templates <application>shipper</application>
+will use later.</para>
 
 <para>Second, <application>shipper</application> reads per-project
 information from a specfile, either an RPM spec or a Debian control
@@ -1008,6 +1010,14 @@ the "Preferred Download". Usually this will point to the most recent download
 subdirectory by default, which is the right thing.</para>
 </refsect1>
 
+<refsect1><title>Files</title>
+<para>
+<filename>$HOME/.shipper</filename>;
+<filename>$HOME/.config/shipper</filename>;
+<filename>$PWD/.shipper</filename>.
+</para>
+
+</refsect1>
 <refsect1><title>Author</title>
 <para>Eric S. Raymond <email>esr@thyrsus.com</email>.</para>
 

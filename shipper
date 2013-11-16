@@ -423,11 +423,15 @@ try:
             croak("%s must not be world-writeable!" % fn)
 
     # Read in variable overrides
-    securecheck(".")
     home_profile = os.path.join(os.getenv('HOME'), ".shipper")
     if os.path.exists(home_profile):
         securecheck(home_profile)
         exec(compile(open(home_profile).read(), home_profile, 'exec'))
+    home_profile = os.path.join(os.getenv('HOME'), ".config/shipper")
+    if os.path.exists(home_profile):
+        securecheck(home_profile)
+        exec(compile(open(home_profile).read(), home_profile, 'exec'))
+    securecheck(".")
     here_profile = ".shipper"
     if os.path.exists(here_profile):
         securecheck(here_profile)
