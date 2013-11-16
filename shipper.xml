@@ -667,19 +667,16 @@ Only generated if the <option>-m</option> option is set.</para>
 </entry>
 </row>
 <row>
-<entry>berlios</entry>
 <entry>tarball, zipfile, RPMs, debs, README, COPYING, ChangeLog, NEWS, HISTORY,
 BUGS, TODO.</entry>
-<entry>-</entry>
 <entry>
-<para>If the Savannah destination is on your list,
-<application>shipper</application> will attempt to ship a tarball and source
-and binary RPMs to your project's download directory via scp.  It
-will also attempt to upload all web deliverables (README, CHANGES,
+<para>If the Sourceforge or Savannah destinations are on your list,
+<application>shipper</application> will attempt to ship a tarball and
+source and binary RPMs to your project's download directory via scp.
+It will also attempt to upload all web deliverables (README, CHANGES,
 NEWS, HISTORY, *.{html,css,js}, BUGS, TODO) to the project's web
-directory, automating away Savannah's painful CVS procedure. Note that
-changes may not be visible for up to an hour after submission!
-</para>
+directory. Note that on Savannah, web page changes may not be visible
+for up to an hour after submission!</para>
 </entry>
 </row>
 <row>
@@ -958,6 +955,21 @@ maintained</ulink>.</para></listitem>
 <listitem><para>For shipping notices to IRC channels. The freecode-submit program is <ulink
 url="http://www.catb.org/~esr/irkerd">separately
 maintained</ulink>.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>lftp</term>
+
+<listitem><para>For shipping to ftp sites.  The freecode-submit
+program is <ulink url="http://lftp.yar.ru/">separately
+maintained</ulink>.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>scp</term>
+
+<listitem><para>For shipping to websites. There are several different
+implementations of scp; one widely-used version is shipped by the
+<ulink url="http://www.openssh.com/">OpenSSH project</ulink>.
+</para></listitem>
 </varlistentry>
 </variablelist>
 
