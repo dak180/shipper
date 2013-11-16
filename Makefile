@@ -45,5 +45,5 @@ pylint:
 dist: shipper-$(VERS).tar.gz shipper-$(VERS).md5 
 
 release: shipper-$(VERS).tar.gz shipper-$(VERS).md5 shipper.html
-	shipper -u -m -t; make clean
+	shipper -u -t version=$(VERS); make clean
 

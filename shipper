@@ -462,30 +462,7 @@ try:
     if not package:
         croak("can't get package name!")
 
-    # Extract the package version from the specfile or Makefile
-    makevers = None
-    makefile = None
-    for mk in ("makefile", "Makefile"):
-        if os.path.exists(mk):
-            makevers = grep("^VERS[A-Z]* *= *(.*)", mk)
-            if makevers:
-                # Maybe it's a shell command intended to extract version from specfile
-                if makevers and makevers[0] == '$':
-                    makevers = commands.getoutput(makevers[7:-1])
-                if makevers[0] == '"' and makevers[-1] == '"':
-                    makevers = makevers[1:-1]
-                makefile = mk
-                break
-    if os.path.exists("SConstruct"):
-        makevers = grep('version *= "*(.*)"', "SConstruct")
-    if makevers and metadata.version and metadata.version != makevers:
-        croak("specfile version %s != Makefile version %s" % (metadata.version, makevers))
-    else:
-        version = makevers or metadata.version
-    if version == None:
-        croak("can't get package version")
-    elif version[0] not in "0123456789":
-        croak("package version %s appears garbled" % version)
+    version = metadata.version
 
     # Specfiles may set their own destinations
     local_destinations = metadata.extract("Destinations")
@@ -573,6 +550,12 @@ try:
             except (SyntaxError, NameError, ValueError):
                 print("shipper: ill-formed variable setting at %s" % arg)
                 raise SystemExit, 1
+
+    if not options.nobuild:
+        if version == None:
+            croak("can't get package version")
+        elif version[0] not in "0123456789":
+            croak("package version %s appears garbled" % version)
 
     if options.verbose:
         print "shipper: variable extraction finished"
@@ -673,47 +656,47 @@ try:
          "project license",
          None,
          False),
-        (re.compile(".*-" + version + r".(tar.gz|tgz)$"),
+        (re.compile(".*-" + str(version) + r".(tar.gz|tgz)$"),
          "gzipped source tarball",
          "Tar/GZ",
          True),
-        (re.compile(package + ".*-" + version + r".tar.bz2$"),
+        (re.compile(package + ".*-" + str(version) + r".tar.bz2$"),
          "bzipped source tarball",
          "Tar/BZ",
          True),
-        (re.compile(package + ".*-" + version + r".md5$"),
+        (re.compile(package + ".*-" + str(version) + r".md5$"),
          "source tarball MD5 checksum",
          "Checksum",
          True),
-        (re.compile(package + ".*-" + version + r".sha224$"),
+        (re.compile(package + ".*-" + str(version) + r".sha224$"),
          "source tarball SHA224 checksum",
          "Checksum",
          True),
-        (re.compile(package + ".*-" + version + r".sha256$"),
+        (re.compile(package + ".*-" + str(version) + r".sha256$"),
          "source tarball SHA256 checksum",
          "Checksum",
          True),
-        (re.compile(package + ".*-" + version + r".sha384$"),
+        (re.compile(package + ".*-" + str(version) + r".sha384$"),
          "source tarball SHA384 checksum",
          "Checksum",
          True),
-        (re.compile(package + ".*-" + version + r".sha512$"),
+        (re.compile(package + ".*-" + str(version) + r".sha512$"),
          "source tarball SHA512 checksum",
          "Checksum",
          True),
-        (re.compile(package + ".*-" + version + r".zip$"),
+        (re.compile(package + ".*-" + str(version) + r".zip$"),
          "zip archive",
          "Zip",
          True),
-        (re.compile(package + ".*-" + version + r"-.*\.src.rpm$"),
+        (re.compile(package + ".*-" + str(version) + r"-.*\.src.rpm$"),
          "source RPM",
          "SRPM-Package",
          True),
-        (re.compile(package + ".*-" + version + r"-.*\.rpm$"),
+        (re.compile(package + ".*-" + str(version) + r"-.*\.rpm$"),
          "binary RPM",
          "RPM-Package",
          True),
-        (re.compile(package + ".*-" + version + r"-.*\.deb$"),
+        (re.compile(package + ".*-" + str(version) + r"-.*\.deb$"),
          "Debian package",
          "Debian-Package",
          True),
