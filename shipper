@@ -36,9 +36,9 @@ summary = None   	# One-line summary of the package
 webdir = None           # Web directory to be mirrored to a project site
 web_extras = None	# Extra web deliverables
 logo = ""               # Project logo
-tagtemplate = "%s"
-tagmessage = "Tagged for external release %s"
-ircmessage = "Version %(version)s of %(package) has just shipped."
+tagtemplate = "%(version)s"
+tagmessage = "Tagged for external release %(version)s"
+ircmessage = "Version %(version)s of %(package)s has just shipped."
 #Stuff after this point is multiline
 description = None	# Multiline description
 changelog = None	# Project changelog
@@ -965,8 +965,8 @@ try:
 
         # Shipping has succeeded.
         if options.vcstag and tagtemplate and tagmessage:
-            tagname = tagtemplate % version
-            tagmessage = tagmessage % version
+            tagname = tagtemplate % globals()
+            tagmessage = tagmessage % globals()
 
             # If we're in the trunk of an SVN repository, we want to tag
             # what just got shipped as an external release.
