@@ -11,7 +11,7 @@
 </refmeta>
 <refnamediv id='name'>
 <refname> shipper</refname>
-<refpurpose>automatic drop-shipping of project releases</refpurpose>
+<refpurpose>automated shipping of project releases</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
@@ -34,11 +34,14 @@ project releases.  Its job is to make it possible for you to run the
 command <command>shipper</command> in the top-level directory of a
 project and have a release be properly exported to all the places that
 you normally deliver it &mdash; your personal website, Linux source
-code archive sites, and distribution submission queues. A second goal
-is to arrange your shipping process in such a way that metadata like
-your project version only have to be kept in one place and modified
-once per release. The overall goal is to reduce the friction cost
-of shipping releases to as near zero as possible.</para>
+code archive sites, distribution submission queues; also, to send
+appropriate notfications to freecode.net and mailing lists.</para>
+
+<para>A second goal is to arrange your shipping process in such a
+way that metadata like your project version only have to be kept in
+one place and modified once per release. The overall goal is to reduce
+the friction cost of shipping releases to as near zero as
+possible.</para>
 
 <para>As much as possible, <application>shipper</application> tries to
 deduce what it should do rather than requiring you to tell it.  In
@@ -55,7 +58,7 @@ to.  You may also want to add some magic <quote>Project-Tag-List</quote>
 headers to your project specfiles.  Once you have
 <application>shipper</application> up and running, you can experiment
 with more advanced features such as having the program generate
-project web pages for you.</para>
+project web pages for you using a simple templating system.</para>
 </refsect1>
 
 <refsect1><title>Theory of Operation</title>
@@ -248,7 +251,7 @@ attempting to deduce it.</para>
 <entry>
 <para>Your ID on <ulink url="http//gittip.com">gittip.com</ulink>. If
 present, generated web pages will include a link to your gittip
-page where peple can leave tips.</para>
+page where people can leave tips.</para>
 </entry>
 </row>
 <row>
