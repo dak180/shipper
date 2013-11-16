@@ -194,7 +194,12 @@ def make_index_page(deliverables, substitutions):
         extralines += "<p>Project statistics are available at <a href='%s'>Ohloh</a>.</p>\n" % \
                       ohloh_url
     if irc_channel:
-        extralines += '<p>There is a project <a href="%s">IRC channel</a>.</p>\n' % irc_channel
+        if ',' in irc_channel:
+            extralines += '<p>There are project IRC channels:'
+            extralines += irc_channel
+            extralines += '</p>\n'
+        else:
+            extralines += '<p>There is a project <a href="%s">IRC channel</a>.</p>\n' % irc_channel
     # Handle the old name of freecode.com for backwards compatibility.
     if 'freecode' in destinations or 'freshmeat' in destinations:
         extralines += "<p>There is a Freecode <a href='http://freecode.com/projects/%s'>%s page</a>.</p>\n" % \
