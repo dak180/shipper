@@ -2,6 +2,7 @@
 
 Repository head:
   Your profile can now be ~/.config/shipper a la XDG.
+  New variable-override syntax on the command line.
 
 0.17: 2013-11-16
   Added support for announcing to project IRC channels via irk.

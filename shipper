@@ -558,6 +558,19 @@ try:
     web_extras = metadata.extract("Web-Extras")
     resourcetable = ""
 
+    # Arguments can be variable settings
+    for arg in args:
+        if arg.count("=") != 1:
+            print("shipper: '%s' is not in name=value form." % arg)
+            raise SystemExit, 1
+        else:
+            (name, val) = arg.split("=")
+            try:
+                exec '%s = "%s"' % (name, val)
+            except (SyntaxError, NameError, ValueError):
+                print("shipper: ill-formed variable setting at %s" % arg)
+                raise SystemExit, 1
+
     if options.verbose:
         print "shipper: variable extraction finished"
 
@@ -719,8 +732,9 @@ try:
     #
     if options.nobuild:
         # Single-line 
-        for variable in ('destinations', 'whoami', 'gittip_id', 'date', 
-                         'package', 'website', 'project_tags', 
+        for variable in ('package', 'version',
+                         'destinations', 'whoami', 'gittip_id', 'date', 
+                         'website', 'project_tags', 
                          'freecode_name', 'berlios_name',
                          'savannah_id', 'savannah_name',
                          'gitorious_url', 'github_url', 'ohloh_url',
