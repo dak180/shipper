@@ -1,5 +1,8 @@
 			shipper project news
 
+Repository head:
+  Added support for announcing to project IRC channels via irk.
+
 0.16: 2013-09-24
   Added support for embedding a gittip link.
 

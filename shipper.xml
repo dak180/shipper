@@ -824,6 +824,20 @@ declare them by putting mailto: urls in the
 <varname>destinations</varname> variable.</para>
 </entry>
 </row>
+<row>
+<entry>IRC</entry>
+<entry>-</entry>
+<entry>IRC URL</entry>
+<entry>
+<para>A generated announcement is sent to a specified IRC channel.</para>
+
+<para>No IRC destinations are set up by default.  You must declare
+them by putting IRC urls in the <varname>destinations</varname>
+variable. IRC URLs specified n the IRC-Channel variable are also
+announced to; they're also listed on the templated web page,
+if templating has been selected.</para>
+</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
@@ -922,6 +936,33 @@ env.Alias("release", [tarball], 'shipper -u -m -t')
 with 'tarball' being a production that makes a release tarball (and
 checksum, if desired).
 </para>
+
+</refsect1>
+
+<refsect1><title>Requirements</title>
+
+<para>This program requires the following helpers for shipping to
+specific destination types:</para>
+
+<variablelist>
+<varlistentry>
+<term>freecode-submit</term>
+
+<listitem><para>For shipping release notifications to freecode.com.
+The freecode-submit program is <ulink
+url="http://www.catb.org/~esr/freecode-submit">separately
+maintained</ulink>.</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>irk</term>
+<listitem><para>For shipping notices to IRC channels. The freecode-submit program is <ulink
+url="http://www.catb.org/~esr/irkerd">separately
+maintained</ulink>.</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>These must be on your executable $PATH at the time this program
+is invoked, or shipping to the relevant destination types will fail.</para>
 
 </refsect1>
 

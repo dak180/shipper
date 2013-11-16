@@ -108,7 +108,7 @@ def croak(msg):
 #
 
 def do_or_die(cmd):
-    "Either execute a command or fail noisily, letting output go to stdout."
+    "Either execute a command or die noisily, letting output go to stdout."
     if options.verbose:
         print("***" + cmd)
     if os.system(cmd):
@@ -127,6 +127,12 @@ def trap_or_die(cmd):
 def upload_or_die(cmd):
     if options.upload:
         do_or_die(cmd)
+    else:
+        print(cmd)
+
+def upload_or_live(cmd):
+    if options.upload:
+        os.system(cmd)
     else:
         print(cmd)
 
@@ -921,6 +927,8 @@ try:
         elif destination.startswith("ftp:"):
             if not options.webonly:
                 upload(destination, download_deliverables)
+        elif destination.startswith("irc:"):
+            pass	# defer this until a later phase
         elif destination not in hardwired:
             if options.webonly:
                 upload(destination, web_deliverables)
@@ -941,6 +949,14 @@ try:
                 print("mail %s <<EOF" % ", ".join(mailaddrs))
                 print(content)
                 print("EOF")
+
+        # Ship to IRC channels
+        if irc_channel:
+            irc_destinations = [chan for chan in destination \
+                                if chan.startswith("irc:")]
+            for url in  irc_destinations + irc_channel.split(","):
+                msg = "Release %s of %s just shipped." % (version, package)
+                upload_or_live("irk %s '%s'" % (url, msg))
 
         # Shipping has succeeded.
         if options.vcstag and tagtemplate and tagmessage:
