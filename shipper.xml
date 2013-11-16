@@ -35,7 +35,8 @@ command <command>shipper</command> in the top-level directory of a
 project and have a release be properly exported to all the places that
 you normally deliver it &mdash; your personal website, Linux source
 code archive sites, distribution submission queues; also, to send
-appropriate notfications to freecode.net and mailing lists.</para>
+appropriate notfications to freecode.net, mailing lists, and project
+IRC channels.</para>
 
 <para>A second goal is to arrange your shipping process in such a
 way that metadata like your project version only have to be kept in
@@ -419,7 +420,8 @@ exists, it should point at a git repository for the source code.</para>
 <entry>#IRC-Channel:</entry>
 <entry>XBS-IRC-Channel:</entry>
 <entry>
-<para>URL pointing at an IRC chat channel for the project.</para>
+<para>URL pointing at one IRC chat channel for the project, or 
+a comma-separated list of such channels.</para>
 </entry>
 </row>
 <row>
@@ -865,7 +867,7 @@ configuration dump to standard output.</para>
 <para>The <option>-u</option> option enables uploading and tag pushing.</para>
 
 <para>The <option>-m</option> option tells
-<application>shipper</application> to generate a web page an upload it
+<application>shipper</application> to generate a web page and upload it
 to website destinations.</para>
 
 <para>The <option>-t</option> option tells <application>shipper</application> to
