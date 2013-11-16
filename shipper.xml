@@ -523,6 +523,21 @@ version.</para>
 variable will be ignored in this case.</para>
 </entry>
 </row>
+
+<row>
+<entry><varname>ircmessage</varname></entry>
+<entry>#IRC-Message</entry>
+<entry>#XBS-IRC-Message</entry>
+<entry>
+<para>You can customize the IRC messge(s) sent on release by setting
+the variable <varname>ircmessage</varname>.  See the default with
+<command>shipper -n</command>; variable cookies in it will be 
+replaced in obvious ways.</para>
+
+<para>bzr, however, cannot annotate tags.  The <varname>tagmessage</varname>
+variable will be ignored in this case.</para>
+</entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>

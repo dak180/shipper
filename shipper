@@ -7,7 +7,7 @@
 import sys, os, re, commands, time, tempfile, shutil
 import glob, optparse, stat, email, smtplib
 
-version = "0.16"
+shipper_version = "0.16"
 
 #
 # State variables
@@ -38,6 +38,7 @@ web_extras = None	# Extra web deliverables
 logo = ""               # Project logo
 tagtemplate = "%s"
 tagmessage = "Tagged for external release %s"
+ircmessage = "Version %(version)s of %(package) has just shipped."
 #Stuff after this point is multiline
 description = None	# Multiline description
 changelog = None	# Project changelog
@@ -257,6 +258,7 @@ class Specfile:
             self.summary = self.extract("Summary")
             self.tagtemplate = self.extract("Tagtemplate")
             self.tagmessage = self.extract("Tagmessage")
+            self.ircmessage = self.extract("IRC-Message")
             self.description = self.rpm_get_multiline("description")
             self.web_extras = self.extract("Web-Extras")
             last = ""
@@ -291,6 +293,7 @@ class Specfile:
             self.summary = self.extract("Description")
             self.tagtemplate = self.extract("Tagtemplate")
             self.tagmessage = self.extract("Tagmessage")
+            self.ircmessage = self.extract("IRC-Message")
             fp = open(self.filename)
             desc = ""
             gather = False
@@ -539,6 +542,8 @@ try:
         tagtemplate = metadata.tagtemplate
     if metadata.tagmessage:
         tagmessage = metadata.tagmessage
+    if metadata.ircmessage:
+        ircmessage = metadata.ircmessage
     sourceforge_folder = metadata.extract("SourceForge-Folder")
     gitorious_url = metadata.extract("Gitorious-URL")
     github_url = metadata.extract("Github-URL")
@@ -718,7 +723,7 @@ try:
                          'irc_channel',
                          'sourceforge_name', 'sourceforge_folder',
                          'summary', 'webdir', 'web_extras', 'logo',
-                         'tagtemplate', 'tagmessage'):
+                         'tagtemplate', 'tagmessage', 'ircmessage'):
             print("%s = %s" % (variable, repr(eval(variable))))
         # Free text, multiline
         for variable in ('description', 'changelog', 'lastchange',
@@ -955,7 +960,7 @@ try:
             irc_destinations = [chan for chan in destination \
                                 if chan.startswith("irc:")]
             for url in  irc_destinations + irc_channel.split(","):
-                msg = "Release %s of %s just shipped." % (version, package)
+                msg = ircmessage % globals()
                 upload_or_live("irk %s '%s'" % (url, msg))
 
         # Shipping has succeeded.

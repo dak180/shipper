@@ -1,6 +1,6 @@
 # Makefile for the shipper project
 
-VERS=$(shell sed <shipper -n -e '/^version *= *\(.*\)/s//\1/p')
+VERS=$(shell sed <shipper -n -e '/^shipper_version *= *\(.*\)/s//\1/p')
 
 prefix?=/usr/local
 mandir?=share/man
