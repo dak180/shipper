@@ -33,7 +33,7 @@ shipper-$(VERS).md5: shipper-$(VERS).tar.gz
 	@md5sum shipper-$(VERS).tar.gz >shipper-$(VERS).md5
 
 clean:
-	rm -f *.1 *.tar.gz *.rpm *.tar.gz SHIPPER.* *.html *.md5 *.sha*
+	rm -f *.1 *.tar.gz *.rpm *.tar.gz *.html *.md5 *.sha*
 
 version:
 	echo $(VERS)
@@ -45,5 +45,5 @@ pylint:
 dist: shipper-$(VERS).tar.gz shipper-$(VERS).md5 
 
 release: shipper-$(VERS).tar.gz shipper-$(VERS).md5 shipper.html
-	shipper -u -t version=$(VERS); make clean
+	shipper version=$(VERS) | sh -x -e
 
