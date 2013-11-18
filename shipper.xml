@@ -27,37 +27,35 @@
 
 <refsect1><title>Description</title>
 
-<para><application>shipper</application> is a tool for shipping
-project releases.  Its job is to make it possible for you to run the
-command <command>shipper | sh</command> in the top-level directory of a
-project and have a release be properly exported to all the places that
-you normally deliver it &mdash; your personal website, Linux source
-code archive sites, distribution submission queues; also, to send
-appropriate notfications to freecode.net, mailing lists, and project
-IRC channels.</para>
-
-<para>A second goal is to arrange your shipping process in such a
-way that metadata like your project version only have to be kept in
-one place and modified once per release. The overall goal is to reduce
-the friction cost of shipping releases to as near zero as
+<para><application>shipper</application> is a tool that tries to
+reduce the friction cost of shipping releases to as near zero as
 possible.</para>
 
-<para>As much as possible, <application>shipper</application> tries to
-deduce what it should do rather than requiring you to tell it.  In
-order to do this, it relies on your project obeying standard GNU-like
-naming conventions.  It also relies on being able to mine project
-metadata out of a package specfile. A package specfile may be either 
-an RPM spec or a Debian control file; for both, <command>shipper</command>
-expects to see a small handful of extension fields that tell it
-what to do.</para>
+<para>Its job is to make it possible for you to run the command
+<command>shipper | sh</command> in the top-level directory of a
+project and have a release be properly exported to all the places that
+you normally deliver it &mdash; your personal website, Linux source
+code archive sites, forge sites, and distribution submission queues;
+also, to send appropriate notfications to freecode.net, mailing lists,
+and project IRC channels.</para>
 
-<para>In normal use, you need set only one header,
-<quote>Destinations:</quote> which is the list of destinations to ship
-to.  You will also need to pass in the release version of the
-software you are shipping. You may also want to add some magic
-<quote>Project-Tag-List</quote> headers to your project specfiles.
-Once you have <application>shipper</application> up and running, you
-can experiment with more advanced features such as having the program
+<para>Another goal is to arrange your shipping process in such a way
+that any one piece of metadata like your project version only has to
+be kept in one place and modified once per release.  Metadata
+is collected </para>
+
+<para>In normal use, you absolutely need to set only two variables:
+<varname>destinations</varname> which is the list of destinations to
+ship to, and <varname>versions</varname> which is the release version
+of the software you are shipping. The default package name is the
+basename of the current directory.</para>
+
+<para>When shipping to freecode.com, you may also want to add
+<quote>Project-Tag-List</quote> headers to your project specfiles
+that will become Freecode tags.</para>
+
+<para>Once you have <application>shipper</application> up and running, you
+can experiment with more advanced features such as: having the program
 generate project web pages for you using a simple templating
 system, and automatically tagging your shipped releases.</para>
 
