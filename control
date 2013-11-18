@@ -11,7 +11,7 @@ Description: Automated shipping of open-source project releases.
  Berlios, and Savannah, and knows how to post a release announcement
  to freecode.com via freecode-submit.
 
-XBS-Destinations: freecode
+XBS-Destinations: freecode, mailto:esr@thyrsus.com
 
 Homepage: http://www.catb.org/~esr/shipper
 
@@ -24,3 +24,5 @@ XBS-IRC-Channel: irc://chat.freenode.net/#shipper
 XBS-Logo: shipper-logo.png
 
 XBS-Project-Tag-List: packaging, distribution
+
+XBS-Tag-Template: %(version)s

@@ -5,7 +5,7 @@
 # Requires Python 2.72 or later.
 
 import sys, os, re, commands, time, tempfile, shutil
-import glob, optparse, stat, email, smtplib
+import glob, optparse, stat, email.utils
 
 shipper_version = "0.17"
 
@@ -36,9 +36,9 @@ summary = None   	# One-line summary of the package
 webdir = None           # Web directory to be mirrored to a project site
 web_extras = None	# Extra web deliverables
 logo = ""               # Project logo
-tagtemplate = "%(version)s"
-tagmessage = "Tagged for external release %(version)s"
-ircmessage = "Version %(version)s of %(package)s has just shipped."
+tag_template = None	# How to tag releases
+tag_message = "Tagged for external release %(version)s"
+irc_message = "Version %(version)s of %(package)s has just shipped."
 #Stuff after this point is multiline
 description = None	# Multiline description
 changelog = None	# Project changelog
@@ -54,7 +54,6 @@ html_template = """
 <head>
 <meta name='description' content='Resource page for %(package)s' />
 <meta name='generator' content='shipper' />
-<meta name='MSSmartTagsPreventParsing' content='TRUE' />
 <meta name='description' content="%(summary)s"/>
 <title>Resource page for %(package)s %(version)s</title>
 </head>
@@ -87,7 +86,7 @@ $(gittip)s
 </html>
 """
 
-mailtemplate = """Subject: Announcing release %(version)s of %(package)s
+mail_template = """Subject: Announcing release %(version)s of %(package)s
 
 Release %(version)s of %(package)s is now available at:
 
@@ -108,46 +107,22 @@ def croak(msg):
 # Shipping methods
 #
 
-def do_or_die(cmd):
-    "Either execute a command or die noisily, letting output go to stdout."
-    if options.verbose:
-        print("***" + cmd)
-    if os.system(cmd):
-        croak("command '%s' failed!" % cmd)
-
-def upload_or_die(cmd):
-    if options.upload:
-        do_or_die(cmd)
-    else:
-        print(cmd)
-
-def upload_or_live(cmd):
-    if options.upload:
-        os.system(cmd)
-    else:
-        print(cmd)
-
 def upload(dest, files, subdir=None):
     "Upload a file via ftp or scp."
     if subdir == None:
         subdir = package
-    print("# Uploading to %s" % dest)
     files = [x for x in files if os.path.exists(x)]
     if dest.startswith("ftp://"):
         dest = dest[6:].split("/")
         host = dest.pop(0)
         directory = "/".join(dest)
-        upcmds = ["lftp\n", "open -u anonymous," + myaddress + " " + host + "\n"]
+        upcmds = ["lftp\n", "open -u anonymous," + myaddress + " " + host + "<<'INAGADADAVIDA'\n"]
         if directory:
             upcmds.append("cd " + directory + "\n")
         upcmds.append("mput " + " ".join(files) + "\n")
         upcmds.append("close\n")
-        if options.upload:
-            pfp = os.popen(upcmds.pop(0), "w")
-            pfp.writelines(upcmds)
-            pfp.close()
-        else:
-            print("".join(upcmds))
+        upcmds.append("INAGADADAVIDA\n")
+        print("".join(upcmds))
     elif dest.find(":") > -1:
         (host, directory) = dest.split(":")
         for fn in files:
@@ -156,22 +131,14 @@ def upload(dest, files, subdir=None):
             # will set that permission on the remote host and allow you to
             # update the files with scp later.
             remote = os.path.join(directory, subdir, os.path.basename(fn))
-            upload_or_die("scp -p " + fn + " " + host + ":" + remote)
+            print("scp -p " + fn + " " + host + ":" + remote)
     else:
         sys.stderr.write("Don't know what to do with destination %s!\n" % dest)
 
-def freecode_ship(job_card):
-    "Ship a specified update to freecode."
-    if options.upload:
-        upload_or_die("freecode-submit <" + job_card)
-    print("Announcing to freecode <<EOF")
-    sys.stdout.write(open(job_card).read())
-    print("EOF")
-
 def make_templated_page(deliverables, substitutions, outfile):
     "Make templated page, listing specified deliverables."
-    print("# Building %s..." % outfile)
     global extralines
+    substitutions = substitutions.copy()
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
     for (ifile, explanation, __tag, big) in deliverables:
         if big:
@@ -212,9 +179,9 @@ def make_templated_page(deliverables, substitutions, outfile):
     substitutions["description"] = "<p>" + substitutions["description"].replace("\n\n", "</p>\n\n<p>") + "</p>"
     substitutions.update(locals())
     # OK, now build the templated page itself
-    ofp = open(outfile, "w")
-    ofp.write(html_template % substitutions)
-    ofp.close()
+    print("cat >%s <<'INAGADADAVIDA'" % outfile)
+    print(html_template % substitutions)
+    print "INAGADADAVIDA\n"
 
 #
 # Metadata extraction
@@ -246,9 +213,9 @@ class Specfile:
             self.version = self.extract("Version")
             self.website = self.extract("URL")
             self.summary = self.extract("Summary")
-            self.tagtemplate = self.extract("Tagtemplate")
-            self.tagmessage = self.extract("Tagmessage")
-            self.ircmessage = self.extract("IRC-Message")
+            self.tag_template = self.extract("Tag-Template")
+            self.tag_message = self.extract("Tag-Message")
+            self.irc_message = self.extract("IRC-Message")
             self.description = self.rpm_get_multiline("description")
             self.web_extras = self.extract("Web-Extras")
             self.html_target = self.extract("HTML-Target")
@@ -282,10 +249,10 @@ class Specfile:
                 self.version = self.version.split("-")[0]
             self.website = self.extract("Homepage")
             self.summary = self.extract("Description")
-            self.tagtemplate = self.extract("Tagtemplate")
-            self.tagmessage = self.extract("Tagmessage")
-            self.ircmessage = self.extract("IRC-Message")
-            self.html_target = self.extract("NTML-Target")
+            self.tag_template = self.extract("XBS-Tag-Template")
+            self.tag_message = self.extract("XBS-Tag-Message")
+            self.irc_message = self.extract("XBS-IRC-Message")
+            self.html_target = self.extract("XBS-HTML-Target")
             fp = open(self.filename)
             desc = ""
             gather = False
@@ -382,18 +349,9 @@ try:
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose", default=False,
                       help="print progress messages to stdout")
-    parser.add_option("-u", "--upload",
-                      action="store_true", dest="upload", default=False,
-                      help="do uploads")
     parser.add_option("-n", "--nobuild",
                       action="store_true", dest="nobuild", default=False,
                       help="dump configuration only, no builds or uploads")
-    parser.add_option("-m", "--makeindex",
-                      action="store_true", dest="makeindex", default=False,
-                      help="generate an index.html for websites")
-    parser.add_option("-t", "--tag",
-                      action="store_true", dest="vcstag", default=False,
-                      help="tag repo for external release after shipping")
     parser.add_option("-x", "--exclude",
                       dest="excluded", default="",
                       help="exclude some shipping targets")
@@ -478,8 +436,6 @@ try:
                 sys.stderr.write("shipper: %s isn't in the destinations!\n" % excludee)
                 raise SystemExit(1)
 
-    print("# Uploading version %s of %s" % (version, package))
-
     # Extract remaining variables for templating
     # Note: When you add a variable here,
     # don't forget to update the dump code down below.
@@ -511,12 +467,12 @@ try:
     else:
         sourceforge_name = package
         sourceforge_userid = myuserid
-    if metadata.tagtemplate:
-        tagtemplate = metadata.tagtemplate
-    if metadata.tagmessage:
-        tagmessage = metadata.tagmessage
-    if metadata.ircmessage:
-        ircmessage = metadata.ircmessage
+    if metadata.tag_template:
+        tag_template = metadata.tag_template
+    if metadata.tag_message:
+        tag_message = metadata.tag_message
+    if metadata.irc_message:
+        irc_message = metadata.irc_message
     sourceforge_folder = metadata.extract("SourceForge-Folder")
     gitorious_url = metadata.extract("Gitorious-URL")
     github_url = metadata.extract("Github-URL")
@@ -612,7 +568,6 @@ try:
     if options.verbose:
         print("shipper: starting deliverables computation")
 
-    # Stuff not included here: SHIPPER.EMAIL, SHIPPER.FREECODE.
     deliverable_types = (
         (re.compile("^README$"),
          "roadmap file",
@@ -717,12 +672,12 @@ try:
                          'irc_channel',
                          'sourceforge_name', 'sourceforge_folder',
                          'summary', 'webdir', 'web_extras', 'logo',
-                         'tagtemplate', 'tagmessage', 'ircmessage',
+                         'tag_template', 'tag_message', 'irc_message',
                          "html_target"):
             print("%s = %s" % (variable, repr(eval(variable))))
         # Free text, multiline
         for variable in ('description', 'changelog', 'lastchange',
-                         'extralines', 'mailtemplate', 'html_template'):
+                         'extralines', 'mail_template', 'html_template'):
             if not eval(variable):
                 print("No %s" % variable)
             else:
@@ -770,14 +725,7 @@ try:
                     explanation = "Custom web deliverable"
                 deliverables.append((fn, explanation, None, False))
 
-        # If a web page doesn't already exist, but the template
-        # variable is nonempty (which is the default) make one.
-        if options.makeindex:
-            print("shipper: -m is deprecated, set html_template instead.")
-            if html_target:
-                print("# Ignoring -m, HTML target already set to %s" % html_target)
-            else:
-                html_target = "index.html"
+        # Template a resource page?
         if html_template and html_target:
             make_templated_page(deliverables, globals(), html_target)
             # Now that the web page has been generated, it can add
@@ -789,49 +737,6 @@ try:
         if logo:
             deliverables.append((logo, "project logo", None, False))
 
-    # The freecode announcement
-    if not options.webonly and 'freecode' in destinations and not os.path.exists("SHIPPER.FREECODE"):
-        print("# Building SHIPPER.FREECODE...")
-        if not website:
-            print("# Can't announce to freecode without a primary website!")
-            destinations.remove("freecode")
-        elif not lastchange:
-            print("# Can't announce to freecode without a changes field!")
-            destinations.remove("freecode")
-        else:
-            ofp = open("SHIPPER.FREECODE", "w")
-            ofp.write("Project: %s\n" % (freecode_name or package))
-            ofp.write("Version: %s\n" % version)            
-            ofp.write("Description: %s" % description.replace("\n", "\n    ")[:-4])
-            if project_tags:
-                ofp.write("Project-Tag-List: %s\n" % project_tags)
-            ofp.write("Website-URL: %s\n" % website)
-            for (f, e, s, b) in deliverables:
-                if s:
-                    if b:
-                        url = download
-                    else:
-                        url = website
-                    url = os.path.join(url, f)
-                    ofp.write("%s-URL: %s\n" % (s, url))
-            # freecode.com doesn't like bulleted entries.
-            freecodelog = [s.lstrip() for s in lastchange.split("\n")]
-            ofp.write("\n" + "\n".join(freecodelog))
-            ofp.close()
-
-    # Finally, email notification
-    maildests = [x for x in destinations if x.startswith("mailto:")]
-    if maildests and not os.path.exists("SHIPPER.EMAIL"):
-        print("# Building SHIPPER.EMAIL...")
-        ofp = open("SHIPPER.EMAIL", "w")
-        ofp.write("To: " + ", ".join([x[7:] for x in maildests]) + "\n")
-        ofp.write(mailtemplate % globals())
-        ofp.close()
-
-    #
-    # Now actually ship
-    #
-
     # Compute final deliverables.  This computation needs to coincide
     # with the way web deliverables are distinguished from download
     # deliverables in make_templated_page(), otherwise havoc will ensue.
@@ -841,7 +746,33 @@ try:
 
     # Shipping methods for public destinations.
     def freecode():
-        freecode_ship("SHIPPER.FREECODE")
+        if not options.webonly:
+            if not website:
+                print("# Can't announce to freecode without a primary website!")
+                return
+            elif not lastchange:
+                print("# Can't announce to freecode without a changes field!")
+                return
+            else:
+                print("freecode-submit <<'INAGADAVIDA'")
+                print("Project: %s" % (freecode_name or package))
+                print("Version: %s" % version)            
+                print("Description: %s" % description.replace("\n", "\n    ").rstrip())
+                if project_tags:
+                    print("Project-Tag-List: %s" % project_tags)
+                print("Website-URL: %s" % website)
+                for (f, e, s, b) in deliverables:
+                    if s:
+                        if b:
+                            url = download
+                        else:
+                            url = website
+                        url = os.path.join(url, f)
+                        print("%s-URL: %s" % (s, url))
+                # freecode.com doesn't like bulleted entries.
+                freecodelog = [s.lstrip() for s in lastchange.split("\n")]
+                sys.stdout.write("\n" + "\n".join(freecodelog))
+                print("INAGADADAVIDA\n")
     def savannah():
         if not options.webonly:
             upload("dl.sv.nongnu.org:/releases/%s/" % savannah_name,
@@ -855,7 +786,7 @@ try:
         #
         # We're using -kb to avoid keyword expansion on binary files.
         tmpdir = tempfile.mkdtemp()
-        upload_or_die("cd %s; cvs -z3 -kb -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
+        print("cd %s; cvs -z3 -kb -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
                   % (tmpdir, savannah_id, savannah_name, savannah_name))
         if not webdir:
             deliver = " ".join(web_deliverables)
@@ -872,7 +803,7 @@ try:
                                              savannah_name,
                                              source_subdir)
                 if not os.path.exists(target_subdir):
-                    upload_or_die("cd %s/%s; cvs add %s"
+                    print("cd %s/%s; cvs add %s"
                                   % (tmpdir, savannah_name, source_subdir))
                 elif not os.path.isdir(target_subdir):
                     # If this ever happens, you'll need to delete the
@@ -887,9 +818,9 @@ try:
             # This code handles additions, but you'll have to do
             # deletions by hand. Assuming you ever care.  
             if not pre_existing:
-                upload_or_die("cd %s/%s; cvs add %s"
+                print("cd %s/%s; cvs add %s"
                                % (tmpdir, savannah_name, source))
-        upload_or_die("cd %s/%s; cvs commit" % (tmpdir, savannah_name))
+        print("cd %s/%s; cvs commit" % (tmpdir, savannah_name))
     def berlios():
         upload("ftp://ftp.berlios.de/incoming", download_deliverables)
         berlios_webdir = \
@@ -903,7 +834,7 @@ try:
             destdir =  "/home/frs/project/%s" % sourceforge_name
             if sourceforge_folder:
                 destdir += "/" + sourceforge_folder
-            upload_or_die("rsync -avP -e ssh %s '%s,%s@frs.sourceforge.net:%s'" % (
+            print("rsync -avP -e ssh %s '%s,%s@frs.sourceforge.net:%s'" % (
                 " ".join(download_deliverables),
                 sourceforge_userid,
                 sourceforge_name,
@@ -913,7 +844,7 @@ try:
         else:
             websources = " ".join(web_deliverables),
         # https://sourceforge.net/apps/trac/sourceforge/wiki/Rsync%20over%20SSH
-        upload_or_die("rsync -aiv %s %s,%s@web.sourceforge.net:/home/project-web/%s/htdocs/" % (
+        print("rsync -aiv %s %s,%s@web.sourceforge.net:/home/project-web/%s/htdocs/" % (
             websources,
             sourceforge_userid,
             sourceforge_name,
@@ -923,16 +854,19 @@ try:
     if options.verbose:
         print("Destinations: " + ", ".join(destinations))
 
-    # OK, ship everything.  First, the non-mail destinations
-    for destination in [d for d in destinations if not d.startswith("mailto:")]:
+    #
+    # OK, commands for everything.  First, the uploads
+    #
+    for destination in destinations:
         if destination in hardwired:
             if destination == 'freecode' and options.webonly:
                 continue
-            print("# Shipping to public destination %s" % destination)
             eval(destination + "()")
         elif destination.startswith("ftp:"):
             if not options.webonly:
                 upload(destination, download_deliverables)
+        elif destination.startswith("mailto:"):
+            pass	# defer this until a later phase
         elif destination.startswith("irc:"):
             pass	# defer this until a later phase
         elif destination not in hardwired:
@@ -942,32 +876,10 @@ try:
                 upload(destination, all_deliverables)
 
     if not options.webonly:
-        mailaddrs = [d for d in destinations if d.startswith("mailto:")]
-        if mailaddrs:
-            mailaddrs = [a[8:] for a in mailaddrs]
-            print("# Mailing to %s" % ", ".join(mailaddrs))
-            content = open("SHIPPER.EMAIL").read()
-            if options.upload:
-                server = smtplib.SMTP('localhost')
-                server.sendmail(whoami, mailaddrs, content)
-                server.quit()
-            else:
-                print("mail %s <<EOF" % ", ".join(mailaddrs))
-                print(content)
-                print("EOF")
-
-        # Ship to IRC channels
-        if irc_channel:
-            irc_destinations = [chan for chan in destination \
-                                if chan.startswith("irc:")]
-            for url in  irc_destinations + irc_channel.split(","):
-                msg = ircmessage % globals()
-                upload_or_live("irk %s '%s'" % (url, msg))
-
-        # Shipping has succeeded.
-        if options.vcstag and tagtemplate and tagmessage:
-            tagname = tagtemplate % globals()
-            tagmessage = tagmessage % globals()
+        # Tag the release
+        if tag_template and tag_message:
+            tagname = tag_template % globals()
+            tag_message = tag_message % globals()
 
             # If we're in the trunk of an SVN repository, we want to tag
             # what just got shipped as an external release.
@@ -979,26 +891,33 @@ try:
                         print("# This release has aleady been tagged.")
                     else:
                         print("# I will copy and tag this release as %s." % tagname)
-                        upload_or_die("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tagmessage))
+                        print("cd .. && svn copy trunk tags/%s && svn -m '%s' commit" % (tagname, tag_message))
             for (idir, what, tagger, pusher) in (
-                (".git", "git", "git tag -a %(tagname)s -m '%(tagmessage)s'", "git push; git push --tags"),
-                (".hg",  "hg",  "hg tag %(tagname)s -m '%(tagmessage)s'", "hg push"),
+                (".git", "git", "git tag -a %(tagname)s -m '%(tag_message)s'", "git push; git push --tags"),
+                (".hg",  "hg",  "hg tag %(tagname)s -m '%(tag_message)s'", "hg push"),
                 (".bzr", "bzr", "bzr tag %(tagname)s", "bzr push"),
                 ):
                 if os.path.exists(idir):
-                    print("# I will %s-tag this release as %s." % (what, tagname))
-                    upload_or_die(tagger % globals())
-                    if upload:
-                        print("# I will update the remote repo.")
-                        upload_or_die(pusher % globals())
-            if not upload:
-                if 'sourceforge' in destinations:
-                    print("# Don't forget to push changes and tags to the SourceForge %s repo." % what)
-                    if gitorious_url:
-                        print("# Don't forget to push to the gitorious repo.")
-                    if github_url:
-                        print("# Don't forget to push to the github repo.")
-    print("# Done")
+                    print(tagger % globals())
+                    print(pusher % globals())
+
+        # Email notifications
+        maildests = [x for x in destinations if x.startswith("mailto:")]
+        if maildests:
+            print("sendmail %s <<'INAGADADAVIDA'" \
+                  " ".join([x[7:] for x in maildests])
+            print(mail_template % globals())
+            print("INAGADADAVIDA\n")
+
+        # Ship to IRC channels
+        if irc_channel:
+            irc_destinations = [chan for chan in destination \
+                                if chan.startswith("irc:")]
+            for url in  irc_destinations + irc_channel.split(","):
+                msg = irc_message % globals()
+                print("irk %s '%s'" % (url, msg))
+
+    print("# That's all, folks!")
 except KeyboardInterrupt:
     print("# Bye!")
 

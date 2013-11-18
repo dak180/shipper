@@ -17,11 +17,8 @@
 
 <cmdsynopsis>
   <command>shipper</command>  
-  <arg choice='opt'>-u</arg>
   <arg choice='opt'>-n</arg>
   <arg choice='opt'>-v</arg>
-  <arg choice='opt'>-m</arg>
-  <arg choice='opt'>-t</arg>
   <arg choice='opt'>-w</arg>
   <arg choice='opt'>-x <replaceable>destinations</replaceable></arg>
   <arg choice='opt' rep='repeat'><replaceable>var</replaceable>=<replaceable>val</replaceable></arg>
@@ -32,7 +29,7 @@
 
 <para><application>shipper</application> is a tool for shipping
 project releases.  Its job is to make it possible for you to run the
-command <command>shipper</command> in the top-level directory of a
+command <command>shipper | sh</command> in the top-level directory of a
 project and have a release be properly exported to all the places that
 you normally deliver it &mdash; your personal website, Linux source
 code archive sites, distribution submission queues; also, to send
@@ -56,25 +53,36 @@ what to do.</para>
 
 <para>In normal use, you need set only one header,
 <quote>Destinations:</quote> which is the list of destinations to ship
-to.  You wiill also need to pass in the release version of the
+to.  You will also need to pass in the release version of the
 software you are shipping. You may also want to add some magic
 <quote>Project-Tag-List</quote> headers to your project specfiles.
 Once you have <application>shipper</application> up and running, you
 can experiment with more advanced features such as having the program
 generate project web pages for you using a simple templating
-system.</para>
+system, and automatically tagging your shipped releases.</para>
+
+<para>The output of shipper, run in your top-level project source
+directory, is a shellscript. To ship your project, feed the script to
+a shell (of course you can review it before you run it).  The only
+shell features required are command execution and here-documents. No
+wilcard expansion, shell control syntax, or shell variable evaluation
+will be required.  In practical use you will probably want to pass
+the shell the -e option (any command failure aborts the script, so
+notifications sent later don't go out if an early upload fails) and
+the -x option (to echo shipping commands as they are performed).</para>
+
 </refsect1>
 
 <refsect1><title>Theory of Operation</title>
 
-<para><application>shipper</application> pushes
+<para><application>shipper</application> generates commands to push
 <emphasis>deliverables</emphasis> out to
 <emphasis>destinations</emphasis>.  Deliverables include: source
 tarballs, source zip archives, ChangeLog files, README files,and
 various other project metadata files.  Destinations include both
 <emphasis>private destinations</emphasis> like websites, FTP archive
 sites and mailing lists, and <emphasis>public destinations</emphasis>
-like freecode.com and berlios.de. The
+like soureceforge.net, freecode.com, savannah.nongnu.org and berlios.de. The
 <application>shipper</application> framework is extensible and it is
 relatively easy to add new destination types and new deliverables; in
 the future, we hope to support all major forge sites as
@@ -84,12 +92,12 @@ destinations.</para>
 to read the <filename>.shipper</filename> files in your home directory
 and the current directory (if you like XDG conventions, make a
 <filename>~/.config/shipper</filename> instead).  These set various
-control variables and templates <application>shipper</application>
+control variables and templates that <application>shipper</application>
 will use later.</para>
 
 <para>Second, <application>shipper</application> reads per-project
 information from a specfile, either an RPM spec or a Debian control
-file. The project name, version, and various other pieces of
+file. The project name and various other pieces of
 project-related metadata are extracted from the specfile.</para>
 
 <para>The <option>-n</option> (nobuild) option causes
@@ -98,42 +106,32 @@ and exit immediately after collecting them.</para>
 
 <para>The first real work that gets done is finding deliverables.
 These are either unversioned project metadata (like a README or NEWS
-file) or versioned product files such as source tarballs. Finding
-deliverables is separated from uploading because it means that you can
-stop and inspect what you're going to ship before committing to an
-upload.</para>
+file) or versioned product files such as source tarballs.</para>
 
-<para>The last step before uploading may be to generate an HTML file
-for uploading, if no such file already exists and you have specified
-either the <varname>html_target</varname> or the (deprecated)
-<option>-m</option> variable option.</para>
+<para>The last step before generating upload commands may be to
+generate an HTML file for uploading, if you have specified the
+<varname>html_target</varname> variable.</para>
 
-<para>Without the <option>-u</option> (upload) option,
-<application>shipper</application> stops just before uploading,
-displaying the exact upload commands that would have been used to ship
-deliverables.  Thus, the command <command>shipper</command> with no
-options will show you exactly what <application>shipper</application>
-would do for a real upload.</para>
+<para>The option <option>-w</option> (web-only) tells shipper to
+generate update commands web pages only rather than shipping (and
+possibly tagging) a release. This may be useful for forges like
+Savannah that have a tricky procedure for website updates.</para>
 
-<para>The option <option>-w</option> (web-only) tells shipper to update
-web pages only rather than shipping (and possibly tagging) a release. This
-will be useful for forges like Savannah that have a tricky procedure for
-website updates.</para> 
-
-<para>Otherwise, <application>shipper</application> then uploads
-deliverables and posts all announcements.  The <option>-x</option> may
-be use to suppress delivery to specified destinations that would
-normally be performed (e.g., due to a destination variable set in one
-of your <filename>.shipper</filename> files); it may be a
-comma-separated list.</para>
+<para>Otherwise, <application>shipper</application> then generates
+commands to upload deliverables and post all announcements.  The
+<option>-x</option> may be use to suppress delivery to specified
+destinations that would normally be performed (e.g., due to a
+destination variable set in one of your <filename>.shipper</filename>
+files); it may be a comma-separated list.</para>
 
 <para>After deliverables have shipped successfully and notifications
 posted, <application>shipper</application> determines if the directory
 it is in is a working copy in a version-control system that supports
-release tagging.  If so, and the <option>-t</option> option has been
-selected, it tries to tag the release just shipped.  See <xref
-linkend='postinstall'/> for discussion of what version-control systems
-are supported and what actions will be taken.</para>
+release tagging.  If so, and the <option>tag_template</option>
+variable is set to a nonempty value, it generates commabds to tag the
+release just shipped.  See <xref linkend='postinstall'/> for
+discussion of what version-control systems are supported and what
+actions will be taken.</para>
 
 <para>Finally, note that <application>shipper</application> makes one
 important assumption about the structure of your website(s).  Beneath
@@ -158,7 +156,8 @@ noisily.</para>
 <para>The behavior of shipper depends on a handful of internal
 variables.  Some of these variables have defaults computed at startup
 time.  All can be set or overridden in the per-user
-<filename>~/.shipper</filename> file, and overridden again in any
+<filename>~/.config/shipper</filename> and
+<filename>~/.shipper</filename> files, and overridden again in any
 per-project <filename>.shipper</filename> file.  Both files are Python
 code and the syntax of variable settings is Python's.</para>
 
@@ -190,12 +189,12 @@ from the Name field.</para>
 as a 'version=' setting on the shipper command line.  But if
 it is more convenient for your build practices to regenerate the
 specfile on each build, you can set a Version header and
-that wukk be picked up.</para>
+that will be picked up.</para>
 
 <para><application>shipper</application> gets most of the rest of the
-data it uses to decide what to do from headers in the specfile.
-The following table lists all the variables and their corresponding
-specfile fields.</para>
+data it uses to decide what commands to generate from headers in the
+specfile.  The following table lists all the variables and their
+corresponding specfile fields.</para>
 
 <informaltable>
 <tgroup cols="4">
@@ -239,7 +238,7 @@ removed.</para>
 
 <para><emphasis role='bold'>There is no default.</emphasis>.  If you
 do not set this variable, <application>shipper</application> won't
-ship anything.</para>
+generate any shipping commands.</para>
 </entry>
 </row>
 <row>
@@ -282,10 +281,10 @@ set a default for you.</para>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>Name of a file to which a templated web page generated from the
-release data should be generated.  If this variable is an empty string
-(the default), templated page generation is suppressed.  The
-most likely value for this, if you set it, is "index.html"</para>
+<para>File to which a templated web page generated from the release
+data should be generated.  If this variable is an empty string (the
+default), templated page generation is suppressed.  The most likely
+value for this, if you set it, is "index.html"</para>
 </entry>
 </row>
 <row>
@@ -302,11 +301,11 @@ suppressed.</para>
 </entry>
 </row>
 <row>
-<entry><varname>mailtemplate</varname></entry>
+<entry><varname>mail_template</varname></entry>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>
 <entry>
-<para>Template text from which to generate the file SHIPPER.EMAIL to be
+<para>Template text from which to generate the message
 shipped to destinations that are mailto URLs.  There is a default which
 generates a very simple email containing a subject, a pointer to the 
 project web page, and the last entry in the project changelog.</para>
@@ -329,7 +328,9 @@ version number (after the dash) is removed.</para>
 <entry>Version:</entry>
 <entry>
 <para>Project version, used in generating the names of deliverables
-that <application>shipper</application> builds.</para>
+that <application>shipper</application> builds.  In order to run,
+<application>shipper</application> requires that version be set
+somewhere, in a profile or spec file or as a command-line override.</para>
 </entry>
 </row>
 <row>
@@ -518,8 +519,8 @@ that have tortuous procedures for updating webspace.</para>
 </entry>
 </row>
 <row>
-<entry><varname>tagtemplate</varname></entry>
-<entry>#Tagtemplate</entry>
+<entry><varname>tag_template</varname></entry>
+<entry>#Tag-Template</entry>
 <entry>#XBS-Tagtemplate</entry>
 <entry>
 <para>You can change tagging behavior by setting the variable
@@ -531,9 +532,9 @@ globals are available for substitution in the same way.</para>
 </entry>
 </row>
 <row>
-<entry><varname>tagmessage</varname></entry>
-<entry>#Tagmessage</entry>
-<entry>#XBS-Tagmessage</entry>
+<entry><varname>tag_message</varname></entry>
+<entry>#Tag-Message</entry>
+<entry>#XBS-Tag-Message</entry>
 <entry>
 <para>You can also customize the actual log message by setting
 the variable <varname>tagmessage</varname>.  See the default with
@@ -547,11 +548,11 @@ variable will be ignored in this case.</para>
 </row>
 
 <row>
-<entry><varname>ircmessage</varname></entry>
+<entry><varname>irc_message</varname></entry>
 <entry>#IRC-Message</entry>
 <entry>#XBS-IRC-Message</entry>
 <entry>
-<para>You can customize the IRC messge(s) sent on release by setting
+<para>You can customize the IRC message(s) sent on release by setting
 the variable <varname>ircmessage</varname>.  See the default with
 <command>shipper -n</command>; variable cookies in it will be 
 replaced in obvious ways.</para>
@@ -678,9 +679,10 @@ declared a web directory to mirror to website destinations.</para>
 </informaltable>
 
 <para>Stock deliverables which are textfiles and contain the string
-"shipper: ignore this." will not be shipped.  This is especially useful
-for archival GNU-style ChangeLogs, which you may want to avoid shipping
-but which need to be present to pacify autotools.</para>
+"shipper: ignore this." will not be shipped by the generated script.
+This is especially useful for archival GNU-style ChangeLogs, which you
+may want to avoid shipping but which need to be present to pacify
+autotools.</para>
 
 <para>Here are the generated deliverables that
 <application>shipper</application> will build and ship, if they don't
@@ -709,42 +711,20 @@ directory. Note that on Savannah, web page changes may not be visible
 for up to an hour after submission!</para>
 </entry>
 </row>
-<row>
-<entry>SHIPPER.FREECODE</entry>
-<entry>
-<para>If freecode is in the user's destination list,
-<application>shipper</application> will generate a file called
-SHIPPER.FREECODE, unless that file already exists (this is soo you
-can generate the file with <command>shipper -n</command> and edit it
-before running without <option>-n</option>). This file will be a job card
-that can be fed to freecode.com's API via
-<citerefentry><refentrytitle>freecode-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
-</para>
-</entry>
-</row>
-<row>
-<entry>SHIPPER.EMAIL</entry>
-<entry>
-<para>This what <application>shipper</application> generates to be
-emailed to destinations that are mailto URLs.  This file mill not be
-generated if it already exists (this is so you can generate the file
-with <command>shipper</command> (no options) and edit it before
-running with <option>-u</option>).</para>
-</entry>
-</row>
 </tbody>
 </tgroup>
 </informaltable>
 
 <para>Additionally, if the <varname>html_template</varname> and
 <varname>html_target</varname> variables are set, a templated HTML
-page named by will be generated and shipped to websites.</para>
+page named by it will be composed and shipped to websites by the
+generated script.</para>
 </refsect1>
 
 <refsect1><title>Shipping to Destinations</title>
 <para>In operation, <application>shipper</application> walks through a
 list of destinations, building the required deliverables for each one and
-performing the required shipping actions to push them out to the
+generating the required shipping actions to push them out to the
 destination.  Here are the destination types
 <application>shipper</application> knows about:</para>
 
@@ -770,12 +750,12 @@ BUGS, TODO.</entry>
 <entry>-</entry>
 <entry>
 <para>If the sourceforge destination is on your list,
-<application>shipper</application> will attempt to ship a tarball and
-source and binary RPMs to the prject's frs directory via rsync; the
-deliverables will be placed in a subdirectory named after the version.
-It will also attempt to upload all web deliverables (README, CHANGES,
-NEWS, HISTORY, *.{html,css,js}, BUGS, TODO) to the project's
-SourceForge web directory.</para>
+<application>shipper</application> will generate commands to ship a
+tarball and source and binary RPMs to the prject's frs directory via
+rsync; the deliverables will be placed in a subdirectory named after
+the version.  It will also attempt to upload all web deliverables
+(README, CHANGES, NEWS, HISTORY, *.{html,css,js}, BUGS, TODO) to the
+project's SourceForge web directory.</para>
 </entry>
 </row>
 <row>
@@ -785,21 +765,21 @@ BUGS, TODO.</entry>
 <entry>-</entry>
 <entry>
 <para>If the berlios destination is on your list,
-<application>shipper</application> will attempt to ship a tarball and source
-and binary RPMs to the berlios.de submission directory via FTP.  It
-will also attempt to upload all web deliverables (README, CHANGES,
-NEWS, HISTORY, *.{html,css,js}, BUGS, TODO) to the project's Berlios web
-directory.
+<application>shipper</application> will generate commands to ship a
+tarball and source and binary RPMs to the berlios.de submission
+directory via FTP.  It will also attempt to upload all web
+deliverables (README, CHANGES, NEWS, HISTORY, *.{html,css,js}, BUGS,
+TODO) to the project's Berlios web directory.
 </para>
 </entry>
 </row>
 <row>
 <entry>freecode</entry>
-<entry>SHIPPER.FREECODE</entry>
+<entry>-</entry>
 <entry>-</entry>
 <entry>
 <para>If the freecode destination is on your list,
-<application>shipper</application> will attempt to post a release
+<application>shipper</application> will generate a command to post a release
 announcement on freecode.com using
 <citerefentry><refentrytitle>freecode-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 The announcement will include URLs for whichever of the following
@@ -815,7 +795,7 @@ generated into the local deliverable SHIPPER.FREECODE.</para>
 <entry>scp destination ([user@]host:dir)</entry>
 <entry>
 <para>This destination type represents a website.
-<application>shipper</application> uses
+<application>shipper</application> generates commands using
 <citerefentry><refentrytitle>scp</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 to put deliverables on websites.  If the user part of the scp
 destination is absent, it will be taken from the environment variable
@@ -844,14 +824,14 @@ declare them by putting FTP urls in the
 </row>
 <row>
 <entry>Email address</entry>
-<entry>SHIPPER.EMAIL</entry>
+<entry>-</entry>
 <entry>mailto URL</entry>
 <entry>
-<para>The contents of the generated SHIPPER.EMAIL file is emailed to
-each email address specified as a destination.</para>
+<para>A message expanded from the <varname>mail_template</varname> is
+emailed to each email address specified as a destination.</para>
 
 <para>No email destinations are set up by default.  You must
-declare them by putting mailto: urls in the
+declare them by putting mailto: URLs in the
 <varname>destinations</varname> variable.</para>
 </entry>
 </row>
@@ -864,7 +844,7 @@ declare them by putting mailto: urls in the
 
 <para>No IRC destinations are set up by default.  You must declare
 them by putting IRC urls in the <varname>destinations</varname>
-variable. IRC URLs specified n the IRC-Channel variable are also
+variable. IRC URLs specified in the IRC-Channel variable are also
 announced to; they're also listed on the templated web page,
 if templating has been selected.</para>
 </entry>
@@ -874,12 +854,13 @@ if templating has been selected.</para>
 </informaltable>
 </refsect1>
 
-<refsect1 id='postinstall'><title>After Deliverables have Shipped</title>
+<refsect1 id='postinstall'><title>After Uploads</title>
 
-<para>When uploads are complete, <application>shipper</application>
-looks at where it is running. If it can recognize that the current
-directory is under version control, and the <option>-t</option> option
-has been anabled, it will try to tag the just-shipped tree as an
+<para>After upload commands have been generated,
+<application>shipper</application> looks at where it is running. If it
+can recognize that the current directory is under version control, and
+the <varname>tag_template</varname> option has been enabled, it will
+generare additional commands to tag the just-shipped tree as an
 external release.</para>
 
 <para>Currently, the version-control systems supported for tagging
@@ -887,38 +868,34 @@ after shipping are Subversion, git, hg, and bzr.  Due to variations
 in tagging behavior in these systems, this feature behaves slightly
 differently depending on which one is in use.</para>
 
-<para>If it is in the trunk of a Subversion repository (that is, the
-current directory is name <filename>trunk</filename> and has a
+<para>If the run is in the trunk of a Subversion repository (that is,
+the current directory is name <filename>trunk</filename> and has a
 subdirectory named <filename>.svn</filename>) and there is a
 <filename>tags</filename> peer directory, and the tags directory does
 not have a subdirectory named "$version", then
-<application>shipper</application> copies and tags the contents of
-trunk.</para>
+<application>shipper</application> generates commands to copy and tags
+the contents of trunk.</para>
 
 <para>If it is in a git, hg, or bzr repository (that is, there is a
 subdirectory named <filename>.git</filename>,
-<filename>.bzr</filename>, or <filename>.hg</filename>) it will tag
-the release. If there is a remote repo to be pushed to, local changes
-and tags wil be pushed. In all three of these cases the tag attempt
-will fail if the tag previously existed.  See also the discussion
-of the <varname>tagtemplate</varname> variable.</para>
+<filename>.bzr</filename>, or <filename>.hg</filename>) it will
+generare commands to tag the release. If there is a remote repo to be
+pushed to, local changes and tags wil be pushed. In all three of these
+cases the tag attempt will fail if the tag previously existed.  See
+also the discussion of the <varname>tagtemplate</varname>
+variable.</para>
+
+<para>After tagging, commands to ship email notifications are
+generated.</para>
+
+<para>The last command generated, if applicable, will be the IRC
+broadcast.</para>
 </refsect1>
 
 <refsect1><title>Command-line Options</title>
 
 <para>The <option>-n</option> generates a
 configuration dump to standard output.</para>
-
-<para>The <option>-u</option> option enables uploading and tag pushing.</para>
-
-<para>The (deprecated) <option>-m</option> option tells
-<application>shipper</application> to generate a templated page named
-"index.html" and upload it to website destinations. This option may be
-removed in a future release; set the <varname>html_target</varname>
-variable to "index.html" instead.</para>
-
-<para>The <option>-t</option> option tells <application>shipper</application> to
-attempt to tag the local repo after shipping.</para>
 
 <para>The <option>-x</option> option specifies a destination, or a 
 comma-separated list of destinations, not to ship to. This overrides 
@@ -941,7 +918,7 @@ that the makefile version is derived from (and thus always consistent
 with) the specfile version.</para>
 
 <programlisting>
-VERS=$(shell sed &lt;*.spec control -n -e '/Version: \(.*\)/s//\1/p')
+VERSION=$(shell sed &lt;*.spec control -n -e '/Version: \(.*\)/s//\1/p')
 </programlisting>
 
 <para>A makefile production like the following will allow
@@ -950,15 +927,20 @@ the deliverables <application>shipper</application> knows about
 will be rebuilt before being shipped.</para>
 
 <programlisting>
-release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>-$(VERS).md5 <emphasis>package</emphasis>.html 
-	shipper -u -t $(VERS)
+release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>-$(VERSION).md5
+	shipper version=$(VERS) | sh -e -x
 </programlisting>
+
+<para>The -e option is recommended to make all errors fatal.  This
+way if an upload fails for some reason, the later notifications won't
+happen. The -x option makes the script echo its commands as they're 
+performed.</para>
 
 <para>You will want to change <emphasis>package</emphasis> to your 
 project name. You will need to write a production that builds your
 tarball and checksum files.</para>
 
-<para>In an SConstruct file, you want:
+<para>In an SConstruct file, you may want something like this:
 
 <programlisting>
 version = <emphasis>version</emphasis>
@@ -967,11 +949,11 @@ version = <emphasis>version</emphasis>
 and something like
 
 <programlisting>
-env.Alias("release", [tarball], 'shipper -u -t')
+env.Alias("release", [tarball], 'shipper version=%s | sh -e -x' % version)
 </programlisting>
 
 with 'tarball' being a production that makes a release tarball (and
-checksum, if desired).
+checksum file, if desired).
 </para>
 
 </refsect1>
@@ -984,32 +966,40 @@ specific destination types:</para>
 <variablelist>
 <varlistentry>
 <term>freecode-submit</term>
-
 <listitem><para>For shipping release notifications to freecode.com.
 The freecode-submit program is <ulink
 url="http://www.catb.org/~esr/freecode-submit">separately
 maintained</ulink>.</para></listitem>
 </varlistentry>
+
 <varlistentry>
 <term>irk</term>
 <listitem><para>For shipping notices to IRC channels. The freecode-submit program is <ulink
 url="http://www.catb.org/~esr/irkerd">separately
 maintained</ulink>.</para></listitem>
 </varlistentry>
+
 <varlistentry>
 <term>lftp</term>
-
 <listitem><para>For shipping to ftp sites.  The freecode-submit
 program is <ulink url="http://lftp.yar.ru/">separately
 maintained</ulink>.</para></listitem>
 </varlistentry>
+
 <varlistentry>
 <term>scp</term>
-
 <listitem><para>For shipping to websites. There are several different
 implementations of scp; one widely-used version is shipped by the
 <ulink url="http://www.openssh.com/">OpenSSH project</ulink>.
 </para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>sendmail</term>
+<listitem><para>For shipping email announcements. Either classic
+sendmail or postfix sendmail will work. All it has to be able to do
+is ship mail presented on standard input to a list of addresses
+specified as arguments.</para></listitem>
 </varlistentry>
 </variablelist>
 
