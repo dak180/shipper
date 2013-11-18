@@ -3,6 +3,7 @@
 Repository head:
   Your profile can now be ~/.config/shipper a la XDG.
   New variable-override syntax on the command line.
+  The -m option is deprecated in favor of the HTML-Target directive.
 
 0.17: 2013-11-16
   Added support for announcing to project IRC channels via irk.
