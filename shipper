@@ -115,16 +115,6 @@ def do_or_die(cmd):
     if os.system(cmd):
         croak("command '%s' failed!" % cmd)
 
-def trap_or_die(cmd):
-    "Either execute a command or fail noisily, capturing output."
-    if options.verbose:
-        print("***", cmd)
-    (status, output) =  commands.getstatusoutput(cmd)
-    if status:
-        croak("command '%s' failed!" % cmd)
-    else:
-        return output
-
 def upload_or_die(cmd):
     if options.upload:
         do_or_die(cmd)
