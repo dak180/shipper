@@ -902,10 +902,9 @@ try:
                     print(pusher % globals())
 
         # Email notifications
-        maildests = [x for x in destinations if x.startswith("mailto:")]
+        maildests = [x[7:] for x in destinations if x.startswith("mailto:")]
         if maildests:
-            print("sendmail %s <<'INAGADADAVIDA'" \
-                  " ".join([x[7:] for x in maildests])
+            print("sendmail %s <<'INAGADADAVIDA'" % " ".join(maildests)
             print(mail_template % globals())
             print("INAGADADAVIDA\n")
 
