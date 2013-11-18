@@ -41,8 +41,9 @@ and project IRC channels.</para>
 
 <para>Another goal is to arrange your shipping process in such a way
 that any one piece of metadata like your project version only has to
-be kept in one place and modified once per release.  Metadata
-is collected </para>
+be kept in one place and modified once per release.  Metadata is
+collected from several locations that naturally own pieces of
+it.</para>
 
 <para>In normal use, you absolutely need to set only two variables:
 <varname>destinations</varname> which is the list of destinations to
@@ -80,58 +81,102 @@ tarballs, source zip archives, ChangeLog files, README files,and
 various other project metadata files.  Destinations include both
 <emphasis>private destinations</emphasis> like websites, FTP archive
 sites and mailing lists, and <emphasis>public destinations</emphasis>
-like soureceforge.net, freecode.com, savannah.nongnu.org and berlios.de. The
-<application>shipper</application> framework is extensible and it is
-relatively easy to add new destination types and new deliverables; in
-the future, we hope to support all major forge sites as
-destinations.</para>
+like soureceforge.net, freecode.com, savannah.nongnu.org and
+berlios.de.</para>
 
-<para>The <application>shipper</application> program's first step is
-to read the <filename>.shipper</filename> files in your home directory
-and the current directory (if you like XDG conventions, make a
-<filename>~/.config/shipper</filename> instead).  These set various
-control variables and templates that <application>shipper</application>
-will use later.</para>
+<para><application>shipper</application> goes through the following
+steps each time it runs:</para>
 
-<para>Second, <application>shipper</application> reads per-project
-information from a specfile, either an RPM spec or a Debian control
-file. The project name and various other pieces of
-project-related metadata are extracted from the specfile.</para>
+<procedure>
+<step>
+<para>Deduce your identity, if it can.</para>
+</step>
+<step>
+<para>Collect metadata</para>
+<substeps>
+<step><para>Read <filename>~/.shipper</filename>.</para></step>
+<step><para>Read <filename>~/.config/shipper</filename>.</para></step>
+<step><para>Read <filename>./control</filename>.</para></step>
+<step><para>Read an RPM spec, if there is just one.</para></step>
+<step><para>Apply command-line overrides..</para></step>
+</substeps>
+</step>
+<step>
+<para>Find deliverables</para>
+</step>
+<step>
+<para>Generate shipping commands</para>
+<substeps>
+<step><para>File and directory uploads.</para></step>
+<step><para>Repository release tagging.</para></step>
+<step><para>freenode.com announcement.</para></step>
+<step><para>Mailing-list announcements.</para></step>
+<step><para>Sends to IRC channels.</para></step>
+</substeps>
+</step>
+</procedure>
+
+<para>First, <application>shipper</application> it reads the
+<filename>.shipper</filename> file in your home directory and the
+current directory (if you like XDG conventions, make a
+<filename>~/.config/shipper</filename> instead).  These can set
+various control variables and templates that aren't project
+specific.</para>
+
+<para>If that first step didn't find your ientity (a nonempty value of
+<varname>whoami</varname>), the program's first step is to try to
+figure out what your name and email address are. It snoops the
+profiles asociated with git, bzr, and hg looking for these. If it
+can't deduce this information, it will complain and exit.</para>
+
+<para>Next, <application>shipper</application> reads per-project
+information from a project metadata file in the current directory,
+either a Debian control file or an RPM spec. This is where it will
+normally find the project name, a short text description, its declared
+homepage location, and other similar things.</para>
+
+<para>The program then reads <filename>.shipper</filename> for
+project-specific configuration settings.</para>
+
+<para>Finally, any override settings specified on the 
+<application>shipper</application> command line are applied.
+Normally <varname>version</varname>, the release version
+designation, will be set here.</para>
 
 <para>The <option>-n</option> (nobuild) option causes
 <application>shipper</application> to dump all configuration values
 and exit immediately after collecting them.</para>
 
-<para>The first real work that gets done is finding deliverables.
-These are either unversioned project metadata (like a README or NEWS
-file) or versioned product files such as source tarballs.</para>
+<para>The next phase is finding deliverables.  These are either
+unversioned project metadata (like a README or NEWS file) or versioned
+product files such as source tarballs.</para>
 
 <para>The last step before generating upload commands may be to
 generate an HTML file for uploading, if you have specified the
 <varname>html_target</varname> variable.</para>
 
 <para>The option <option>-w</option> (web-only) tells shipper to
-generate update commands web pages only rather than shipping (and
-possibly tagging) a release. This may be useful for forges like
+generate upload commands for web pages only rather than for shipping
+(and possibly tagging) a release. This may be useful for forges like
 Savannah that have a tricky procedure for website updates.</para>
 
 <para>Otherwise, <application>shipper</application> then generates
-commands to upload deliverables and post all announcements.  The
-<option>-x</option> may be use to suppress delivery to specified
-destinations that would normally be performed (e.g., due to a
-destination variable set in one of your <filename>.shipper</filename>
-files); it may be a comma-separated list.</para>
+commands to upload deliverables.  The <option>-x</option> may be use
+to suppress delivery to specified destinations that would normally be
+performed (e.g., due to a destination variable set in one of your
+<filename>.shipper</filename> files); it may be a comma-separated
+list.</para>
 
-<para>After deliverables have shipped successfully and notifications
-posted, <application>shipper</application> determines if the directory
-it is in is a working copy in a version-control system that supports
-release tagging.  If so, and the <option>tag_template</option>
-variable is set to a nonempty value, it generates commabds to tag the
-release just shipped.  See <xref linkend='postinstall'/> for
-discussion of what version-control systems are supported and what
-actions will be taken.</para>
+<para>After deliverables have shipped successfully
+<application>shipper</application> determines if the directory it is
+in is a working copy in a version-control system that supports release
+tagging.  If so, and the <option>tag_template</option> variable is set
+to a nonempty value, it generates commands to tag the release just
+shipped.  See <xref linkend='postinstall'/> for discussion of what
+version-control systems are supported and what actions will be
+taken.</para>
 
-<para>Finally, note that <application>shipper</application> makes one
+<para>Note that <application>shipper</application> makes one
 important assumption about the structure of your website(s).  Beneath
 each directory in your <varname>destinations</varname> list, there
 will be one subdirectory for each project, with the directory leaf
@@ -147,17 +192,25 @@ Note that <application>shipper</application> will not create these
 project directories for you if they're missing; this is deliberate, so
 that uploads to sites that are not prepared for them will fail
 noisily.</para>
+
+<para>After generating commands to do uploads,
+<application>shipper</application> may generates additional commands 
+to perform project release notifications to freecode.com, 
+email lists, and IRC channels.</para>
+
 </refsect1>
 
-<refsect1><title>How Shipper Deduces What To Do</title>
+<refsect1><title>Configuration in More Detaul</title>
 
-<para>The behavior of shipper depends on a handful of internal
-variables.  Some of these variables have defaults computed at startup
-time.  All can be set or overridden in the per-user
-<filename>~/.config/shipper</filename> and
+<para>The behavior of <application>shipper</application> depends on a
+handful of internal variables.  Some of these variables have defaults
+computed at startup time.  All can be set or overridden in the
+per-user <filename>~/.config/shipper</filename> and
 <filename>~/.shipper</filename> files, and overridden again in any
-per-project <filename>.shipper</filename> file.  Both files are Python
-code and the syntax of variable settings is Python's.</para>
+per-project control file, specfile, or <filename>.shipper</filename>
+file.  All .shipper files are Python code and the syntax of variable
+settings is Python's; control and RPM files are parsed according to
+their native conventions.</para>
 
 <para>If a variable is set in a config file, that value is locked in
 (except for the <varname>destinations</varname> variable which can be
@@ -168,31 +221,19 @@ of fields in your project specfile.</para>
 <para>Any variable, locked or not, can be overidden from the command
 line by an argument of the form "name=value".</para>
 
-<para>For basic use, it is only necessary to set one such variable:
-<varname>destinations</varname>, the list of destinations to ship to.
-Normally you'll set this globally, pointing all your projects at your
-main distribution website and public drop sites, in your
-<filename>~/.shipper</filename> file.  It is also possible to add
-destinations on a per-project basis by giving a comma-separated list
-in a #Destinations: comment in the specfile.  You can set the variable
-in a per-project <filename>.shipper</filename> to ignore your global
+<para>For basic use, it is only necessary to set one variable in your
+<filename>~/.config/shipper</filename> or
+<filename>~/.shipper</filename> file: <varname>destinations</varname>,
+the list of destinations to ship to.  Normally you'll set this
+globally, pointing all your projects at your main distribution website
+and public drop sites.  It is also possible to add destinations on a
+per-project basis by giving a comma-separated list in a #Destinations:
+comment in one of the specfile.  Finally, you can set the variable in
+a per-project <filename>.shipper</filename> to ignore your global
 destination list.</para>
 
-<para>The first thing shipper looks for is a specfile in the current
-directory; there must be exactly one.  It extracts the project name
-from the Name field.</para>
-
-<para>Next step is to find the project version (the variable
-<varname>version</varname>). Normally you will pass this in 
-as a 'version=' setting on the shipper command line.  But if
-it is more convenient for your build practices to regenerate the
-specfile on each build, you can set a Version header and
-that will be picked up.</para>
-
-<para><application>shipper</application> gets most of the rest of the
-data it uses to decide what commands to generate from headers in the
-specfile.  The following table lists all the variables and their
-corresponding specfile fields.</para>
+<para>Here are all of the configuration variables 
+<application>shipper</application> uses:</para>
 
 <informaltable>
 <tgroup cols="4">
@@ -275,6 +316,28 @@ set a default for you.</para>
 </entry>
 </row>
 <row>
+<entry><varname>package</varname></entry>
+<entry>Name:</entry>
+<entry>Package:</entry>
+<entry>
+<para>Project name, used to generate the stem part of the names
+deliverables that <application>shipper</application> builds. If the
+specfile is a Debian control file, the Debian-specific part of the
+version number (after the dash) is removed.</para>
+</entry>
+</row>
+<row>
+<entry><varname>version</varname></entry>
+<entry>Version:</entry>
+<entry>Version:</entry>
+<entry>
+<para>Project version, used in generating the names of deliverables
+that <application>shipper</application> builds.  In order to run,
+<application>shipper</application> requires that version be set
+somewhere, in a profile or spec file or as a command-line override.</para>
+</entry>
+</row>
+<row>
 <entry><varname>html_target</varname></entry>
 <entry align='center'>-</entry>
 <entry align='center'>-</entry>
@@ -307,28 +370,6 @@ suppressed.</para>
 shipped to destinations that are mailto URLs.  There is a default which
 generates a very simple email containing a subject, a pointer to the 
 project web page, and the last entry in the project changelog.</para>
-</entry>
-</row>
-<row>
-<entry><varname>package</varname></entry>
-<entry>Name:</entry>
-<entry>Package:</entry>
-<entry>
-<para>Project name, used to generate the stem part of the names
-deliverables that <application>shipper</application> builds. If the
-specfile is a Debian control file, the Debian-specific part of the
-version number (after the dash) is removed.</para>
-</entry>
-</row>
-<row>
-<entry><varname>version</varname></entry>
-<entry>Version:</entry>
-<entry>Version:</entry>
-<entry>
-<para>Project version, used in generating the names of deliverables
-that <application>shipper</application> builds.  In order to run,
-<application>shipper</application> requires that version be set
-somewhere, in a profile or spec file or as a command-line override.</para>
 </entry>
 </row>
 <row>
@@ -535,12 +576,12 @@ globals are available for substitution in the same way.</para>
 <entry>#XBS-Tag-Message</entry>
 <entry>
 <para>You can also customize the actual log message by setting
-the variable <varname>tagmessage</varname>.  See the default with
+the variable <varname>tag_message</varname>.  See the default with
 <command>shipper -N</command>; the "%(version)s" in it will be
 replaced with the version, and other globals
 are available for substitution in the same way.</para>
 
-<para>bzr, however, cannot annotate tags.  The <varname>tagmessage</varname>
+<para>bzr, however, cannot annotate tags.  The <varname>tag_message</varname>
 variable will be ignored in this case.</para>
 </entry>
 </row>
@@ -554,9 +595,6 @@ variable will be ignored in this case.</para>
 the variable <varname>ircmessage</varname>.  See the default with
 <command>shipper -n</command>; variable cookies in it will be 
 replaced in obvious ways.</para>
-
-<para>bzr, however, cannot annotate tags.  The <varname>tagmessage</varname>
-variable will be ignored in this case.</para>
 </entry>
 </row>
 </tbody>
@@ -721,7 +759,7 @@ generated script.</para>
 
 <refsect1><title>Shipping to Destinations</title>
 <para>In operation, <application>shipper</application> walks through a
-list of destinations, building the required deliverables for each one and
+list of destinations, finding the required deliverables for each one and
 generating the required shipping actions to push them out to the
 destination.  Here are the destination types
 <application>shipper</application> knows about:</para>
@@ -782,8 +820,7 @@ announcement on freecode.com using
 <citerefentry><refentrytitle>freecode-submit</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
 The announcement will include URLs for whichever of the following
 deliverables are shipped, using the URL field from your specfile:
-tarballs, zipfiles, RPMs, debs, ChangeLog.  This announcement is
-generated into the local deliverable SHIPPER.FREECODE.</para>
+tarballs, zipfiles, RPMs, debs, ChangeLog.</para>
 </entry>
 </row>
 <row>
@@ -1016,6 +1053,11 @@ web interface.</para>
 <para>The program can put downloadables in place on SourceForge, but not set
 the "Preferred Download". Usually this will point to the most recent download
 subdirectory by default, which is the right thing.</para>
+
+<para>The <application>shipper</application> framework is extensible
+and it is relatively easy to add new destination types and new
+deliverables; it is a bug that we do not yet support all major forge sites
+as destinations.</para>
 </refsect1>
 
 <refsect1><title>Files</title>

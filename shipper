@@ -364,15 +364,14 @@ try:
     # Extract metadata and compute control information
     #
 
-    def disable(s):
-        destinations.remove(s)
+    package = os.path.basename(os.getcwd())
 
     # Security check, don't let an attacker elevate privileges 
     def securecheck(fn):
         if stat.S_IMODE(os.stat(fn).st_mode) & 0o0002:
             croak("%s must not be world-writeable!" % fn)
 
-    # Read in variable overrides
+    # Read in user's profiles
     home_profile = os.path.join(os.getenv('HOME'), ".shipper")
     if os.path.exists(home_profile):
         securecheck(home_profile)
@@ -381,28 +380,31 @@ try:
     if os.path.exists(home_profile):
         securecheck(home_profile)
         exec(compile(open(home_profile).read(), home_profile, 'exec'))
+
+    # User's identity
+    if not whoami:
+        whoami = whoami_really()
+    if not whoami:
+        croak("please set whoami in your ~/.config.shipper or ~/.shipper file.")
+    (myrealname, myaddress) = email.utils.parseaddr(whoami)
+    (myuserid, myhost) = myaddress.split("@")
+
+    # Project metadata
+    if os.path.exists("control"):
+        metadata = Specfile("control")
+    else:
+        specfiles = glob.glob("*.spec")
+        if len(specfiles) == 1:
+            metadata = Specfile(specfiles[0])
+        else:
+            croak("must be exactly one RPM specfile in the directory!")
+
+    # Shipper-specific project profile
     securecheck(".")
     here_profile = ".shipper"
     if os.path.exists(here_profile):
         securecheck(here_profile)
         exec(compile(open(here_profile).read(), here_profile, 'exec'))
-
-    # Set various sensible defaults
-    if not whoami:
-        whoami = whoami_really()
-    if not whoami:
-        croak("please set whoami in your .shipper file.")
-    (myrealname, myaddress) = email.utils.parseaddr(whoami)
-    (myuserid, myhost) = myaddress.split("@")
-
-    # Where to get the metadata
-    specfiles = glob.glob("*.spec")
-    if len(specfiles) == 1:
-        metadata = Specfile(specfiles[0])
-    elif os.path.exists("control"):
-        metadata = Specfile("control")
-    else:
-        croak("must be exactly one RPM or dpkg control file in the directory!")
 
     # Get the package name
     if not package:
@@ -745,34 +747,6 @@ try:
     web_deliverables = [x[0] for x in [f_e_s_b1 for f_e_s_b1 in deliverables if not f_e_s_b1[3]]]
 
     # Shipping methods for public destinations.
-    def freecode():
-        if not options.webonly:
-            if not website:
-                print("# Can't announce to freecode without a primary website!")
-                return
-            elif not lastchange:
-                print("# Can't announce to freecode without a changes field!")
-                return
-            else:
-                print("freecode-submit <<'INAGADAVIDA'")
-                print("Project: %s" % (freecode_name or package))
-                print("Version: %s" % version)            
-                print("Description: %s" % description.replace("\n", "\n    ").rstrip())
-                if project_tags:
-                    print("Project-Tag-List: %s" % project_tags)
-                print("Website-URL: %s" % website)
-                for (f, e, s, b) in deliverables:
-                    if s:
-                        if b:
-                            url = download
-                        else:
-                            url = website
-                        url = os.path.join(url, f)
-                        print("%s-URL: %s" % (s, url))
-                # freecode.com doesn't like bulleted entries.
-                freecodelog = [s.lstrip() for s in lastchange.split("\n")]
-                sys.stdout.write("\n" + "\n".join(freecodelog))
-                print("INAGADADAVIDA\n")
     def savannah():
         if not options.webonly:
             upload("dl.sv.nongnu.org:/releases/%s/" % savannah_name,
@@ -849,7 +823,7 @@ try:
             sourceforge_userid,
             sourceforge_name,
             sourceforge_name))
-    hardwired = ("freecode", "berlios", "savannah", "sourceforge")
+    hardwired = ("berlios", "savannah", "sourceforge")
 
     if options.verbose:
         print("Destinations: " + ", ".join(destinations))
@@ -859,8 +833,6 @@ try:
     #
     for destination in destinations:
         if destination in hardwired:
-            if destination == 'freecode' and options.webonly:
-                continue
             eval(destination + "()")
         elif destination.startswith("ftp:"):
             if not options.webonly:
@@ -868,6 +840,8 @@ try:
         elif destination.startswith("mailto:"):
             pass	# defer this until a later phase
         elif destination.startswith("irc:"):
+            pass	# defer this until a later phase
+        elif destination == 'freecode':
             pass	# defer this until a later phase
         elif destination not in hardwired:
             if options.webonly:
@@ -901,10 +875,37 @@ try:
                     print(tagger % globals())
                     print(pusher % globals())
 
+        # Freecode notification, after uploads and tagging
+        if 'freecode' in destinations:
+            if not website:
+                print("# Can't announce to freecode without a primary website!")
+            elif not lastchange:
+                print("# Can't announce to freecode without a changes field!")
+            else:
+                print("freecode-submit <<'INAGADAVIDA'")
+                print("Project: %s" % (freecode_name or package))
+                print("Version: %s" % version)            
+                print("Description: %s" % description.replace("\n", "\n    ").rstrip())
+                if project_tags:
+                    print("Project-Tag-List: %s" % project_tags)
+                print("Website-URL: %s" % website)
+                for (f, e, s, b) in deliverables:
+                    if s:
+                        if b:
+                            url = download
+                        else:
+                            url = website
+                        url = os.path.join(url, f)
+                        print("%s-URL: %s" % (s, url))
+                # freecode.com doesn't like bulleted entries.
+                freecodelog = [s.lstrip() for s in lastchange.split("\n")]
+                sys.stdout.write("\n" + "\n".join(freecodelog))
+                print("INAGADADAVIDA\n")
+
         # Email notifications
         maildests = [x[7:] for x in destinations if x.startswith("mailto:")]
         if maildests:
-            print("sendmail %s <<'INAGADADAVIDA'" % " ".join(maildests)
+            print("sendmail %s <<'INAGADADAVIDA'" % " ".join(maildests))
             print(mail_template % globals())
             print("INAGADADAVIDA\n")
 
