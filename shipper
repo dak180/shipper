@@ -658,7 +658,7 @@ try:
                             continue
                 deliverables.append((filename, explanation, tag, bulky))
     if options.verbose:
-        print("Deliverables:" + " ".join([x[0] for x in deliverables]))
+        print("shipper: deliverables: " + " ".join([x[0] for x in deliverables]))
 
     #
     # Might be time to dump
