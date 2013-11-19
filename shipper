@@ -111,7 +111,19 @@ class Shipper:
         after.remove('before')
         for name in set(after) - set(before):
             setattr(self, name, eval(name))
+    def merge_with_negations(self, additional):
+        "Merge in additional destinations, using ~ for exclusion."
+        negations = [s for s in additional if s.startswith("~")]
+        additional = [s for s in additional if not s.startswith("~")]
+        if "~" in negations:
+            self.destinations = additional
+        else:
+            self.destinations += additional
+            for removable in [s[1:] for s in negations]:
+                if removable in self.destinations:
+                    self.destinations.remove(removable)
     def dump(self):
+        "Dump the shipper state variables."
         for variable in sorted(shipper.__dict__.keys()):
             if variable in Shipper.multiline:
                 if not getattr(self, variable):
@@ -208,22 +220,6 @@ def make_templated_page(deliverables):
 # Metadata extraction
 #
 
-def grep(regexp, fp):
-    "Mine for a specified regexp in a file."
-    # Note: this blank-strips its output!
-    fp = open(fp)
-    try:
-        while True:
-            line = fp.readline()
-            if not line:
-                return None
-            m = re.search(regexp, line)
-            if m:
-                return m.group(1).strip()
-    finally:
-        fp.close()
-    return None
-
 class Specfile:
     def __init__(self, filename):
         self.filename = filename
@@ -313,10 +309,10 @@ class Specfile:
     def extract(self, fld):
         "Extract a one-line field, possibly embedded as a magic comment."
         if self.type == "RPM":
-            return grep("^#?"+fld+r":\s*(.*)", self.filename)
+            return Specfile.grep("^#?"+fld+r":\s*(.*)", self.filename)
         elif self.type == "deb":
             fld = fld.replace('-', '[-_]')
-            return grep("^(?:XBS-)?"+fld+": (.*)", self.filename)
+            return Specfile.grep("^(?:XBS-)?"+fld+": (.*)", self.filename)
     def rpm_get_multiline(self, fieldname):
         "Grab everything from leader line to just before the next leader line."
         fp = open(self.filename)
@@ -339,6 +335,22 @@ class Specfile:
             return data.strip() + "\n"
         else:
             return None
+    @staticmethod
+    def grep(regexp, fp):
+        "Mine for a specified regexp in a file."
+        # Note: this blank-strips its output!
+        fp = open(fp)
+        try:
+            while True:
+                line = fp.readline()
+                if not line:
+                    return None
+                m = re.search(regexp, line)
+                if m:
+                    return m.group(1).strip()
+        finally:
+            fp.close()
+        return None
 
 #
 # Who am I? 
@@ -441,26 +453,11 @@ try:
         if getattr(shipper, name) is None:
             setattr(shipper, name, getattr(metadata, name))
 
-    # Shipper-specific project profile
-    securecheck(".")
-    here_profile = ".shipper"
-    if os.path.exists(here_profile):
-        securecheck(here_profile)
-        shipper_incorporate(here_profile)
-
     # Specfiles may set their own destinations
     project_destinations = metadata.extract("Destinations")
     if project_destinations:
         project_destinations = [x.strip() for x in project_destinations.split(",")]
-        negations = [s for s in project_destinations if s.startswith("~")]
-        project_destinations = [s for s in project_destinations if not s.startswith("~")]
-        if "~" in negations:
-            shipper.destinations = project_destinations
-        else:
-            shipper.destinations += project_destinations
-            for removable in [s[1:] for s in negations]:
-                if removable in shipper.destinations:
-                    shipper.destinations.remove(removable)
+        shipper.merge_with_negations(project_destinations)
 
     # Apply command-line destination exclusions
     if options.excluded:
@@ -484,6 +481,13 @@ try:
     else:
         shipper.sourceforge_name = shipper.package
         shipper.sourceforge_id = myuserid
+
+    # Shipper-specific project profile
+    securecheck(".")
+    here_profile = ".shipper"
+    if os.path.exists(here_profile):
+        securecheck(here_profile)
+        shipper_incorporate(here_profile)
 
     # Arguments can be variable settings
     for arg in args:
