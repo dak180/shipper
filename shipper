@@ -68,7 +68,7 @@ class Shipper:
                  'extralines', 'mail_template', 'html_template'}
     def __init__(self):
         self.destinations = []		# List of remote directories to update
-        self.date = time.asctime()	# User has not yet set a date
+        self.date = time.strftime("%Y-%m-%d", time.gmtime())
         self.whoami = None		# Who am I? (Used for logins and mail signatures)
         self.gittip_id = None		# My name on gittip.com
         self.savannah_id = None		# User ID to use for CVS on Savannah
@@ -142,7 +142,7 @@ def croak(msg):
 #
 
 def upload(dest, files, subdir=None):
-    "Upload a file via ftp or scp."
+    "Generate upload command for a file via ftp or scp."
     if subdir == None:
         subdir = shipper.package
     files = [x for x in files if os.path.exists(x)]
@@ -380,6 +380,90 @@ def whoami_really():
     # Out of alternatives
     return None
 
+
+#
+# Shipping methods for public destinations.
+#
+
+def savannah():
+    if not options.webonly:
+        upload("dl.sv.nongnu.org:/releases/%s/" % shipper.savannah_name,
+               download_deliverables)
+    # This code is weird and complicated because what Savannah wants
+    # you to do is check out a per-project CVS repository for the
+    # web pages, make changes to that repo, and commit it.
+    # See http://savannah.gnu.org/maintenance/HomepageUpload
+    # Sometime after this commit a cron job will run and check out
+    # the visible version of the webpage(s). 
+    #
+    # We're using -kb to avoid keyword expansion on binary files.
+    tmpdir = tempfile.mkdtemp()
+    print("cd %s; cvs -z3 -kb -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
+              % (tmpdir, shipper.savannah_id, shipper.savannah_name, shipper.savannah_name))
+    if not shipper.webdir:
+        deliver = " ".join(web_deliverables)
+    else:
+        deliver = []
+        for path, dirs, files in os.walk(shipper.webdir):
+            for fn in files:
+                deliver.append(os.path.join(path, fn))
+    for source in deliver:
+        dirparts = source.split(os.sep)
+        for i in range(1, len(dirparts)):
+            source_subdir = os.sep.join(dirparts[:i])
+            target_subdir = os.path.join(tmpdir,
+                                         shipper.savannah_name,
+                                         source_subdir)
+            if not os.path.exists(target_subdir):
+                print("cd %s/%s; cvs add %s"
+                              % (tmpdir, shipper.savannah_name, source_subdir))
+            elif not os.path.isdir(target_subdir):
+                # If this ever happens, you'll need to delete the
+                # offending file by hand.
+                sys.stderr.write(
+                    "%s already exists as non-directory!" % \
+                    target_subdir)
+                raise SystemExit, 1
+        target = os.path.join(tmpdir, shipper.savannah_name, source)
+        pre_existing = os.path.exists(target)
+        shutil.copyfile(source, target)
+        # This code handles additions, but you'll have to do
+        # deletions by hand. Assuming you ever care.  
+        if not pre_existing:
+            print("cd %s/%s; cvs add %s"
+                           % (tmpdir, shipper.savannah_name, source))
+    print("cd %s/%s; cvs commit" % (tmpdir, shipper.savannah_name))
+
+def berlios():
+    upload("ftp://ftp.berlios.de/incoming", download_deliverables)
+    berlios_webdir = \
+                   "shell.berlios.de:/home/groups/" \
+                   + (shipper.berlios_name or shipper.package) \
+                   + "/htdocs"
+    upload(berlios_webdir, web_deliverables, subdir="")
+
+def sourceforge():
+    if not options.webonly:
+        # See https://sourceforge.net/apps/trac/sourceforge/wiki/Release%20files%20for%20download
+        destdir =  "/home/frs/project/%s" % shipper.sourceforge_name
+        if shipper.sourceforge_folder:
+            destdir += "/" + shipper.sourceforge_folder
+        print("rsync -avP -e ssh %s '%s,%s@frs.sourceforge.net:%s'" % (
+            " ".join(download_deliverables),
+            shipper.sourceforge_id,
+            shipper.sourceforge_name,
+            destdir))
+    if shipper.webdir:
+        websources = shipper.webdir + '/'
+    else:
+        websources = " ".join(web_deliverables),
+    # https://sourceforge.net/apps/trac/sourceforge/wiki/Rsync%20over%20SSH
+    print("rsync -aiv %s %s,%s@web.sourceforge.net:/home/project-web/%s/htdocs/" % (
+        websources,
+        shipper.sourceforge_id,
+        shipper.sourceforge_name,
+        shipper.sourceforge_name))
+
 #
 # Main sequence
 #
@@ -454,10 +538,9 @@ try:
             setattr(shipper, name, getattr(metadata, name))
 
     # Specfiles may set their own destinations
-    project_destinations = metadata.extract("Destinations")
+    project_destinations = metadata.extract("Destinations").split(",")
     if project_destinations:
-        project_destinations = [x.strip() for x in project_destinations.split(",")]
-        shipper.merge_with_negations(project_destinations)
+        shipper.merge_with_negations([x.strip() for x in project_destinations])
 
     # Apply command-line destination exclusions
     if options.excluded:
@@ -678,8 +761,6 @@ try:
 
     if options.verbose:
         print("shipper: destinations: " + ", ".join(shipper.destinations))
-
-    if options.verbose:
         print("shipper: sanity checks passed")
 
     if not shipper.webdir:
@@ -714,10 +795,8 @@ try:
         # Template a resource page?
         if shipper.html_template and shipper.html_target:
             make_templated_page(deliverables)
-            # Now that the web page has been generated, it can add
-            # itself to the deliverables without having it show up in
-            # the resource table.
-            deliverables.append((shipper.html_target, "templated web page", None, False))
+            deliverables.append((shipper.html_target,
+                                 "templated web page", None, False))
 
         # We'll want the logo if it exists, too
         if shipper.logo:
@@ -730,90 +809,11 @@ try:
     download_deliverables = [x[0] for x in [f_e_s_b for f_e_s_b in deliverables if f_e_s_b[3]]]
     web_deliverables = [x[0] for x in [f_e_s_b1 for f_e_s_b1 in deliverables if not f_e_s_b1[3]]]
 
-    # Shipping methods for public destinations.
-    def savannah():
-        if not options.webonly:
-            upload("dl.sv.nongnu.org:/releases/%s/" % shipper.savannah_name,
-                   download_deliverables)
-        # This code is weird and complicated because what Savannah wants
-        # you to do is check out a per-project CVS repository for the
-        # web pages, make changes to that repo, and commit it.
-        # See http://savannah.gnu.org/maintenance/HomepageUpload
-        # Sometime after this commit a cron job will run and check out
-        # the visible version of the webpage(s). 
-        #
-        # We're using -kb to avoid keyword expansion on binary files.
-        tmpdir = tempfile.mkdtemp()
-        print("cd %s; cvs -z3 -kb -d:ext:%s@cvs.sv.gnu.org:/web/%s co %s" \
-                  % (tmpdir, shipper.savannah_id, shipper.savannah_name, shipper.savannah_name))
-        if not shipper.webdir:
-            deliver = " ".join(web_deliverables)
-        else:
-            deliver = []
-            for path, dirs, files in os.walk(shipper.webdir):
-                for fn in files:
-                    deliver.append(os.path.join(path, fn))
-        for source in deliver:
-            dirparts = source.split(os.sep)
-            for i in range(1, len(dirparts)):
-                source_subdir = os.sep.join(dirparts[:i])
-                target_subdir = os.path.join(tmpdir,
-                                             shipper.savannah_name,
-                                             source_subdir)
-                if not os.path.exists(target_subdir):
-                    print("cd %s/%s; cvs add %s"
-                                  % (tmpdir, shipper.savannah_name, source_subdir))
-                elif not os.path.isdir(target_subdir):
-                    # If this ever happens, you'll need to delete the
-                    # offending file by hand.
-                    sys.stderr.write(
-                        "%s already exists as non-directory!" % \
-                        target_subdir)
-                    raise SystemExit, 1
-            target = os.path.join(tmpdir, shipper.savannah_name, source)
-            pre_existing = os.path.exists(target)
-            shutil.copyfile(source, target)
-            # This code handles additions, but you'll have to do
-            # deletions by hand. Assuming you ever care.  
-            if not pre_existing:
-                print("cd %s/%s; cvs add %s"
-                               % (tmpdir, shipper.savannah_name, source))
-        print("cd %s/%s; cvs commit" % (tmpdir, shipper.savannah_name))
-    def berlios():
-        upload("ftp://ftp.berlios.de/incoming", download_deliverables)
-        berlios_webdir = \
-                       "shell.berlios.de:/home/groups/" \
-                       + (shipper.berlios_name or shipper.package) \
-                       + "/htdocs"
-        upload(berlios_webdir, web_deliverables, subdir="")
-    def sourceforge():
-        if not options.webonly:
-            # See https://sourceforge.net/apps/trac/sourceforge/wiki/Release%20files%20for%20download
-            destdir =  "/home/frs/project/%s" % shipper.sourceforge_name
-            if shipper.sourceforge_folder:
-                destdir += "/" + shipper.sourceforge_folder
-            print("rsync -avP -e ssh %s '%s,%s@frs.sourceforge.net:%s'" % (
-                " ".join(download_deliverables),
-                shipper.sourceforge_id,
-                shipper.sourceforge_name,
-                destdir))
-        if shipper.webdir:
-            websources = shipper.webdir + '/'
-        else:
-            websources = " ".join(web_deliverables),
-        # https://sourceforge.net/apps/trac/sourceforge/wiki/Rsync%20over%20SSH
-        print("rsync -aiv %s %s,%s@web.sourceforge.net:/home/project-web/%s/htdocs/" % (
-            websources,
-            shipper.sourceforge_id,
-            shipper.sourceforge_name,
-            shipper.sourceforge_name))
-    hardwired = ("berlios", "savannah", "sourceforge")
-
     #
     # OK, commands for everything.  First, the uploads
     #
     for destination in shipper.destinations:
-        if destination in hardwired:
+        if destination in ("berlios", "savannah", "sourceforge"):
             eval(destination + "()")
         elif destination.startswith("ftp:"):
             if not options.webonly:
@@ -824,7 +824,7 @@ try:
             pass	# defer this until a later phase
         elif destination == 'freecode':
             pass	# defer this until a later phase
-        elif destination not in hardwired:
+        else:
             if options.webonly:
                 upload(destination, web_deliverables)
             else:
