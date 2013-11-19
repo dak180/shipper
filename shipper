@@ -62,34 +62,30 @@ Here are the most recent changes:
                              shipper, acting for %(whoami)s
 """
 
-#
-# State variables
-#
-# Note: When you add a variable to this set, be sure also to tweak
-# the state-dumping code.
-#
-
 class Shipper:
     "Hold shipper state variables so they can be enumerated."
     multiline = {'description', 'lastchange',
                  'extralines', 'mail_template', 'html_template'}
     def __init__(self):
         self.destinations = []		# List of remote directories to update
+        self.date = time.asctime()	# User has not yet set a date
         self.whoami = None		# Who am I? (Used for logins and mail signatures)
         self.gittip_id = None		# My name on gittip.com
-        self.date = time.asctime()	# User has not yet set a date
+        self.savannah_id = None		# User ID to use for CVS on Savannah
+        self.sourceforge_id = None	# User ID on SourceForge
+        self.berlios_id = None		# User ID on Berlios
+        # Per-project
         self.package = os.path.basename(os.getcwd())	# Nor a package name
-        self.website = None		# Nor a home page
-        self.irc_channel = None		# Nor IRC channels
+        self.version = None		# Package release version
+        self.website = None		# Project home page
+        self.irc_channel = None		# Project IRC channels
         self.project_tags = None  	# Keywords for tagging
         self.freecode_name = None	# Name of the project on Freecode
         self.berlios_name = None	# Name of the project on Berlios
-        self.savannah_id = None		# User ID to use for CVS on Savannah
-        self.savannah_name = None	# Name of the project on savannah.org (non-gnu)
-        self.gitorious_url = None	# URL of the project on gitorious
-        self.github_url = None		# URL of the project on github
-        self.sourceforge_id = None	# User ID on SourceForge
-        self.sourceforge_name = None	# Name of the project on sourceforge.net
+        self.sourceforge_name = None	# Name of the project on SourceForge
+        self.savannah_name = None	# Name of the project on Savannah
+        self.gitorious_url = None	# URL of the project on Gitorious
+        self.github_url = None		# URL of the project on Github
         self.sourceforge_folder = ""	# Subfolder for file releases 
         self.ohloh_url = ""		# Where the Ohloh stats live
         self.summary = None		# One-line summary of the package
@@ -100,7 +96,6 @@ class Shipper:
         self.tag_message = "Tagged for external release %(version)s"
         self.irc_message = "%(package)s-%(version)s has just shipped."
         self.html_target = None		# Name to template a page to
-        self.version = None		# Package release version
         # Stuff after this point is multiline
         self.description = None		# Multiline description
         self.lastchange = None  	# Last entry in changelog
@@ -162,9 +157,9 @@ def upload(dest, files, subdir=None):
     else:
         sys.stderr.write("Don't know what to do with destination %s!\n" % dest)
 
-def make_templated_page(deliverables, substitutions, outfile):
+def make_templated_page(deliverables):
     "Make templated page, listing specified deliverables."
-    substitutions = substitutions.copy()
+    substitutions = shipper.__dict__.copy()
     resourcetable = '<table border="1" align="center" summary="Downloadable resources">\n'
     for (ifile, explanation, __tag, big) in deliverables:
         if big:
@@ -205,7 +200,7 @@ def make_templated_page(deliverables, substitutions, outfile):
     substitutions["description"] = "<p>" + substitutions["description"].replace("\n\n", "</p>\n\n<p>") + "</p>"
     substitutions.update(locals())
     # OK, now build the templated page itself
-    print("cat >%s <<'INAGADADAVIDA'" % outfile)
+    print("cat >%s <<'INAGADADAVIDA'" % shipper.html_target)
     print(shipper.html_template % substitutions)
     print "INAGADADAVIDA\n"
 
@@ -344,6 +339,7 @@ class Specfile:
             return data.strip() + "\n"
         else:
             return None
+
 #
 # Who am I? 
 #
@@ -426,7 +422,7 @@ try:
     (myrealname, myaddress) = email.utils.parseaddr(shipper.whoami)
     (myuserid, myhost) = myaddress.split("@")
 
-    # Project metadata
+    # Read in per-project metadata
     if os.path.exists("control"):
         metadata = Specfile("control")
     else:
@@ -436,37 +432,6 @@ try:
         else:
             croak("must be exactly one RPM specfile in the directory!")
 
-    # Shipper-specific project profile
-    securecheck(".")
-    here_profile = ".shipper"
-    if os.path.exists(here_profile):
-        securecheck(here_profile)
-        shipper_incorporate(here_profile)
-
-    # Specfiles may set their own destinations
-    local_destinations = metadata.extract("Destinations")
-    if local_destinations:
-        local_destinations = [x.strip() for x in local_destinations.split(",")]
-        negations = [s for s in local_destinations if s.startswith("~")]
-        local_destinations = [s for s in local_destinations if not s.startswith("~")]
-        if "~" in negations:
-            shipper.destinations = local_destinations
-        else:
-            shipper.destinations += local_destinations
-            for removable in [s[1:] for s in negations]:
-                if removable in shipper.destinations:
-                    shipper.destinations.remove(removable)
-
-    # Hack the destinations variable if need be, might mean we can avoid some
-    # builds.
-    if options.excluded:
-        for excludee in options.excluded.split(","):
-            if excludee in shipper.destinations:
-                shipper.destinations.remove(excludee)
-            else:
-                sys.stderr.write("shipper: %s isn't in the destinations!\n" % excludee)
-                raise SystemExit(1)
-
     # Merge in information from the project metadata files
     metadata_keys = metadata.__dict__.keys()
     metadata_keys.remove("destinations")
@@ -475,6 +440,36 @@ try:
     for name in metadata_keys:
         if getattr(shipper, name) is None:
             setattr(shipper, name, getattr(metadata, name))
+
+    # Shipper-specific project profile
+    securecheck(".")
+    here_profile = ".shipper"
+    if os.path.exists(here_profile):
+        securecheck(here_profile)
+        shipper_incorporate(here_profile)
+
+    # Specfiles may set their own destinations
+    project_destinations = metadata.extract("Destinations")
+    if project_destinations:
+        project_destinations = [x.strip() for x in project_destinations.split(",")]
+        negations = [s for s in project_destinations if s.startswith("~")]
+        project_destinations = [s for s in project_destinations if not s.startswith("~")]
+        if "~" in negations:
+            shipper.destinations = project_destinations
+        else:
+            shipper.destinations += project_destinations
+            for removable in [s[1:] for s in negations]:
+                if removable in shipper.destinations:
+                    shipper.destinations.remove(removable)
+
+    # Apply command-line destination exclusions
+    if options.excluded:
+        for excludee in options.excluded.split(","):
+            if excludee in shipper.destinations:
+                shipper.destinations.remove(excludee)
+            else:
+                sys.stderr.write("shipper: %s isn't in the destinations!\n" % excludee)
+                raise SystemExit(1)
 
     # Some defaults
     if not shipper.freecode_name:
@@ -670,9 +665,6 @@ try:
     if options.dump:
         shipper.dump()
         raise SystemExit(0)
-    #
-    # Build deliverables
-    #
 
     # Sanity checks
     if not shipper.destinations:
@@ -717,7 +709,7 @@ try:
 
         # Template a resource page?
         if shipper.html_template and shipper.html_target:
-            make_templated_page(deliverables, shipper.__dict__, shipper.html_target)
+            make_templated_page(deliverables)
             # Now that the web page has been generated, it can add
             # itself to the deliverables without having it show up in
             # the resource table.
