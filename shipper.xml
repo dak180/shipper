@@ -17,7 +17,7 @@
 
 <cmdsynopsis>
   <command>shipper</command>  
-  <arg choice='opt'>-n</arg>
+  <arg choice='opt'>-d</arg>
   <arg choice='opt'>-v</arg>
   <arg choice='opt'>-w</arg>
   <arg choice='opt'>-x <replaceable>destinations</replaceable></arg>
@@ -143,7 +143,7 @@ project-specific configuration settings.</para>
 Normally <varname>version</varname>, the release version
 designation, will be set here.</para>
 
-<para>The <option>-n</option> (nobuild) option causes
+<para>The <option>-d</option> (dump) option causes
 <application>shipper</application> to dump all configuration values
 and exit immediately after collecting them.</para>
 

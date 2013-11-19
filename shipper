@@ -349,8 +349,8 @@ try:
     parser.add_option("-v", "--verbose",
                       action="store_true", dest="verbose", default=False,
                       help="print progress messages to stdout")
-    parser.add_option("-n", "--nobuild",
-                      action="store_true", dest="nobuild", default=False,
+    parser.add_option("-d", "--dump",
+                      action="store_true", dest="dump", default=False,
                       help="dump configuration only, no builds or uploads")
     parser.add_option("-x", "--exclude",
                       dest="excluded", default="",
@@ -499,7 +499,7 @@ try:
                 print("shipper: ill-formed variable setting at %s" % arg)
                 raise SystemExit, 1
 
-    if not options.nobuild:
+    if not options.dump:
         if version == None:
             croak("can't get package version")
         elif version[0] not in "0123456789":
@@ -663,7 +663,7 @@ try:
     #
     # Might be time to dump
     #
-    if options.nobuild:
+    if options.dump:
         # Single-line 
         for variable in ('package', 'version',
                          'destinations', 'whoami', 'gittip_id', 'date', 
