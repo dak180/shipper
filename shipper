@@ -542,15 +542,6 @@ try:
     if project_destinations:
         shipper.merge_with_negations([x.strip() for x in project_destinations])
 
-    # Apply command-line destination exclusions
-    if options.excluded:
-        for excludee in options.excluded.split(","):
-            if excludee in shipper.destinations:
-                shipper.destinations.remove(excludee)
-            else:
-                sys.stderr.write("shipper: %s isn't in the destinations!\n" % excludee)
-                raise SystemExit(1)
-
     # Some defaults
     if not shipper.freecode_name:
         shipper.freecode_name = shipper.package
@@ -584,6 +575,15 @@ try:
             except (SyntaxError, NameError, ValueError):
                 print("shipper: ill-formed variable setting at %s" % arg)
                 raise SystemExit, 1
+
+    # Apply command-line destination exclusions
+    if options.excluded:
+        for excludee in options.excluded.split(","):
+            if excludee in shipper.destinations:
+                shipper.destinations.remove(excludee)
+            else:
+                sys.stderr.write("shipper: %s isn't in the destinations!\n" % excludee)
+                raise SystemExit(1)
 
     if not options.dump:
         if shipper.version == None:
@@ -807,7 +807,7 @@ try:
     # deliverables in make_templated_page(), otherwise havoc will ensue.
     all_deliverables = [x[0] for x in deliverables]
     download_deliverables = [x[0] for x in [f_e_s_b for f_e_s_b in deliverables if f_e_s_b[3]]]
-    web_deliverables = [x[0] for x in [f_e_s_b1 for f_e_s_b1 in deliverables if not f_e_s_b1[3]]]
+    web_deliverables = [x[0] for x in [f_e_s_b for f_e_s_b in deliverables if not f_e_s_b[3]]]
 
     #
     # OK, commands for everything.  First, the uploads
