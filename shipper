@@ -145,7 +145,7 @@ def upload(dest, files, subdir=None):
     "Generate upload command for a file via ftp or scp."
     if subdir == None:
         subdir = shipper.package
-    files = [x for x in files if os.path.exists(x)]
+    files = [x for x in files if os.path.exists(x) or x == shipper.html_target]
     if dest.startswith("ftp://"):
         dest = dest[6:].split("/")
         host = dest.pop(0)
