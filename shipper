@@ -288,8 +288,8 @@ class Specfile:
             self.lastchange = None
         # shipper-only headers
         self.destinations = self.extract("Destinations")
-        self.tag_template = self.extract("Tag-Template")
-        self.tag_message = self.extract("Tag-Message")
+        self.tag_template = self.extract("VC-Tag-Template")
+        self.tag_message = self.extract("VC-Tag-Message")
         self.irc_message = self.extract("IRC-Message")
         self.web_extras = self.extract("Web-Extras")
         self.html_target = self.extract("HTML-Target")

@@ -559,8 +559,8 @@ that have tortuous procedures for updating webspace.</para>
 </row>
 <row>
 <entry><varname>tag_template</varname></entry>
-<entry>#Tag-Template</entry>
-<entry>#XBS-Tagtemplate</entry>
+<entry>#VC-Tag-Template</entry>
+<entry>#XBS-VC-Tag-Template</entry>
 <entry>
 <para>You can change tagging behavior by setting the variable
 <varname>tagtemplate</varname>. If you set it to None, release tagging
@@ -572,8 +572,8 @@ globals are available for substitution in the same way.</para>
 </row>
 <row>
 <entry><varname>tag_message</varname></entry>
-<entry>#Tag-Message</entry>
-<entry>#XBS-Tag-Message</entry>
+<entry>#VC-Tag-Message</entry>
+<entry>#XBS-VC-Tag-Message</entry>
 <entry>
 <para>You can also customize the actual log message by setting
 the variable <varname>tag_message</varname>.  See the default with
