@@ -230,7 +230,7 @@ class Specfile:
             self.version = self.extract("Version")
             self.website = self.extract("URL")
             self.summary = self.extract("Summary")
-            self.description = self.rpm_get_multiline("Description")
+            self.description = self.rpm_get_multiline("description")
             last = ""
             state = 0
             for line in open(self.filename):
