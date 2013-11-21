@@ -835,8 +835,8 @@ try:
         if shipper.tag_template and shipper.tag_message:
             tag_name = shipper.tag_template % shipper.__dict__
             tag_message = shipper.tag_message % shipper.__dict__
-            context = locals().copy()
-            context.update(shipper.__dict__)
+            context = shipper.__dict__.copy()
+            context.update(locals())
 
             # If we're in the trunk of an SVN repository, we want to tag
             # what just got shipped as an external release.
