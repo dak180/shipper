@@ -534,7 +534,7 @@ try:
     metadata_keys.remove("filename")
     metadata_keys.remove("type")
     for name in metadata_keys:
-        if getattr(shipper, name) is None:
+        if not getattr(shipper, name):
             setattr(shipper, name, getattr(metadata, name))
 
     # Specfiles may set their own destinations
