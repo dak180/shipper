@@ -582,8 +582,9 @@ try:
     if not shipper.website:
         if "sourceforge" in shipper.destinations:
             shipper.website = "http://%s.sourceforge.net/" % shipper.sourceforge_name
-        if "savannah" in shipper.destinations:
-            shipper.website = "http://www.nongnu.org/%s/" % shipper.savannah_name
+        # This doesn't work.  Savannah's webspace access is too painful.
+        #if "savannah" in shipper.destinations:
+        #    shipper.website = "http://www.nongnu.org/%s/" % shipper.savannah_name
         if "berlios" in shipper.destinations:
             shipper.website = "http://%s.berlios.de/" % shipper.berlios_name
 
