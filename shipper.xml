@@ -339,8 +339,8 @@ somewhere, in a profile or spec file or as a command-line override.</para>
 </row>
 <row>
 <entry><varname>html_target</varname></entry>
-<entry align='center'>-</entry>
-<entry align='center'>-</entry>
+<entry align='center'>#HTML-Target</entry>
+<entry align='center'>XBS-HTML-Target</entry>
 <entry>
 <para>File to which a templated web page generated from the release
 data should be generated.  If this variable is an empty string (the
@@ -719,37 +719,6 @@ declared a web directory to mirror to website destinations.</para>
 This is especially useful for archival GNU-style ChangeLogs, which you
 may want to avoid shipping but which need to be present to pacify
 autotools.</para>
-
-<para>Here are the generated deliverables that
-<application>shipper</application> will build and ship, if they don't
-exist when it starts up.  Any of these that are created will be 
-deleted after a successful upload.</para>
-
-<informaltable>
-<tgroup cols="2">
-<thead>
-<row>
-<entry>Type</entry>
-<entry>Explanation</entry>
-</row>
-</thead>
-<tbody>
-<row>
-<entry>tarball, zipfile, RPMs, debs, README, COPYING, ChangeLog, NEWS, HISTORY,
-BUGS, TODO.</entry>
-<entry>
-<para>If the Sourceforge or Savannah destinations are on your list,
-<application>shipper</application> will attempt to ship a tarball and
-source and binary RPMs to your project's download directory via scp.
-It will also attempt to upload all web deliverables (README, CHANGES,
-NEWS, HISTORY, *.{html,css,js}, BUGS, TODO) to the project's web
-directory. Note that on Savannah, web page changes may not be visible
-for up to an hour after submission!</para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
 
 <para>Additionally, if the <varname>html_template</varname> and
 <varname>html_target</varname> variables are set, a templated HTML
