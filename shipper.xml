@@ -47,7 +47,7 @@ it.</para>
 
 <para>In normal use, you absolutely need to set only two variables:
 <varname>destinations</varname> which is the list of destinations to
-ship to, and <varname>versions</varname> which is the release version
+ship to, and <varname>version</varname> which is the release version
 of the software you are shipping. The default package name is the
 basename of the current directory.</para>
 
