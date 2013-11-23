@@ -157,8 +157,7 @@ generate an HTML file for uploading, if you have specified the
 
 <para>The option <option>-w</option> (web-only) tells shipper to
 generate upload commands for web pages only rather than for shipping
-(and possibly tagging) a release. This may be useful for forges like
-Savannah that have a tricky procedure for website updates.</para>
+(and possibly tagging) a release.</para>
 
 <para>Otherwise, <application>shipper</application> then generates
 commands to upload deliverables.  The <option>-x</option> may be use
@@ -551,10 +550,6 @@ webspace at a forge location. If this is defined it overrides the
 normal web page templating mechanism associated with the
 <varname>html_template</varname> and <varname>html_target</varname>
 variables.</para>
-
-<para>Usually shipper just generates an rsync of this directory to
-the host location, but it may take special action for forges like Savannah
-that have tortuous procedures for updating webspace.</para>
 </entry>
 </row>
 <row>
@@ -775,6 +770,21 @@ tarball and source and binary RPMs to the berlios.de submission
 directory via FTP.  It will also attempt to upload all web
 deliverables (README, CHANGES, NEWS, HISTORY, *.{html,css,js}, BUGS,
 TODO) to the project's Berlios web directory.
+</para>
+</entry>
+</row>
+<row>
+<entry>savannah</entry>
+<entry>tarball, zipfile, RPMs, debs, 
+BUGS, TODO.</entry>
+<entry>-</entry>
+<entry>
+<para>If the savannah destination is on your list,
+<application>shipper</application> will generate commands to ship a
+tarball and source and binary RPMs to your project's download
+directory.  It does not attempt to do anything with web content,
+as Savannah's web-update protocol involves CVS and is too painful
+to cope with.
 </para>
 </entry>
 </row>
@@ -1017,7 +1027,8 @@ is invoked, or shipping to the relevant destination types will fail.</para>
 not script a Berlios release. That has to be done through the Berlios
 web interface.</para>
 
-<para>The Savannah support is not yet tested.</para>
+<para>The program cannot update Savannah webspace, which is only
+accessible through a CVS checkin procedure.</para>
 
 <para>The program can put downloadables in place on SourceForge, but not set
 the "Preferred Download". Usually this will point to the most recent download
