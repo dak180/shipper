@@ -15,23 +15,23 @@ DEFAULT_HTML_TEMPLATE = """\
     'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
 <html>
 <head>
-<meta name='description' content='Resource page for %(package)s' />
+<meta name='description' content='Resource page for %(project)s' />
 <meta name='generator' content='shipper' />
 <meta name='description' content="%(summary)s"/>
-<title>Resource page for %(package)s %(version)s</title>
+<title>Resource page for %(project)s %(version)s</title>
 </head>
 <body>
 
 <table width='100%%' cellpadding='0' summary='Canned page header' bgcolor='#ddd'>
 <tr>
-<td><h2>Resource page for %(package)s %(version)s</h2></td>
+<td><h2>Resource page for %(project)s %(version)s</h2></td>
 <td align="center">%(centertext)s</td>
 <td align='right'><h2>%(date)s</h2></td>
 </tr>
 </table>
 
 
-<h1>Resource page for %(package)s %(version)s</td></h1>
+<h1>Resource page for %(project)s %(version)s</td></h1>
 
 %(description)s
 
@@ -49,9 +49,9 @@ DEFAULT_HTML_TEMPLATE = """\
 """
 
 DEFAULT_EMAIL_TEMPLATE = """\
-Subject: Announcing release %(version)s of %(package)s
+Subject: Announcing release %(version)s of %(project)s
 
-Release %(version)s of %(package)s is now available at:
+Release %(version)s of %(project)s is now available at:
 
 	%(website)s
 
@@ -75,8 +75,8 @@ class Shipper:
         self.sourceforge_id = None	# User ID on SourceForge
         self.berlios_id = None		# User ID on Berlios
         # Per-project
-        self.package = os.path.basename(os.getcwd())	# Nor a package name
-        self.version = None		# Package release version
+        self.project = os.path.basename(os.getcwd())	# Nor a project name
+        self.version = None		# Project release version
         self.website = None		# Project home page
         self.irc_channel = None		# Project IRC channels
         self.project_tags = None  	# Keywords for tagging
@@ -88,13 +88,13 @@ class Shipper:
         self.github_url = None		# URL of the project on Github
         self.sourceforge_folder = ""	# Subfolder for file releases 
         self.ohloh_url = ""		# Where the Ohloh stats live
-        self.summary = None		# One-line summary of the package
+        self.summary = None		# One-line summary of the project
         self.webdir = None		# Web directory to be mirrored to a project site
         self.web_extras = None		# Extra web deliverables
         self.logo = ""			# Project logo
         self.tag_template = None	# How to tag releases
         self.tag_message = "Tagged for external release %(version)s"
-        self.irc_message = "%(package)s-%(version)s has just shipped."
+        self.irc_message = "%(project)s-%(version)s has just shipped."
         self.html_target = None		# Name to template a page to
         # Stuff after this point is multiline
         self.description = None		# Multiline description
@@ -144,7 +144,7 @@ def croak(msg):
 def upload(dest, files, subdir=None):
     "Generate upload command for a file via ftp or scp."
     if subdir == None:
-        subdir = shipper.package
+        subdir = shipper.project
     files = [x for x in files if os.path.exists(x) or x == shipper.html_target]
     if dest.startswith("ftp://"):
         dest = dest[6:].split("/")
@@ -226,7 +226,7 @@ class Specfile:
         self.type = None
         if filename.endswith(".spec"):
             self.type = "RPM"
-            self.package = self.extract("Name")
+            self.project = self.extract("Name")
             self.version = self.extract("Version")
             self.website = self.extract("URL")
             self.summary = self.extract("Summary")
@@ -255,7 +255,7 @@ class Specfile:
                 self.lastchange = None
         elif filename == "control":
             self.type = "deb"
-            self.package = self.extract("Package")
+            self.project = self.extract("Package")
             self.version = self.extract("Version")
             if self.version and "-" in self.version:
                 self.version = self.version.split("-")[0]
@@ -394,7 +394,7 @@ def berlios():
     upload("ftp://ftp.berlios.de/incoming", download_deliverables)
     berlios_webdir = \
                    "shell.berlios.de:/home/groups/" \
-                   + (shipper.berlios_name or shipper.package) \
+                   + (shipper.berlios_name or shipper.project) \
                    + "/htdocs"
     upload(berlios_webdir, web_deliverables, subdir="")
 
@@ -500,16 +500,16 @@ try:
 
     # Some defaults
     if not shipper.freecode_name:
-        shipper.freecode_name = shipper.package
+        shipper.freecode_name = shipper.project
     if not shipper.savannah_name:
-        shipper.savannah_name = shipper.package
+        shipper.savannah_name = shipper.project
     if not shipper.berlios_name:
-        shipper.berlios_name = shipper.package
+        shipper.berlios_name = shipper.project
     if shipper.sourceforge_name:
         if "@" in shipper.sourceforge_name:
             (shipper.sourceforge_id, shipper.sourceforge_name) = shipper.sourceforge_name.split("@")
     else:
-        shipper.sourceforge_name = shipper.package
+        shipper.sourceforge_name = shipper.project
         shipper.sourceforge_id = myuserid
 
     # Shipper-specific project profile
@@ -543,9 +543,9 @@ try:
 
     if not options.dump:
         if shipper.version == None:
-            croak("can't get package version")
+            croak("can't get project version")
         elif shipper.version[0] not in "0123456789":
-            croak("package version %s appears garbled" % shipper.version)
+            croak("project version %s appears garbled" % shipper.version)
 
     if options.verbose:
         print "shipper: variable extraction finished"
@@ -592,9 +592,9 @@ try:
     # special destinations.
     if shipper.website:
         if "savannah" in shipper.website:
-            download = "http://download.savannah.nongnu.org/releases/%s/"+(shipper.savannah_name or shipper.package)
+            download = "http://download.savannah.nongnu.org/releases/%s/"+(shipper.savannah_name or shipper.project)
         if "berlios"in shipper.website:
-            download = "http://download.berlios.de/"+(shipper.berlios_name or shipper.package)
+            download = "http://download.berlios.de/"+(shipper.berlios_name or shipper.project)
         elif "sourceforge" in shipper.website:
             download = "http://sourceforge.net/projects/%s/files/" % (
                 shipper.sourceforge_name)
@@ -650,43 +650,43 @@ try:
          "gzipped source tarball",
          "Tar/GZ",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r".tar.bz2$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r".tar.bz2$"),
          "bzipped source tarball",
          "Tar/BZ",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r".md5$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r".md5$"),
          "source tarball MD5 checksum",
          "Checksum",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r".sha224$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r".sha224$"),
          "source tarball SHA224 checksum",
          "Checksum",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r".sha256$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r".sha256$"),
          "source tarball SHA256 checksum",
          "Checksum",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r".sha384$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r".sha384$"),
          "source tarball SHA384 checksum",
          "Checksum",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r".sha512$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r".sha512$"),
          "source tarball SHA512 checksum",
          "Checksum",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r".zip$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r".zip$"),
          "zip archive",
          "Zip",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r"-.*\.src.rpm$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r"-.*\.src.rpm$"),
          "source RPM",
-         "SRPM-Shipper.Package",
+         "SRPM-Package",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r"-.*\.rpm$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r"-.*\.rpm$"),
          "binary RPM",
          "RPM-Package",
          True),
-        (re.compile(shipper.package + ".*-" + str(shipper.version) + r"-.*\.deb$"),
+        (re.compile(shipper.project + ".*-" + str(shipper.version) + r"-.*\.deb$"),
          "Debian package",
          "Debian-Package",
          True),
@@ -823,7 +823,7 @@ try:
                 print("# Can't announce to freecode without a changes field!")
             else:
                 print("freecode-submit <<'INAGADAVIDA'")
-                print("Project: %s" % (shipper.freecode_name or shipper.package))
+                print("Project: %s" % (shipper.freecode_name or shipper.project))
                 print("Version: %s" % shipper.version)            
                 print("Description: %s" % shipper.description.replace("\n", "\n    ").rstrip())
                 if shipper.project_tags:

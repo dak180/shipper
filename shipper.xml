@@ -264,7 +264,7 @@ either a [user@]site:path destination that
 can use, or one of the special public destination names. Note that when
 the destination is a web or FTP site
 actual project directory is computed by
-appending the value of <varname>package</varname> to
+appending the value of <varname>project</varname> to
 the destination you're shipping to.</para>
 
 <para>A destination entry of <quote>~</quote> can be used to clear the
@@ -315,9 +315,9 @@ set a default for you.</para>
 </entry>
 </row>
 <row>
-<entry><varname>package</varname></entry>
+<entry><varname>project</varname></entry>
 <entry>Name:</entry>
-<entry>Package:</entry>
+<entry>Project:</entry>
 <entry>
 <para>Project name, used to generate the stem part of the names
 deliverables that <application>shipper</application> builds. If the
@@ -629,36 +629,36 @@ starts up:</para>
 <entry>tarballs</entry>
 <entry>
 <para>Current source tarballs, that is any files named
-${package}.*-${version}.tar.gz or ${package}.*-${version}.tgz or
-${package}.*-${version}.tar.bz2.</para>
+${project}.*-${version}.tar.gz or ${project}.*-${version}.tgz or
+${project}.*-${version}.tar.bz2.</para>
 </entry>
 </row>
 <row>
 <entry>checksum files</entry>
 <entry>
 <para>Current source tarball checksums, that is any files named
-${package}.*-${version}.md5 or 
-${package}.*-${version}.sh{224,356,384,512}.</para>
+${project}.*-${version}.md5 or 
+${project}.*-${version}.sh{224,356,384,512}.</para>
 </entry>
 </row>
 <row>
 <entry>RPMs</entry>
 <entry>
 <para>Current RPMs, that is any files named
-${package}.*-${version}.*.rpm.</para>
+${project}.*-${version}.*.rpm.</para>
 </entry>
 </row>
 <row>
 <entry>debs</entry>
 <entry>
 <para>Current deb files, that is any files named
-${package}.*-${version}.*.deb.</para>
+${project}.*-${version}.*.deb.</para>
 </entry>
 </row>
 <row>
 <entry>zipfiles</entry>
 <entry>
-<para>Current source zip archives, that is any file named ${package}.*-${version}.zip.</para>
+<para>Current source zip archives, that is any file named ${project}.*-${version}.zip.</para>
 </entry>
 </row>
 <row>
@@ -941,7 +941,7 @@ the deliverables <application>shipper</application> knows about
 will be rebuilt before being shipped.</para>
 
 <programlisting>
-release: <emphasis>package</emphasis>-$(VERS).tar.gz <emphasis>package</emphasis>-$(VERSION).md5
+release: <emphasis>project</emphasis>-$(VERS).tar.gz <emphasis>project</emphasis>-$(VERSION).md5
 	shipper version=$(VERS) | sh -e -x
 </programlisting>
 
@@ -950,7 +950,7 @@ way if an upload fails for some reason, the later notifications won't
 happen. The -x option makes the script echo its commands as they're 
 performed.</para>
 
-<para>You will want to change <emphasis>package</emphasis> to your 
+<para>You will want to change <emphasis>project</emphasis> to your 
 project name. You will need to write a production that builds your
 tarball and checksum files.</para>
 
