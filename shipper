@@ -7,7 +7,7 @@
 import sys, os, re, commands, time, tempfile, shutil
 import glob, optparse, stat, email.utils
 
-shipper_version = "0.17"
+shipper_version = "0.18"
 
 DEFAULT_HTML_TEMPLATE = """\
 <?xml version="1.0" encoding="ISO-8859-1"?>

@@ -1,6 +1,6 @@
 			shipper project news
 
-Repository head:
+0.18: 2013-11-22
   Major change in interface; this is now a shellscript generator
   New variable-override syntax on the command line.
   Your profile can now be ~/.config/shipper a la XDG.
